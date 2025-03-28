@@ -39,6 +39,7 @@ public class UserService {
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
         user.setCreatedAt(new Date());
         user.setCards(new ArrayList<>()); //change to default pack
+        user.setRole("USER");
 
         //save user
         userRepository.save(user);

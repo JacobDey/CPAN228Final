@@ -17,6 +17,7 @@ import java.util.List;
 public class MyUser {
     @Id
     private String id;
+    private String role; // will have USER, ADMIN
 
     @Indexed(unique = true)
     private String username;

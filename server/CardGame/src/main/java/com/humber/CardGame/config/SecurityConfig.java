@@ -12,24 +12,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 public class SecurityConfig {
 
-    @Bean
+    @Bean //for encoding password
     public BCryptPasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
+
+
+    @Bean //to permit each api endpoint
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtUtil jwtUtil,
             UserDetailsService userDetailsService) throws Exception {
 
         JwtFilter jwtFilter = new JwtFilter(jwtUtil, userDetailsService);
-
+        // right now permit all end point for draft
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/users/register","/users/login").permitAll()
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers("/**").permitAll() //change this to actual endpoint that permit
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
