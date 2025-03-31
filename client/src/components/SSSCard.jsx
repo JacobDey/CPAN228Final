@@ -4,10 +4,10 @@ import {Link} from "react-router";
 
 // This is just placeholder code to give an idea it, the end result will fetch card art from the database
 function SSSCard({index, data}){
-    const [cardName, setCardName] = useState(data.cardName);
-    const [cardPower, setCardPower] = useState(data.cardPower);
-    const [cardDescription, setCardDescription] = useState(data.cardDescription);
-    const [cardColour, setCardColour] = useState(data.cardColour);
+    const [cardName] = useState(data.name);
+    const [cardPower] = useState(data.power);
+    const [cardDescription] = useState(data.description);
+    const [cardColour] = useState(data.colour);
 
     return(
         <Link to={`/card/${index}`}>
