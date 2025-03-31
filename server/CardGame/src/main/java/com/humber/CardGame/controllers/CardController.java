@@ -28,7 +28,7 @@ public class CardController {
     }
 
     //get card by id
-    @GetMapping("/cards/id/{id}")
+    @GetMapping("/id/{id}")
     public ResponseEntity<Card> getCardById(@PathVariable String id) {
         Card card = cardService.getCardById(id).orElse(null);
         if (card == null) {
@@ -38,7 +38,7 @@ public class CardController {
     }
 
     //get filtered card
-    @GetMapping("/cards/name/{name}")
+    @GetMapping("/name/{name}")
     public ResponseEntity<List<Card>> getCardByName(@PathVariable String name) {
         List<Card> cards = cardService.getCardByName(name);
         if (cards.isEmpty()) {
@@ -47,7 +47,7 @@ public class CardController {
         return ResponseEntity.ok(cards);
     }
 
-    @GetMapping("/cards/colour/{colour}")
+    @GetMapping("/colour/{colour}")
     public ResponseEntity<List<Card>> getCardByColour(@PathVariable String colour) {
         List<Card> cards = cardService.getCardByColour(colour);
         if (cards.isEmpty()) {
@@ -56,7 +56,7 @@ public class CardController {
         return ResponseEntity.ok(cards);
     }
 
-    @GetMapping("/cards/power/{power}")
+    @GetMapping("/power/{power}")
     public ResponseEntity<List<Card>> getCardByPower(@PathVariable int power) {
         List<Card> cards = cardService.getCardByPower(power);
         if (cards.isEmpty()) {
@@ -65,7 +65,7 @@ public class CardController {
         return ResponseEntity.ok(cards);
     }
 
-    @GetMapping("/cards/power/{minPower}/{maxPower}")
+    @GetMapping("/power/{minPower}/{maxPower}")
     public ResponseEntity<List<Card>> getCardByPower(@PathVariable int minPower, @PathVariable int maxPower) {
         List<Card> cards = cardService.getCardByPower(minPower, maxPower);
         if (cards.isEmpty()) {
@@ -74,7 +74,7 @@ public class CardController {
         return ResponseEntity.ok(cards);
     }
 
-    @GetMapping("/cards/power/min/{power}")
+    @GetMapping("/power/min/{power}")
     public ResponseEntity<List<Card>> getCardByMinPower(@PathVariable int power) {
         List<Card> cards = cardService.getCardByMinPower(power);
         if (cards.isEmpty()) {
@@ -83,7 +83,7 @@ public class CardController {
         return ResponseEntity.ok(cards);
     }
 
-    @GetMapping("/cards/power/max/{power}")
+    @GetMapping("/power/max/{power}")
     public ResponseEntity<List<Card>> getCardByMaxPower(@PathVariable int power) {
         List<Card> cards = cardService.getCardByMaxPower(power);
         if (cards.isEmpty()) {

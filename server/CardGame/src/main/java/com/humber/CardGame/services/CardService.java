@@ -34,22 +34,22 @@ public class CardService {
     }
 
     public List<Card> getCardByColour(String colour) {
-        return cardRepository.findByColour(colour);
+        return cardRepository.findByColourIgnoreCase(colour);
     }
 
     public List<Card> getCardByPower(int power) {
         return cardRepository.findByPower(power);
     }
-    public List<Card> getCardByPower(int maxPower, int minPower) {
-        return cardRepository.findByPowerBetween(minPower, maxPower);
+    public List<Card> getCardByPower(int minPower, int maxPower) {
+        return cardRepository.findByPowerBetween(minPower-1, maxPower+1);
     }
 
     public List<Card> getCardByMaxPower(int maxPower) {
-        return cardRepository.findByPowerLessThan(maxPower);
+        return cardRepository.findByPowerLessThanEqual(maxPower);
     }
 
     public List<Card> getCardByMinPower(int minPower) {
-        return cardRepository.findByPowerGreaterThan(minPower);
+        return cardRepository.findByPowerGreaterThanEqual(minPower);
     }
 
 

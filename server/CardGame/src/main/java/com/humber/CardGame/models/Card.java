@@ -19,7 +19,9 @@ public class Card {
     @Indexed(unique = true)
     private String name;
     private String description;
-    private String image;
     private String colour;
     private int power;
+    private String image;
+    //private byte[] imageData;
+    //private String imageType;
 }
