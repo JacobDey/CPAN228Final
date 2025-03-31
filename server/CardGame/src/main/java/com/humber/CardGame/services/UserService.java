@@ -39,8 +39,6 @@ public class UserService {
         }
         //encrypt password
         user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-        user.setCreatedAt(new Date());
-        user.setCards(new HashMap<>()); //change to default pack
         user.setRole("USER");
 
         //save user
@@ -59,8 +57,8 @@ public class UserService {
         throw new RuntimeException("Invalid username or password");
     }
 
-    //get user cards
-    public Map<Card,Integer> getUserCards(String username) {
+//    get user cards
+    public Map<String,Integer> getUserCards(String username) {
         //find user by username
         Optional<MyUser> userOp = userRepository.findByUsername(username);
         //if username is not found
@@ -72,7 +70,7 @@ public class UserService {
     }
 
     //get user deck
-    public Map<Card,Integer> getUserDeck(String username) {
+    public Map<String,Integer> getUserDeck(String username) {
         Optional<MyUser> userOp = userRepository.findByUsername(username);
         if(userOp.isEmpty()) {
             throw new RuntimeException("username not found");
@@ -87,21 +85,20 @@ public class UserService {
         if(userOp.isEmpty() || cardOp.isEmpty()) {
             throw new RuntimeException("username or card id not found");
         }
-        Card card = cardOp.get();
         MyUser user = userOp.get();
 
         //check if user have card
-        if(!user.getCards().containsKey(card)) {
+        if(!user.getCards().containsKey(cardId)) {
             throw new RuntimeException("user do not have card");
         }
 
         //check if maximum reach
-        if(user.getCards().get(card) >= 3) {
+        if(user.getCards().get(cardId) >= 3) {
             throw new RuntimeException("You can only add 3 of the same card");
         }
 
         //add card to user deck
-        user.getDeck().put(card, user.getCards().getOrDefault(card,0)+1);
+        user.getDeck().put(cardId, user.getCards().getOrDefault(cardId,0)+1);
         //save to db
         userRepository.save(user);
     }
@@ -113,20 +110,20 @@ public class UserService {
         if(userOp.isEmpty() || cardOp.isEmpty()) {
             throw new RuntimeException("username or card id not found");
         }
-        Card card = cardOp.get();
+
         MyUser user = userOp.get();
 
         //check if card is in user deck
-        if(!user.getDeck().containsKey(card)) {
+        if(!user.getDeck().containsKey(cardId)) {
             throw new RuntimeException("card is not in the deck");
         }
 
         //remove card from deck
-        user.getDeck().put(card, user.getCards().get(card)-1);
+        user.getDeck().put(cardId, user.getCards().get(cardId)-1);
 
         //if number reach 0 remove it from deck
-        if(user.getCards().get(card) <= 0) {
-            user.getDeck().remove(card);
+        if(user.getCards().get(cardId) <= 0) {
+            user.getDeck().remove(cardId);
         }
         //save to db
         userRepository.save(user);

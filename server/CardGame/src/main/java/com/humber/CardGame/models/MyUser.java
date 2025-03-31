@@ -7,8 +7,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.Date;
-import java.util.Map;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -25,8 +24,8 @@ public class MyUser {
 
     @Indexed(unique = true)
     private String email;
-    private Date createdAt;
+    private Date createdAt = new Date();
 //    private Date lastLoginAt;
-    private Map<Card, Integer> cards;
-    private Map<Card, Integer> deck;
+    private Map<String, Integer> cards = new HashMap<>(); // will change to default pack
+    private Map<String, Integer> deck = new HashMap<>(); // will change to default pack
 }

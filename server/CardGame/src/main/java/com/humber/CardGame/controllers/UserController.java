@@ -1,6 +1,5 @@
 package com.humber.CardGame.controllers;
 
-import com.humber.CardGame.models.Card;
 import com.humber.CardGame.models.MyUser;
 import com.humber.CardGame.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +28,7 @@ public class UserController {
         }
     }
 
+
     //login
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
@@ -42,10 +42,10 @@ public class UserController {
 
     //get user card
     @GetMapping("/card")
-    public ResponseEntity<Map<Card,Integer>> getCard(Principal principal) {
+    public ResponseEntity<Map<String,Integer>> getCard(Principal principal) {
         try {
             String username = principal.getName(); //get username from jwt token
-            Map<Card,Integer> cards = userService.getUserCards(username);
+            Map<String,Integer> cards = userService.getUserCards(username);
             return ResponseEntity.ok(cards);
         } catch (Exception e) {
             return ResponseEntity.status(401).body(null);
@@ -54,10 +54,10 @@ public class UserController {
 
     //get user deck
     @GetMapping("/deck")
-    public ResponseEntity<Map<Card,Integer>> getDeck(Principal principal) {
+    public ResponseEntity<Map<String,Integer>> getDeck(Principal principal) {
         try {
             String username = principal.getName(); //get username from jwt token
-            Map<Card,Integer> cards = userService.getUserDeck(username);
+            Map<String,Integer> cards = userService.getUserDeck(username);
             return ResponseEntity.ok(cards);
         } catch (Exception e) {
             return ResponseEntity.status(401).body(null);
