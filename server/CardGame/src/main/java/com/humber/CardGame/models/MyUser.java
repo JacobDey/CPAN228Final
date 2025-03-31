@@ -8,7 +8,7 @@ import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
@@ -27,5 +27,6 @@ public class MyUser {
     private String email;
     private Date createdAt;
 //    private Date lastLoginAt;
-    private List<Card> cards;
+    private Map<Card, Integer> cards;
+    private Map<Card, Integer> deck;
 }
