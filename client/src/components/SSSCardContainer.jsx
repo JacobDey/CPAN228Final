@@ -11,7 +11,7 @@ function SSSCardContainer(){
         <div style={{display: 'flex', flexDirection: 'row', flexWrap: 'wrap'}}>
             {
                 cards.map((cardData, cardIndex) => (
-                    <SSSCard data={cardData} index={{cardIndex}} />
+                    <SSSCard data={cardData} index={cardIndex} />
                 ))
             }
         </div>

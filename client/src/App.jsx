@@ -7,6 +7,7 @@ import SSSCollection from "./pages/SSSCollection.jsx";
 import SSSDecks from "./pages/SSSDecks.jsx";
 import SSSCards from "./pages/SSSCards.jsx";
 import SSSBattle from "./pages/SSSBattle.jsx";
+import SSSCardDetails from "./pages/SSSCardDetails.jsx";
 
 function App() {
   return(
@@ -17,6 +18,7 @@ function App() {
           <Route path="/decks" element={<SSSDecks />} />
           <Route path="/cards" element={<SSSCards />} />
           <Route path="/battle" element={<SSSBattle />} />
+          <Route path="/card/:id" element={<SSSCardDetails />} />
       </Routes>
   )
 }
