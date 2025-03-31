@@ -30,7 +30,8 @@ public class SecurityConfig {
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll() //change this to actual endpoint that permit
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/card/**","/users/**").permitAll() //change this to actual endpoint that permit
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

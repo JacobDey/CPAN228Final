@@ -52,5 +52,31 @@ public class CardService {
         return cardRepository.findByPowerGreaterThanEqual(minPower);
     }
 
+    // add card to the db
+    public void saveCardToDatabase(Card card) {
+        //check name
+        if(cardRepository.findByNameIgnoreCase(card.getName()) != null) {
+            throw new IllegalStateException("Card already exists!");
+        }
+        cardRepository.save(card);
+    }
+
+    //remove card from db
+    public void deleteCardFromDatabase(String cardId) {
+        //check id
+        if(cardRepository.findById(cardId).isEmpty()) {
+            throw new IllegalStateException("Card does not exist!");
+        }
+        cardRepository.deleteById(cardId);
+    }
+
+    //edit card data
+    public void editCardData(Card card) {
+        // check id
+        if(cardRepository.findById(card.getId()).isEmpty()) {
+            throw new IllegalStateException("Card does not exist!");
+        }
+        cardRepository.save(card);
+    }
 
 }

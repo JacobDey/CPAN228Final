@@ -78,6 +78,21 @@ public class UserService {
         return userOp.get().getDeck();
     }
 
+    //add card to user cards
+    public void addCard(String username, String cardId) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        Optional<Card> cardOp = cardRepository.findById(cardId);
+        if(userOp.isEmpty() || cardOp.isEmpty()) {
+            throw new RuntimeException("username or card id not found");
+        }
+        MyUser user = userOp.get();
+
+        //add card to user card list
+        user.getCards().put(cardId,user.getCards().getOrDefault(cardId,0) + 1);
+        //save to db
+        userRepository.save(user);
+    }
+
     //add card to user deck
     public void addCardToDeck(String username, String cardId) {
         Optional<MyUser> userOp = userRepository.findByUsername(username);
@@ -88,8 +103,9 @@ public class UserService {
         MyUser user = userOp.get();
 
         //check if user have card
-        if(!user.getCards().containsKey(cardId)) {
-            throw new RuntimeException("user do not have card");
+        if(!user.getCards().containsKey(cardId) ||
+                user.getCards().get(cardId) < user.getDeck().getOrDefault(cardId,0)) {
+            throw new RuntimeException("user do not have enough card");
         }
 
         //check if maximum reach
@@ -98,7 +114,7 @@ public class UserService {
         }
 
         //add card to user deck
-        user.getDeck().put(cardId, user.getCards().getOrDefault(cardId,0)+1);
+        user.getDeck().put(cardId, user.getDeck().getOrDefault(cardId,0)+1);
         //save to db
         userRepository.save(user);
     }

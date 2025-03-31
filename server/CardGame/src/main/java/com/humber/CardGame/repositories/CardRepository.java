@@ -9,6 +9,7 @@ import java.util.List;
 @Repository
 public interface CardRepository extends MongoRepository<Card, String> {
     List<Card> findByColourIgnoreCase(String colour);
+    Card findByNameIgnoreCase(String name);
     List<Card> findByNameContainingIgnoreCase(String name);
     List<Card> findByPower(int power);
     List<Card> findByPowerBetween(int low, int high);

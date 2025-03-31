@@ -65,8 +65,20 @@ public class UserController {
         }
     }
 
+    //add card to cards
+    @PutMapping("/addCard/{cardId}")
+    public ResponseEntity<String> addCard(Principal principal, @PathVariable String cardId) {
+        try {
+            String username = principal.getName(); // get username from jwt token
+            userService.addCard(username, cardId);
+            return ResponseEntity.ok("Card added successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
     //add card to deck
-    @PutMapping("/add/{cardId}")
+    @PutMapping("/addDeck/{cardId}")
     public ResponseEntity<String> AddCardToDeck(Principal principal, @PathVariable String cardId) {
         try {
             String username = principal.getName(); // get username from jwt token
@@ -78,7 +90,7 @@ public class UserController {
     }
 
     //remove card from deck
-    @DeleteMapping("/remove/{cardId}")
+    @DeleteMapping("/removeDeck/{cardId}")
     public ResponseEntity<String> RemoveCardFromDeck(Principal principal,@PathVariable String cardId) {
         try {
             String username = principal.getName();
