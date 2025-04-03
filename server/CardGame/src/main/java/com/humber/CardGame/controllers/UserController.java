@@ -1,5 +1,6 @@
 package com.humber.CardGame.controllers;
 
+import com.humber.CardGame.models.Deck;
 import com.humber.CardGame.models.LoginRequest;
 import com.humber.CardGame.models.MyUser;
 import com.humber.CardGame.services.UserService;
@@ -56,11 +57,11 @@ public class UserController {
 
     //get user deck
     @GetMapping("/deck")
-    public ResponseEntity<Map<String,Integer>> getDeck(Principal principal) {
+    public ResponseEntity<Deck> getDeck(Principal principal) {
         try {
             String username = principal.getName(); //get username from jwt token
-            Map<String,Integer> cards = userService.getUserDeck(username);
-            return ResponseEntity.ok(cards);
+            Deck deck = userService.getUserDeck(username);
+            return ResponseEntity.ok(deck);
         } catch (Exception e) {
             return ResponseEntity.status(401).body(null);
         }
@@ -79,11 +80,11 @@ public class UserController {
     }
 
     //add card to deck
-    @PutMapping("/addDeck/{cardId}")
-    public ResponseEntity<String> AddCardToDeck(Principal principal, @PathVariable String cardId) {
+    @PutMapping("/addDeck/{deckId}/{cardId}")
+    public ResponseEntity<String> AddCardToDeck(Principal principal, @PathVariable String cardId, @PathVariable String deckId) {
         try {
             String username = principal.getName(); // get username from jwt token
-            userService.addCardToDeck(username, cardId);
+            userService.addCardToDeck(username, cardId, deckId);
             return ResponseEntity.ok("Card added successfully");
         } catch (Exception e) {
             return ResponseEntity.status(401).body(e.getMessage());
@@ -91,11 +92,11 @@ public class UserController {
     }
 
     //remove card from deck
-    @DeleteMapping("/removeDeck/{cardId}")
-    public ResponseEntity<String> RemoveCardFromDeck(Principal principal,@PathVariable String cardId) {
+    @DeleteMapping("/removeDeck/{deckId}/{cardId}")
+    public ResponseEntity<String> RemoveCardFromDeck(Principal principal,@PathVariable String cardId, @PathVariable String deckId) {
         try {
             String username = principal.getName();
-            userService.removeCardFromDeck(username, cardId);
+            userService.removeCardFromDeck(username, cardId, deckId);
             return ResponseEntity.ok("Card removed successfully");
         } catch (Exception e) {
             return ResponseEntity.status(401).body(e.getMessage());
