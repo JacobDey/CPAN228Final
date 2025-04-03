@@ -1,5 +1,6 @@
 package com.humber.CardGame.controllers;
 
+import com.humber.CardGame.models.LoginRequest;
 import com.humber.CardGame.models.MyUser;
 import com.humber.CardGame.services.UserService;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +33,9 @@ public class UserController {
 
     //login
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestParam String username, @RequestParam String password) {
+    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
         try {
-            String token = userService.login(username, password);
+            String token = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
             return ResponseEntity.ok(token);
         } catch (Exception e) {
             return ResponseEntity.status(401).body(e.getMessage());
@@ -100,4 +101,8 @@ public class UserController {
             return ResponseEntity.status(401).body(e.getMessage());
         }
     }
+
+
 }
+
+

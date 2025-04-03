@@ -10,6 +10,7 @@ function SSSNavbar(){
                     <Nav.Link as={Link} to="/battle">Battle</Nav.Link>
                     <Nav.Link as={Link} to="/collection">Collection</Nav.Link>
                     <Nav.Link as={Link} to="/login">Login</Nav.Link>
+                    <Nav.Link as={Link} to="/register">Register</Nav.Link>
                 </Nav>
             </Navbar>
         </Container>

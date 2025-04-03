@@ -4,6 +4,7 @@ import MainMenu from "./pages/MainMenu.jsx";
 import './App.css'
 import SSSNavbar from "./components/SSSNavbar";
 import Login from "./pages/Login.jsx";
+import Register from "./pages/Register.jsx";
 import SSSCollection from "./pages/SSSCollection.jsx";
 import SSSDecks from "./pages/SSSDecks.jsx";
 import SSSCards from "./pages/SSSCards.jsx";
@@ -18,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<MainMenu />} />
           <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/collection" element={<SSSCollection />} />
           <Route path="/decks" element={<SSSDecks />} />
           <Route path="/cards" element={<SSSCards />} />
