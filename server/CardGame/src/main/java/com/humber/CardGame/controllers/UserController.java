@@ -55,6 +55,39 @@ public class UserController {
         }
     }
 
+    @PutMapping("/newDeck/{deckName}")
+    public ResponseEntity<String> createDeck(Principal principal, @PathVariable String deckName) {
+        try {
+            String username = principal.getName();
+            userService.createNewDeck(username, deckName);
+            return ResponseEntity.ok("Deck \"" + deckName + "\" created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/selectDeck/{deckId}")
+    public ResponseEntity<String> selectDeck(Principal principal, @PathVariable String deckId) {
+        try {
+            String username = principal.getName();
+            userService.setSelectedDeck(username, deckId);
+            return ResponseEntity.ok("Deck selected successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/deleteDeck/{deckId}")
+    public ResponseEntity<String> deleteDeck(Principal principal, @PathVariable String deckId){
+        try{
+            String username = principal.getName();
+            userService.deleteDeck(username, deckId);
+            return ResponseEntity.ok("Deck deleted successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
     //get user deck
     @GetMapping("/deck")
     public ResponseEntity<Deck> getDeck(Principal principal) {

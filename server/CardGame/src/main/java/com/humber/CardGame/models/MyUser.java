@@ -27,9 +27,13 @@ public class MyUser {
     private Date createdAt = new Date();
 //    private Date lastLoginAt;
     private Map<String, Integer> cards = new HashMap<>(); // will change to default pack
-    private Map<String, Deck> decks;
-    private Deck selectedDeck;
+    private Map<String, Deck> decks = new HashMap<>();
+    private String selectedDeck;
 
     //match history
     private List<Match> matchesHistory = new ArrayList<>();
+
+    public Deck getDeck(){
+        return decks.get(selectedDeck);
+    }
 }

@@ -1,8 +1,7 @@
-import SSSNavbar from "../components/SSSNavbar.jsx";
 import {useEffect, useState} from "react";
 import SSSCardContainer from "../components/SSSCardContainer.jsx";
 
-function SSSCards(){
+function SSSDatabase(){
     const [cardData, setCardData] = useState([]);
     useEffect(() => {
         const fetchCards = async () => {
@@ -21,4 +20,4 @@ function SSSCards(){
     )
 }
 
-export default SSSCards;
+export default SSSDatabase;

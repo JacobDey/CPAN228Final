@@ -7,6 +7,7 @@ import com.humber.CardGame.models.Deck;
 import com.humber.CardGame.models.MyUser;
 import com.humber.CardGame.repositories.CardRepository;
 import com.humber.CardGame.repositories.UserRepository;
+import org.bson.types.ObjectId;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -70,13 +71,54 @@ public class UserService {
         return userOp.get().getCards();
     }
 
-    //get user deck
+    //create new deck
+    public void createNewDeck(String username, String deckName){
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        user.getDecks().put(new ObjectId().toString(), new Deck(deckName, "default", new HashMap<>()));
+        userRepository.save(user);
+    }
+
+    //delete deck
+    public void deleteDeck(String username, String deckId){
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        //check if deck exists
+        if(!user.getDecks().containsKey(deckId)){
+            throw new RuntimeException("user does not have a deck with ID:" + deckId);
+        }
+        user.getDecks().remove(deckId);
+        userRepository.save(user);
+    }
+
+    //select deck
+    public void setSelectedDeck(String username, String deckId){
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        //check if deck exists
+        if(!user.getDecks().containsKey(deckId)){
+            throw new RuntimeException("user does not have a deck with ID:" + deckId);
+        }
+        user.setSelectedDeck(deckId);
+        userRepository.save(user);
+    }
+
+    //get user's selected deck
     public Deck getUserDeck(String username) {
         Optional<MyUser> userOp = userRepository.findByUsername(username);
         if(userOp.isEmpty()) {
             throw new RuntimeException("username not found");
         }
-        return userOp.get().getSelectedDeck();
+        return userOp.get().getDeck();
     }
 
     //get all decks

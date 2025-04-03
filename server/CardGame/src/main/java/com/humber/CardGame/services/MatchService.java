@@ -26,7 +26,7 @@ public class MatchService {
         MyUser player1 = userRepository.findByUsername(player1Username)
                 .orElseThrow(() -> new IllegalArgumentException("Player " + player1Username + " not found"));
         match.setPlayer1(player1Username);
-        match.setPlayer1Deck(convertDeckToCard(player1.getSelectedDeck())); //set deck
+        match.setPlayer1Deck(convertDeckToCard(player1.getDeck())); //set deck
         match.setPlayer1Hand(drawInitialHand(match.getPlayer1Deck())); //set hand
         match.setCurrentTurnPlayer(player1Username);
         match.setStatus(MatchStatus.WAITING);
@@ -53,7 +53,7 @@ public class MatchService {
         MyUser player2 = userRepository.findByUsername(player2Username)
                 .orElseThrow(() -> new RuntimeException("Player " + player2Username + " not found"));
         match.setPlayer2(player2Username);
-        match.setPlayer2Deck(convertDeckToCard(player2.getSelectedDeck())); //set deck
+        match.setPlayer2Deck(convertDeckToCard(player2.getDeck())); //set deck
         match.setPlayer2Hand(drawInitialHand(match.getPlayer2Deck())); //set hand
         match.setStatus(MatchStatus.PLAYING);
         match.setCurrentPhase(GamePhase.BEGIN);
