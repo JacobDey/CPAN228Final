@@ -11,7 +11,6 @@ function SSSCollection(){
 
     return(
         <>
-            <SSSNavbar />
             <h1>This is the collection page for displaying decks and cards</h1>
             <div>
                 <Link to="/decks">Decks</Link>

@@ -6,7 +6,6 @@ function SSSCardDetails(){
 
     return(
         <>
-            <SSSNavbar />
             <h1>This page will eventually fetch card details by id from the database</h1>
             <p>ID: {id}</p>
         </>
