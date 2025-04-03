@@ -104,17 +104,18 @@ public class UserService {
 
         //check if user have card
         if(!user.getCards().containsKey(cardId) ||
-                user.getCards().get(cardId) < user.getDeck().getOrDefault(cardId,0)) {
+                user.getCards().get(cardId) <= user.getDeck().getOrDefault(cardId,0)) {
             throw new RuntimeException("user do not have enough card");
         }
 
         //check if maximum reach
-        if(user.getCards().get(cardId) >= 3) {
+        if(user.getDeck().getOrDefault(cardId,0) > 3) {
             throw new RuntimeException("You can only add 3 of the same card");
         }
 
         //add card to user deck
         user.getDeck().put(cardId, user.getDeck().getOrDefault(cardId,0)+1);
+
         //save to db
         userRepository.save(user);
     }
