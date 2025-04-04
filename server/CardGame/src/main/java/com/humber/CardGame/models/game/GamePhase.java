@@ -1,4 +1,4 @@
-package com.humber.CardGame.models;
+package com.humber.CardGame.models.game;
 
 public enum GamePhase {
     BEGIN,

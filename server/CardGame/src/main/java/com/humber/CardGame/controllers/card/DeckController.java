@@ -1,7 +1,7 @@
-package com.humber.CardGame.controllers;
+package com.humber.CardGame.controllers.card;
 
-import com.humber.CardGame.models.Deck;
-import com.humber.CardGame.services.DeckService;
+import com.humber.CardGame.models.card.Deck;
+import com.humber.CardGame.services.card.DeckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

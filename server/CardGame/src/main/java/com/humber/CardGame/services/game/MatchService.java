@@ -1,6 +1,12 @@
-package com.humber.CardGame.services;
+package com.humber.CardGame.services.game;
 
-import com.humber.CardGame.models.*;
+import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.Deck;
+import com.humber.CardGame.models.game.GamePhase;
+import com.humber.CardGame.models.game.Match;
+import com.humber.CardGame.models.game.MatchStatus;
+import com.humber.CardGame.models.game.Tower;
+import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.repositories.CardRepository;
 import com.humber.CardGame.repositories.MatchRepository;
 import com.humber.CardGame.repositories.UserRepository;

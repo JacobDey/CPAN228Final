@@ -1,10 +1,10 @@
-package com.humber.CardGame.services;
+package com.humber.CardGame.services.user;
 
 
 import com.humber.CardGame.config.JwtUtil;
-import com.humber.CardGame.models.Card;
-import com.humber.CardGame.models.Deck;
-import com.humber.CardGame.models.MyUser;
+import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.Deck;
+import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.repositories.CardRepository;
 import com.humber.CardGame.repositories.DeckRepository;
 import com.humber.CardGame.repositories.UserRepository;

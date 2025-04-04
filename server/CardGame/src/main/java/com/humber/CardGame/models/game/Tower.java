@@ -1,5 +1,6 @@
-package com.humber.CardGame.models;
+package com.humber.CardGame.models.game;
 
+import com.humber.CardGame.models.card.Card;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

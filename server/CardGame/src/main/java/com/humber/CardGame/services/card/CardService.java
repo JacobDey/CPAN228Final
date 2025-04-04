@@ -1,7 +1,7 @@
-package com.humber.CardGame.services;
+package com.humber.CardGame.services.card;
 
 
-import com.humber.CardGame.models.Card;
+import com.humber.CardGame.models.card.Card;
 import com.humber.CardGame.repositories.CardRepository;
 import org.springframework.stereotype.Service;
 

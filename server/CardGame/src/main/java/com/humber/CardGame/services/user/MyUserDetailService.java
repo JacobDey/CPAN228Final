@@ -1,6 +1,6 @@
-package com.humber.CardGame.services;
+package com.humber.CardGame.services.user;
 
-import com.humber.CardGame.models.MyUser;
+import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;

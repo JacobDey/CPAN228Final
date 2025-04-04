@@ -1,6 +1,6 @@
 package com.humber.CardGame.repositories;
 
-import com.humber.CardGame.models.MyUser;
+import com.humber.CardGame.models.user.MyUser;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

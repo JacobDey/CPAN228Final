@@ -1,9 +1,9 @@
-package com.humber.CardGame.controllers;
+package com.humber.CardGame.controllers.user;
 
-import com.humber.CardGame.models.Deck;
-import com.humber.CardGame.models.LoginRequest;
-import com.humber.CardGame.models.MyUser;
-import com.humber.CardGame.services.UserService;
+import com.humber.CardGame.models.card.Deck;
+import com.humber.CardGame.models.user.LoginRequest;
+import com.humber.CardGame.models.user.MyUser;
+import com.humber.CardGame.services.user.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
