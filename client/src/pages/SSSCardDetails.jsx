@@ -73,7 +73,7 @@ function SSSCardDetails() {
                     </Card.Header>
                     <Card.Body>
                         <Card.Text><strong>Power:</strong> {card.power}</Card.Text>
-                        <Card.Text><strong>Description:</strong> {card.description}</Card.Text>
+                        <Card.Text><strong>Effect:</strong> {card.description ? card.description : "None"}</Card.Text>
                         <Card.Text>
                             <strong>Colour:</strong> 
                             <span 
