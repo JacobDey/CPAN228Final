@@ -51,6 +51,10 @@ public class DeckService {
             throw new RuntimeException("username not found");
         }
         MyUser user = userOp.get();
+        //user cannot remove select deck
+        if(user.getSelectedDeck().getId().equals(deckId)) {
+            throw new RuntimeException("You cannot delete selected deck");
+        }
         //check if deck exists
         Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
@@ -136,7 +140,6 @@ public class DeckService {
         if(userOp.isEmpty()) {
             throw new RuntimeException("username not found");
         }
-        MyUser user = userOp.get();
         //check if deck exists
         Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
@@ -152,7 +155,6 @@ public class DeckService {
         if(userOp.isEmpty()) {
             throw new RuntimeException("username not found");
         }
-        MyUser user = userOp.get();
         Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
             throw new RuntimeException("deck not found");
