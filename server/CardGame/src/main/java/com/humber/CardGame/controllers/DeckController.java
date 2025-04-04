@@ -1,6 +1,5 @@
 package com.humber.CardGame.controllers;
 
-import com.humber.CardGame.models.Deck;
 import com.humber.CardGame.services.DeckService;
 import com.humber.CardGame.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,14 +12,13 @@ import java.security.Principal;
 @RequestMapping("/decks")
 public class DeckController {
     @Autowired private DeckService deckService;
-    @Autowired private UserService userService;
 
     @PostMapping("/newDeck")
     public ResponseEntity<String> createDeck(Principal principal, @RequestParam(required = false) String deckName) {
         try {
             String username = principal.getName();
             if(deckName == null) deckName = "New Deck";
-            userService.createNewDeck(username, deckName);
+            deckService.createNewDeck(username, deckName);
             return ResponseEntity.ok("Deck \"" + deckName + "\" created successfully");
         } catch (Exception e) {
             return ResponseEntity.status(401).body(e.getMessage());
@@ -46,6 +44,18 @@ public class DeckController {
             String username = principal.getName();
             deckService.removeCardFromDeck(username, cardId, deckId);
             return ResponseEntity.ok("Card removed successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
+    //delete deck
+    @DeleteMapping("/deleteDeck/{deckId}")
+    public ResponseEntity<String> deleteDeck(Principal principal, @PathVariable String deckId){
+        try{
+            String username = principal.getName();
+            deckService.deleteDeck(username, deckId);
+            return ResponseEntity.ok("Deck deleted successfully");
         } catch (Exception e) {
             return ResponseEntity.status(401).body(e.getMessage());
         }

@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.util.List;
 import java.util.Map;
 
 @CrossOrigin
@@ -56,6 +55,7 @@ public class UserController {
         }
     }
 
+    //set user deck
     @PutMapping("/selectDeck/{deckId}")
     public ResponseEntity<String> selectDeck(Principal principal, @PathVariable String deckId) {
         try {
@@ -67,16 +67,6 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/deleteDeck/{deckId}")
-    public ResponseEntity<String> deleteDeck(Principal principal, @PathVariable String deckId){
-        try{
-            String username = principal.getName();
-            userService.deleteDeck(username, deckId);
-            return ResponseEntity.ok("Deck deleted successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
-    }
 
     //get user deck
     @GetMapping("/deck")

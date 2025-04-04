@@ -74,46 +74,7 @@ public class UserService {
         return userOp.get().getCards();
     }
 
-    //create new deck
-    public Deck createNewDeck(String username, String deckName){
-        //find user
-        Optional<MyUser> userOp = userRepository.findByUsername(username);
-        if(userOp.isEmpty()) {
-            throw new RuntimeException("username not found");
-        }
-        MyUser user = userOp.get();
 
-        //create new deck
-        Deck deck = new Deck();
-        deck.setOwner(user);
-        deck.setName(deckName);
-        deck.setIcon("default");
-        deck.setCardList(new HashMap<>());
-        Deck savedDeck = deckRepository.save(deck);
-
-        //add deck to user deck list
-        user.getDecks().add(savedDeck);
-        return savedDeck;
-    }
-
-    //delete deck
-    public void deleteDeck(String username, String deckId){
-        Optional<MyUser> userOp = userRepository.findByUsername(username);
-        if(userOp.isEmpty()) {
-            throw new RuntimeException("username not found");
-        }
-        MyUser user = userOp.get();
-        //check if deck exists
-        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
-        if(deckOp.isEmpty()) {
-            throw new RuntimeException("deck not found");
-        }
-        Deck deck = deckOp.get();
-        //remove deck from user deck list
-        user.getDecks().removeIf(d -> d.getId().equals(deckId));
-        userRepository.save(user);
-        deckRepository.delete(deck);
-    }
 
     //Set selected deck
     public void setSelectedDeck(String username, String deckId){
