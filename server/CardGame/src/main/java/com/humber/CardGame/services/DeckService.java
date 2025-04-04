@@ -41,6 +41,7 @@ public class DeckService {
 
         //add deck to user deck list
         user.getDecks().add(savedDeck);
+        userRepository.save(user);
     }
 
     //delete deck
@@ -128,4 +129,37 @@ public class DeckService {
         //save to db
         deckRepository.save(deck);
     }
+
+    //get deck by id
+    public Deck getDeckById(String username, String deckId) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        //check if deck exists
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
+        if(deckOp.isEmpty()) {
+            throw new RuntimeException("deck not found");
+        }
+
+        return deckOp.get();
+    }
+
+    //change deck name
+    public void updateDeckName(String username, String deckId, String newDeckName) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
+        if(deckOp.isEmpty()) {
+            throw new RuntimeException("deck not found");
+        }
+        Deck deck = deckOp.get();
+        deck.setName(newDeckName);
+        deckRepository.save(deck);
+    }
+
 }
