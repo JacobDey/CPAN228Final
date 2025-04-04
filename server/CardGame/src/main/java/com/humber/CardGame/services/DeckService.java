@@ -23,7 +23,7 @@ public class DeckService {
     DeckRepository deckRepository;
 
     //create new deck
-    public Deck createNewDeck(String username, String deckName){
+    public void createNewDeck(String username, String deckName){
         //find user
         Optional<MyUser> userOp = userRepository.findByUsername(username);
         if(userOp.isEmpty()) {
@@ -41,7 +41,6 @@ public class DeckService {
 
         //add deck to user deck list
         user.getDecks().add(savedDeck);
-        return savedDeck;
     }
 
     //delete deck
