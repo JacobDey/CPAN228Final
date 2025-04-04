@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin
@@ -55,7 +56,7 @@ public class UserController {
 
     //get user deck
     @GetMapping("/deck")
-    public ResponseEntity<?> getDeck(Principal principal) {
+    public ResponseEntity<Deck> getDeck(Principal principal) {
         String username = principal.getName(); //get username from jwt token
         Deck deck = userService.getUserDeck(username);
         return ResponseEntity.ok(deck);
@@ -63,7 +64,7 @@ public class UserController {
 
     //get all user deck
     @GetMapping("/allDeck")
-    public ResponseEntity<?> getAllDeck(Principal principal) {
+    public ResponseEntity<List<Deck>> getAllDeck(Principal principal) {
         String username = principal.getName();
         return ResponseEntity.ok(userService.getUserDecks(username));
     }

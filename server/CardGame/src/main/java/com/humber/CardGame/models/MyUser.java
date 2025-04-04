@@ -27,12 +27,13 @@ public class MyUser {
     private String email;
     private Date createdAt = new Date();
 //    private Date lastLoginAt;
-    private Map<String, Integer> cards = new HashMap<>(); // will change to default pack
-    @DBRef(db = "deck")
-    private List<Deck> decks = new ArrayList<>();
-    @DBRef(db = "deck")
+    private Map<String, Integer> cards;
+    @DBRef
+    private List<Deck> decks;
+    @DBRef
     private Deck selectedDeck;
 
     //match history
     private List<Match> matchesHistory = new ArrayList<>();
+
 }

@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleException() {
-        return ResponseEntity.status(500).body("An unexpected error occurred");
+    public ResponseEntity<String> handleException(Exception e) {
+        return ResponseEntity.status(500).body("An unexpected error occurred" + e.getMessage());
     }
 }

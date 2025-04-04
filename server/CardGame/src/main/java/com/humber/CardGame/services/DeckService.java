@@ -33,7 +33,7 @@ public class DeckService {
 
         //create new deck
         Deck deck = new Deck();
-        deck.setOwner(user);
+        deck.setOwner(username);
         deck.setName(deckName);
         deck.setIcon("default");
         deck.setCardList(new HashMap<>());
@@ -51,7 +51,7 @@ public class DeckService {
         }
         MyUser user = userOp.get();
         //check if deck exists
-        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
             throw new RuntimeException("deck not found");
         }
@@ -72,7 +72,7 @@ public class DeckService {
         MyUser user = userOp.get();
 
         //check if deck exists
-        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
             throw new RuntimeException("user does not have a deck with ID:" + deckId);
         }
@@ -107,7 +107,7 @@ public class DeckService {
         MyUser user = userOp.get();
 
         //check if deck exists
-        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
             throw new RuntimeException("user does not have a deck with ID:" + deckId);
         }

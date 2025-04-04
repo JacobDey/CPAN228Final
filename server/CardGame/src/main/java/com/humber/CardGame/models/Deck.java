@@ -16,8 +16,8 @@ import java.util.Map;
 public class Deck {
     @Id
     private String id;
-    @DBRef(db = "users", lazy = true)
-    private MyUser owner;
+
+    private String owner;
     private String name;
     private String icon;
     private Map<String, Integer> cardList;
