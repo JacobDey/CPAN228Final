@@ -1,3 +1,4 @@
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -77,6 +78,25 @@ button:focus-visible {
 .nav-icon {
   margin-right: 8px;
   filter: drop-shadow(0 0 2px rgba(76, 201, 240, 0.7));
+}
+
+
+/* Hover effects */
+.hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px rgba(67, 97, 238, 0.2);
+}
+
+/* Form input focus states */
+.form-control:focus {
+  border-color: #4361ee !important;
+  box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15) !important;
+  background-color: white !important;
+}
+
+/* Smooth transitions */
+.auth-container, .form-control, .btn {
+  transition: all 0.3s ease;
 }
 
 @media (max-width: 992px) {
