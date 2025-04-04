@@ -8,6 +8,8 @@ function SSSDecks() {
     const [selectedDeck, setSelectedDeck] = useState(null);
     const [error, setError] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deckToDelete, setDeckToDelete] = useState(null);
     const [newDeckName, setNewDeckName] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
@@ -65,7 +67,7 @@ function SSSDecks() {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
-            }).then(response => console.log(response));
+            });
 
             // Refresh decks
             const response = await axios.get(`${SERVER_URL}/users/allDeck`, {
@@ -81,6 +83,45 @@ function SSSDecks() {
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleDeleteDeck = async () => {
+        if (!deckToDelete) return;
+
+        try {
+            setIsLoading(true);
+            await axios.delete(`${SERVER_URL}/decks/deleteDeck/${deckToDelete}`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+
+            // Refresh decks
+            const response = await axios.get(`${SERVER_URL}/users/allDeck`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            });
+            setDecks(response.data);
+            
+            // If the deleted deck was the selected one, clear selection
+            if (selectedDeck === deckToDelete) {
+                setSelectedDeck(null);
+            }
+            
+            setShowDeleteModal(false);
+            setDeckToDelete(null);
+        } catch (err) {
+            setError(err.response?.data || "Failed to delete deck");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const promptDeleteDeck = (deckId, e) => {
+        e.stopPropagation();
+        setDeckToDelete(deckId);
+        setShowDeleteModal(true);
     };
 
     return (
@@ -136,7 +177,7 @@ function SSSDecks() {
                                     <Card.Text className="text-muted mb-3">
                                         {Object.values(deck.cardList || {}).reduce((sum, count) => sum + count, 0)} cards
                                     </Card.Text>
-                                    <div className="mt-auto">
+                                    <div className="mt-auto d-flex flex-column gap-2">
                                         <Button
                                             variant={selectedDeck === deck.id ? "success" : "outline-primary"}
                                             size="sm"
@@ -144,9 +185,15 @@ function SSSDecks() {
                                                 e.stopPropagation();
                                                 handleSelectDeck(deck.id);
                                             }}
-                                            className="w-100"
                                         >
                                             {selectedDeck === deck.id ? "✓ Selected" : "Select Deck"}
+                                        </Button>
+                                        <Button
+                                            variant="outline-danger"
+                                            size="sm"
+                                            onClick={(e) => promptDeleteDeck(deck.id, e)}
+                                        >
+                                            Delete Deck
                                         </Button>
                                     </div>
                                 </Card.Body>
@@ -183,6 +230,28 @@ function SSSDecks() {
                         disabled={isLoading || !newDeckName.trim()}
                     >
                         {isLoading ? 'Creating...' : 'Create Deck'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
+
+            {/* Delete Deck Confirmation Modal */}
+            <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>Confirm Delete</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    Are you sure you want to delete this deck? This action cannot be undone.
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="danger"
+                        onClick={handleDeleteDeck}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Deleting...' : 'Delete Deck'}
                     </Button>
                 </Modal.Footer>
             </Modal>
