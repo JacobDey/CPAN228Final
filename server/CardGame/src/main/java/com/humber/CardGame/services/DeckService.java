@@ -104,8 +104,6 @@ public class DeckService {
             throw new RuntimeException("username or card id not found");
         }
 
-        MyUser user = userOp.get();
-
         //check if deck exists
         Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
