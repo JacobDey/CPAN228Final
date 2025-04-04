@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 import java.util.Map;
 
 @CrossOrigin
@@ -55,17 +56,6 @@ public class UserController {
         }
     }
 
-    @PutMapping("/newDeck/{deckName}")
-    public ResponseEntity<String> createDeck(Principal principal, @PathVariable String deckName) {
-        try {
-            String username = principal.getName();
-            userService.createNewDeck(username, deckName);
-            return ResponseEntity.ok("Deck \"" + deckName + "\" created successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
-    }
-
     @PutMapping("/selectDeck/{deckId}")
     public ResponseEntity<String> selectDeck(Principal principal, @PathVariable String deckId) {
         try {
@@ -90,13 +80,24 @@ public class UserController {
 
     //get user deck
     @GetMapping("/deck")
-    public ResponseEntity<Deck> getDeck(Principal principal) {
+    public ResponseEntity<?> getDeck(Principal principal) {
         try {
             String username = principal.getName(); //get username from jwt token
             Deck deck = userService.getUserDeck(username);
             return ResponseEntity.ok(deck);
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(null);
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
+    //get all user deck
+    @GetMapping("/allDeck")
+    public ResponseEntity<?> getAllDeck(Principal principal) {
+        try {
+            String username = principal.getName();
+            return ResponseEntity.ok(userService.getUserDecks(username));
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
         }
     }
 

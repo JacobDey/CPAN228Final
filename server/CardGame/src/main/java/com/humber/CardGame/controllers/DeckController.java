@@ -16,10 +16,15 @@ public class DeckController {
     @Autowired private UserService userService;
 
     @PostMapping("/newDeck")
-    public Deck createDeck(Principal principal, @RequestParam(required = false) String deckName) {
-        String username = principal.getName();
-        if(deckName == null) deckName = "default";
-        return userService.createNewDeck(username, deckName);
+    public ResponseEntity<String> createDeck(Principal principal, @RequestParam(required = false) String deckName) {
+        try {
+            String username = principal.getName();
+            if(deckName == null) deckName = "New Deck";
+            userService.createNewDeck(username, deckName);
+            return ResponseEntity.ok("Deck \"" + deckName + "\" created successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(401).body(e.getMessage());
+        }
     }
 
     //add card to deck
