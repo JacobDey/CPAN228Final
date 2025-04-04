@@ -16,6 +16,7 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+
     public UserController(UserService userService) {
         this.userService = userService;
     }
@@ -23,87 +24,57 @@ public class UserController {
     //register
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody MyUser user) {
-        try {
-            userService.saveUser(user);
-            return ResponseEntity.ok("User registered successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        userService.saveUser(user);
+        return ResponseEntity.ok("User registered successfully");
     }
 
 
     //login
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest) {
-        try {
-            String token = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
-            return ResponseEntity.ok(token);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        String token = userService.login(loginRequest.getUsername(), loginRequest.getPassword());
+        return ResponseEntity.ok(token);
     }
 
     //get user card
     @GetMapping("/card")
-    public ResponseEntity<Map<String,Integer>> getCard(Principal principal) {
-        try {
-            String username = principal.getName(); //get username from jwt token
-            Map<String,Integer> cards = userService.getUserCards(username);
-            return ResponseEntity.ok(cards);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(null);
-        }
+    public ResponseEntity<Map<String, Integer>> getCard(Principal principal) {
+        String username = principal.getName(); //get username from jwt token
+        Map<String, Integer> cards = userService.getUserCards(username);
+        return ResponseEntity.ok(cards);
     }
 
     //set user deck
     @PutMapping("/selectDeck/{deckId}")
     public ResponseEntity<String> selectDeck(Principal principal, @PathVariable String deckId) {
-        try {
-            String username = principal.getName();
-            userService.setSelectedDeck(username, deckId);
-            return ResponseEntity.ok("Deck selected successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        String username = principal.getName();
+        userService.setSelectedDeck(username, deckId);
+        return ResponseEntity.ok("Deck selected successfully");
     }
 
 
     //get user deck
     @GetMapping("/deck")
     public ResponseEntity<?> getDeck(Principal principal) {
-        try {
-            String username = principal.getName(); //get username from jwt token
-            Deck deck = userService.getUserDeck(username);
-            return ResponseEntity.ok(deck);
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        String username = principal.getName(); //get username from jwt token
+        Deck deck = userService.getUserDeck(username);
+        return ResponseEntity.ok(deck);
     }
 
     //get all user deck
     @GetMapping("/allDeck")
     public ResponseEntity<?> getAllDeck(Principal principal) {
-        try {
-            String username = principal.getName();
-            return ResponseEntity.ok(userService.getUserDecks(username));
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        String username = principal.getName();
+        return ResponseEntity.ok(userService.getUserDecks(username));
     }
 
     //add card to cards
     @PutMapping("/addCard/{cardId}")
     public ResponseEntity<String> addCard(Principal principal, @PathVariable String cardId) {
-        try {
-            String username = principal.getName(); // get username from jwt token
-            userService.addCard(username, cardId);
-            return ResponseEntity.ok("Card added successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        String username = principal.getName(); // get username from jwt token
+        userService.addCard(username, cardId);
+        return ResponseEntity.ok("Card added successfully");
     }
-
-
 
 
 }

@@ -22,33 +22,21 @@ public class AdminController {
     //add card to db
     @PostMapping("/addCard")
     public ResponseEntity<String> addCard(@RequestBody Card card) {
-        try {
-            cardService.saveCardToDatabase(card);
-            return ResponseEntity.ok("success, card added to database");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        cardService.saveCardToDatabase(card);
+        return ResponseEntity.ok("success, card added to database");
     }
 
     //edit card
     @PutMapping("/editCard")
     public ResponseEntity<String> editCard(@RequestBody Card card) {
-        try {
-            cardService.editCardData(card);
-            return ResponseEntity.ok("success, card edited");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        cardService.editCardData(card);
+        return ResponseEntity.ok("success, card edited");
     }
 
     //remove card from db
     @DeleteMapping("/deleteCard/{cardId}")
     public ResponseEntity<String> deleteCard(@PathVariable String cardId) {
-        try {
-            cardService.deleteCardFromDatabase(cardId);
-            return ResponseEntity.ok("success, card deleted from database");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
+        cardService.deleteCardFromDatabase(cardId);
+        return ResponseEntity.ok("success, card deleted from database");
     }
 }
