@@ -54,6 +54,38 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.nav-link-custom {
+  padding: 0.5rem 1rem;
+  margin: 0 0.2rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link-custom:hover {
+  background: rgba(76, 201, 240, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-link-custom.active {
+  color: #4cc9f0 !important;
+  font-weight: bold;
+}
+
+.nav-icon {
+  margin-right: 8px;
+  filter: drop-shadow(0 0 2px rgba(76, 201, 240, 0.7));
+}
+
+@media (max-width: 992px) {
+  .nav-link-custom {
+      margin: 0.2rem 0;
+      padding: 0.8rem 1rem;
+  }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

@@ -16,16 +16,18 @@ function App() {
     <Router>
       <div>
         <SSSNavbar />
-        <Routes>
-          <Route path="/" element={<MainMenu />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/collection" element={<SSSCollection />} />
-          <Route path="/decks" element={<SSSDecks />} />
-          <Route path="/cards" element={<SSSCards />} />
-          <Route path="/battle" element={<SSSBattle />} />
-          <Route path="/card/:id" element={<SSSCardDetails />} />
-        </Routes>
+        <div style={{ marginTop: '60px'}}>
+          <Routes>
+            <Route path="/" element={<MainMenu />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/collection" element={<SSSCollection />} />
+            <Route path="/decks" element={<SSSDecks />} />
+            <Route path="/cards" element={<SSSCards />} />
+            <Route path="/battle" element={<SSSBattle />} />
+            <Route path="/card/:id" element={<SSSCardDetails />} />
+          </Routes>
+        </div>
       </div>
     </Router>
   )
