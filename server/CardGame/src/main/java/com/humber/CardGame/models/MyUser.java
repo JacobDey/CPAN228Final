@@ -30,6 +30,7 @@ public class MyUser {
     private Map<String, Integer> cards = new HashMap<>(); // will change to default pack
     @DBRef(db = "deck")
     private List<Deck> decks = new ArrayList<>();
+    @DBRef(db = "deck")
     private Deck selectedDeck;
 
     //match history
