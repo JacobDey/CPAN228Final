@@ -112,29 +112,7 @@ public class UserController {
         }
     }
 
-    //add card to deck
-    @PutMapping("/addDeck/{deckId}/{cardId}")
-    public ResponseEntity<String> AddCardToDeck(Principal principal, @PathVariable String cardId, @PathVariable String deckId) {
-        try {
-            String username = principal.getName(); // get username from jwt token
-            userService.addCardToDeck(username, cardId, deckId);
-            return ResponseEntity.ok("Card added successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
-    }
 
-    //remove card from deck
-    @DeleteMapping("/removeDeck/{deckId}/{cardId}")
-    public ResponseEntity<String> RemoveCardFromDeck(Principal principal,@PathVariable String cardId, @PathVariable String deckId) {
-        try {
-            String username = principal.getName();
-            userService.removeCardFromDeck(username, cardId, deckId);
-            return ResponseEntity.ok("Card removed successfully");
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(e.getMessage());
-        }
-    }
 
 
 }

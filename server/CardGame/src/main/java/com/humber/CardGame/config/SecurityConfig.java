@@ -26,12 +26,13 @@ public class SecurityConfig {
             UserDetailsService userDetailsService) throws Exception {
 
         JwtFilter jwtFilter = new JwtFilter(jwtUtil, userDetailsService);
-        // right now permit all end point for draft
+
         return http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/card/**","/users/**","/matches/**").permitAll() //change this to actual endpoint that permit
+                        .requestMatchers("/matches/**","/decks/**").hasAnyRole("ADMIN","USER")
+                        .requestMatchers("/card/**","/users/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

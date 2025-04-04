@@ -6,8 +6,8 @@ import com.humber.CardGame.models.Card;
 import com.humber.CardGame.models.Deck;
 import com.humber.CardGame.models.MyUser;
 import com.humber.CardGame.repositories.CardRepository;
+import com.humber.CardGame.repositories.DeckRepository;
 import com.humber.CardGame.repositories.UserRepository;
-import org.bson.types.ObjectId;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,12 +21,15 @@ public class UserService {
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final JwtUtil jwtUtil;
     private final CardRepository cardRepository;
+    private final DeckRepository deckRepository;
 
-    public UserService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder, JwtUtil jwtUtil, CardRepository cardRepository) {
+    public UserService(UserRepository userRepository, BCryptPasswordEncoder bCryptPasswordEncoder
+            , JwtUtil jwtUtil, CardRepository cardRepository, DeckRepository deckRepository) {
         this.userRepository = userRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.jwtUtil = jwtUtil;
         this.cardRepository = cardRepository;
+        this.deckRepository = deckRepository;
     }
 
     //save user to db
@@ -72,14 +75,25 @@ public class UserService {
     }
 
     //create new deck
-    public void createNewDeck(String username, String deckName){
+    public Deck createNewDeck(String username, String deckName){
+        //find user
         Optional<MyUser> userOp = userRepository.findByUsername(username);
         if(userOp.isEmpty()) {
             throw new RuntimeException("username not found");
         }
         MyUser user = userOp.get();
-        user.getDecks().put(new ObjectId().toString(), new Deck(deckName, "default", new HashMap<>()));
-        userRepository.save(user);
+
+        //create new deck
+        Deck deck = new Deck();
+        deck.setOwner(user);
+        deck.setName(deckName);
+        deck.setIcon("default");
+        deck.setCardList(new HashMap<>());
+        Deck savedDeck = deckRepository.save(deck);
+
+        //add deck to user deck list
+        user.getDecks().add(savedDeck);
+        return savedDeck;
     }
 
     //delete deck
@@ -90,14 +104,18 @@ public class UserService {
         }
         MyUser user = userOp.get();
         //check if deck exists
-        if(!user.getDecks().containsKey(deckId)){
-            throw new RuntimeException("user does not have a deck with ID:" + deckId);
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
+        if(deckOp.isEmpty()) {
+            throw new RuntimeException("deck not found");
         }
-        user.getDecks().remove(deckId);
+        Deck deck = deckOp.get();
+        //remove deck from user deck list
+        user.getDecks().removeIf(d -> d.getId().equals(deckId));
         userRepository.save(user);
+        deckRepository.delete(deck);
     }
 
-    //select deck
+    //Set selected deck
     public void setSelectedDeck(String username, String deckId){
         Optional<MyUser> userOp = userRepository.findByUsername(username);
         if(userOp.isEmpty()) {
@@ -105,10 +123,13 @@ public class UserService {
         }
         MyUser user = userOp.get();
         //check if deck exists
-        if(!user.getDecks().containsKey(deckId)){
-            throw new RuntimeException("user does not have a deck with ID:" + deckId);
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
+        if(deckOp.isEmpty()) {
+            throw new RuntimeException("deck not found");
         }
-        user.setSelectedDeck(deckId);
+        Deck deck = deckOp.get();
+        //set selected deck
+        user.setSelectedDeck(deck);
         userRepository.save(user);
     }
 
@@ -118,11 +139,15 @@ public class UserService {
         if(userOp.isEmpty()) {
             throw new RuntimeException("username not found");
         }
-        return userOp.get().getDeck();
+        MyUser user = userOp.get();
+        if(user.getSelectedDeck() == null) {
+            throw new RuntimeException("No deck selected");
+        }
+        return user.getSelectedDeck();
     }
 
     //get all decks
-    public Map<String, Deck> getUserDecks(String username){
+    public List<Deck> getUserDecks(String username){
         Optional<MyUser> userOp = userRepository.findByUsername(username);
         if(userOp.isEmpty()) {
             throw new RuntimeException("username not found");
@@ -141,71 +166,6 @@ public class UserService {
 
         //add card to user card list
         user.getCards().put(cardId,user.getCards().getOrDefault(cardId,0) + 1);
-        //save to db
-        userRepository.save(user);
-    }
-
-    //add card to user deck
-    public void addCardToDeck(String username, String cardId, String deckId) {
-        Optional<MyUser> userOp = userRepository.findByUsername(username);
-        Optional<Card> cardOp = cardRepository.findById(cardId);
-        if(userOp.isEmpty() || cardOp.isEmpty()) {
-            throw new RuntimeException("username or card id not found");
-        }
-        MyUser user = userOp.get();
-
-        //check if deck exists
-        if(!user.getDecks().containsKey(deckId)){
-            throw new RuntimeException("user does not have a deck with ID:" + deckId);
-        }
-        Deck deck = user.getDecks().get(deckId);
-
-        //check if user have card
-        if(!user.getCards().containsKey(cardId) ||
-                user.getCards().get(cardId) <= deck.getCardList().getOrDefault(cardId,0)) {
-            throw new RuntimeException("user does not have enough card");
-        }
-
-        //check if maximum reach
-        if(deck.getCardList().getOrDefault(cardId,0) > 3) {
-            throw new RuntimeException("You can only add 3 of the same card");
-        }
-
-        //add card to user deck
-        deck.getCardList().put(cardId, deck.getCardList().getOrDefault(cardId,0)+1);
-
-        //save to db
-        userRepository.save(user);
-    }
-
-    //remove card from user deck
-    public void removeCardFromDeck(String username, String cardId, String deckId) {
-        Optional<MyUser> userOp = userRepository.findByUsername(username);
-        Optional<Card> cardOp = cardRepository.findById(cardId);
-        if(userOp.isEmpty() || cardOp.isEmpty()) {
-            throw new RuntimeException("username or card id not found");
-        }
-
-        MyUser user = userOp.get();
-
-        //check if deck exists
-        if(!user.getDecks().containsKey(deckId)){
-            throw new RuntimeException("user does not have a deck with ID:" + deckId);
-        }
-        Deck deck = user.getDecks().get(deckId);
-
-        //check if card is in user deck
-        if(!deck.getCardList().containsKey(cardId)) {
-            throw new RuntimeException("card is not in the deck");
-        }
-
-        //remove card from deck
-        deck.getCardList().put(cardId, user.getCards().get(cardId)-1);
-
-        //if number reach 0 remove it from deck
-        if(deck.getCardList().get(cardId) <= 0) {
-            deck.getCardList().remove(cardId);
-        }
         //save to db
         userRepository.save(user);
     }
