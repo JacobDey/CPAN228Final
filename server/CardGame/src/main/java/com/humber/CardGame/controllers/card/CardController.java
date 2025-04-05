@@ -3,12 +3,15 @@ package com.humber.CardGame.controllers.card;
 import com.humber.CardGame.models.card.Card;
 import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.services.card.CardService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.CacheControl;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -24,9 +27,21 @@ public class CardController {
         this.cardService = cardService;
     }
 
-    //get all cards
+    //get all cards with paginated and sort
     @GetMapping("/cards")
-    public ResponseEntity<List<CardDTO>> getCards() {
+    public ResponseEntity<Page<CardDTO>> getCards(@RequestParam(defaultValue = "0") int page,
+                                                  @RequestParam(defaultValue = "6") int size,
+                                                  @RequestParam(defaultValue = "colour") String sortField,
+                                                  @RequestParam(defaultValue = "asc") String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        return ResponseEntity.ok(cardService.getAllCard(pageable));
+    }
+
+    //get all card without paginated
+    @GetMapping("/allCards")
+    public ResponseEntity<List<CardDTO>> getAllCards() {
         return ResponseEntity.ok(cardService.getAllCard());
     }
 
@@ -40,10 +55,23 @@ public class CardController {
         return ResponseEntity.ok(card);
     }
 
+    //get random card
+    @GetMapping("/random/{count}")
+    public ResponseEntity<List<CardDTO>> getRandomCards(@PathVariable int count) {
+        return ResponseEntity.ok(cardService.getRandomCard(count));
+    }
+
     //get filtered card
     @GetMapping("/name/{name}")
-    public ResponseEntity<List<CardDTO>> getCardByName(@PathVariable String name) {
-        List<CardDTO> cards = cardService.getCardByName(name);
+    public ResponseEntity<Page<CardDTO>> getCardByName(@PathVariable String name,
+                                                       @RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "6") int size,
+                                                       @RequestParam(defaultValue = "colour") String sortField,
+                                                       @RequestParam(defaultValue = "asc") String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<CardDTO> cards = cardService.getCardByName(name, pageable);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -51,8 +79,15 @@ public class CardController {
     }
 
     @GetMapping("/colour/{colour}")
-    public ResponseEntity<List<CardDTO>> getCardByColour(@PathVariable String colour) {
-        List<CardDTO> cards = cardService.getCardByColour(colour);
+    public ResponseEntity<Page<CardDTO>> getCardByColour(@PathVariable String colour,
+                                                         @RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "6") int size,
+                                                         @RequestParam(defaultValue = "colour") String sortField,
+                                                         @RequestParam(defaultValue = "asc") String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<CardDTO> cards = cardService.getCardByColour(colour, pageable);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -60,8 +95,15 @@ public class CardController {
     }
 
     @GetMapping("/power/{power}")
-    public ResponseEntity<List<CardDTO>> getCardByPower(@PathVariable int power) {
-        List<CardDTO> cards = cardService.getCardByPower(power);
+    public ResponseEntity<Page<CardDTO>> getCardByPower(@PathVariable int power,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "6") int size,
+                                                        @RequestParam(defaultValue = "power") String sortField,
+                                                        @RequestParam(defaultValue = "asc") String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<CardDTO> cards = cardService.getCardByPower(power, pageable);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -69,8 +111,15 @@ public class CardController {
     }
 
     @GetMapping("/power/{minPower}/{maxPower}")
-    public ResponseEntity<List<CardDTO>> getCardByPower(@PathVariable int minPower, @PathVariable int maxPower) {
-        List<CardDTO> cards = cardService.getCardByPower(minPower, maxPower);
+    public ResponseEntity<Page<CardDTO>> getCardByPower(@PathVariable int minPower, @PathVariable int maxPower,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "6") int size,
+                                                        @RequestParam(defaultValue = "power") String sortField,
+                                                        @RequestParam(defaultValue = "asc") String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size,sort);
+        Page<CardDTO> cards = cardService.getCardByPower(minPower, maxPower, pageable);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -78,8 +127,15 @@ public class CardController {
     }
 
     @GetMapping("/power/min/{power}")
-    public ResponseEntity<List<CardDTO>> getCardByMinPower(@PathVariable int power) {
-        List<CardDTO> cards = cardService.getCardByMinPower(power);
+    public ResponseEntity<Page<CardDTO>> getCardByMinPower(@PathVariable int power,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "6") int size,
+                                                           @RequestParam(defaultValue = "power") String sortField,
+                                                           @RequestParam(defaultValue = "asc") String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size,sort);
+        Page<CardDTO> cards = cardService.getCardByMinPower(power, pageable);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -87,8 +143,15 @@ public class CardController {
     }
 
     @GetMapping("/power/max/{power}")
-    public ResponseEntity<List<CardDTO>> getCardByMaxPower(@PathVariable int power) {
-        List<CardDTO> cards = cardService.getCardByMaxPower(power);
+    public ResponseEntity<Page<CardDTO>> getCardByMaxPower(@PathVariable int power,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "6") int size,
+                                                           @RequestParam(defaultValue = "power") String sortField,
+                                                           @RequestParam(defaultValue = "asc") String sortDirection) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDirection);
+        Sort sort = Sort.by(direction, sortField);
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<CardDTO> cards = cardService.getCardByMaxPower(power, pageable);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }

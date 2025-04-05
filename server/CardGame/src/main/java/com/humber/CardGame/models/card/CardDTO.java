@@ -3,7 +3,6 @@ package com.humber.CardGame.models.card;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 @Data
 @AllArgsConstructor
