@@ -23,8 +23,8 @@ function SSSCard({ data }) {
 
     return (
         <div style={{ 
-            margin: '10px', 
-            width: '340px',
+            margin: '5px', 
+            width: '325px',
             flex: '0 0 auto'
         }}>
             <Link to={`/card/${data.id}`} style={{ textDecoration: 'none' }}>

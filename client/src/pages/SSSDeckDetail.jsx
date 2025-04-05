@@ -11,7 +11,6 @@ function SSSDeckDetail() {
     const [cards, setCards] = useState([]);
     const [userCards, setUserCards] = useState([]);
     const [deckName, setDeckName] = useState("");
-    const [count, setCount] = useState(0);
     const [error, setError] = useState(null);
     const SERVER_URL = "http://localhost:8080";
 
@@ -103,7 +102,6 @@ function SSSDeckDetail() {
         const [reorderedItem] = items.splice(result.source.index, 1);
         items.splice(result.destination.index, 0, reorderedItem);
 
-        // Convert back to object
         const newCardList = Object.fromEntries(items);
 
         setDeck({
@@ -111,8 +109,6 @@ function SSSDeckDetail() {
             cardList: newCardList
         });
 
-        // Optional: Send update to backend
-        // axios.put(`${SERVER_URL}/decks/${deckId}/reorder`, { cardList: newCardList });
     };
 
     if (!deck) return <div>Loading...</div>;
