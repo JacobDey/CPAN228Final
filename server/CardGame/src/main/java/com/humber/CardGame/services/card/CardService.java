@@ -136,16 +136,14 @@ public class CardService {
             if ("colour".equalsIgnoreCase(sortField)) {
                 cards = colourSort(pageable, cards);
             } else {
-                cards.sort((c1, c2) -> {
-                    return switch (sortField.toLowerCase()) {
-                        case "power" -> direction == Sort.Direction.ASC
-                                ? Integer.compare(c1.getPower(), c2.getPower())
-                                : Integer.compare(c2.getPower(), c1.getPower());
-                        case "name" -> direction == Sort.Direction.ASC
-                                ? c1.getName().compareToIgnoreCase(c2.getName())
-                                : c2.getName().compareToIgnoreCase(c1.getName());
-                        default -> 0; // no sorting
-                    };
+                cards.sort((c1, c2) -> switch (sortField.toLowerCase()) {
+                    case "power" -> direction == Sort.Direction.ASC
+                            ? Integer.compare(c1.getPower(), c2.getPower())
+                            : Integer.compare(c2.getPower(), c1.getPower());
+                    case "name" -> direction == Sort.Direction.ASC
+                            ? c1.getName().compareToIgnoreCase(c2.getName())
+                            : c2.getName().compareToIgnoreCase(c1.getName());
+                    default -> 0; // no sorting
                 });
             }
         }
