@@ -45,16 +45,15 @@ function SSSCard({ data }) {
                     className="hover-effect"
                 >
                     {/* Placeholder Image */}
-                    <div style={{
+                    <img src={`http://localhost:8080/card/image/${data.id}`} alt={cardName} 
+                    style={{
                         height: '180px',
                         backgroundColor: '#f0f0f0',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         borderBottom: `3px solid ${colorStyle.hex}`
-                    }}>
-  
-                    </div>
+                    }} />
 
                     <Card.Header 
                         style={{ 

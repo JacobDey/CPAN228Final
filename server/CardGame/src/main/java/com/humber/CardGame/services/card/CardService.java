@@ -2,25 +2,42 @@ package com.humber.CardGame.services.card;
 
 
 import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.repositories.CardRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.stream;
 
 @Service
 public class CardService {
 
-//    repository injection
+    //    repository injection
     private final CardRepository cardRepository;
 
     public CardService(CardRepository cardRepository) {
         this.cardRepository = cardRepository;
     }
 
+    //change card to CardDTO
+    public List<CardDTO> convertCards(List<Card> cards) {
+        return cards.stream()
+                .map(card -> new CardDTO(
+                        card.getId(),
+                        card.getName(),
+                        card.getDescription(),
+                        card.getColour(),
+                        card.getPower()
+                ))
+                .collect(Collectors.toList());
+    }
+
     // get all cards
-    public List<Card> getAllCard() {
-        return cardRepository.findAll();
+    public List<CardDTO> getAllCard() {
+        return convertCards(cardRepository.findAll());
     }
 
     //get a card by id
@@ -29,33 +46,34 @@ public class CardService {
     }
 
     //get filtered card
-    public List<Card> getCardByName(String name) {
-        return cardRepository.findByNameContainingIgnoreCase(name);
+    public List<CardDTO> getCardByName(String name) {
+        return convertCards(cardRepository.findByNameContainingIgnoreCase(name));
     }
 
-    public List<Card> getCardByColour(String colour) {
-        return cardRepository.findByColourIgnoreCase(colour);
+    public List<CardDTO> getCardByColour(String colour) {
+        return convertCards(cardRepository.findByColourIgnoreCase(colour));
     }
 
-    public List<Card> getCardByPower(int power) {
-        return cardRepository.findByPower(power);
-    }
-    public List<Card> getCardByPower(int minPower, int maxPower) {
-        return cardRepository.findByPowerBetween(minPower-1, maxPower+1);
+    public List<CardDTO> getCardByPower(int power) {
+        return convertCards(cardRepository.findByPower(power));
     }
 
-    public List<Card> getCardByMaxPower(int maxPower) {
-        return cardRepository.findByPowerLessThanEqual(maxPower);
+    public List<CardDTO> getCardByPower(int minPower, int maxPower) {
+        return convertCards(cardRepository.findByPowerBetween(minPower - 1, maxPower + 1));
     }
 
-    public List<Card> getCardByMinPower(int minPower) {
-        return cardRepository.findByPowerGreaterThanEqual(minPower);
+    public List<CardDTO> getCardByMaxPower(int maxPower) {
+        return convertCards(cardRepository.findByPowerLessThanEqual(maxPower));
+    }
+
+    public List<CardDTO> getCardByMinPower(int minPower) {
+        return convertCards(cardRepository.findByPowerGreaterThanEqual(minPower));
     }
 
     // add card to the db
     public void saveCardToDatabase(Card card) {
         //check name
-        if(cardRepository.findByNameIgnoreCase(card.getName()) != null) {
+        if (cardRepository.findByNameIgnoreCase(card.getName()) != null) {
             throw new IllegalStateException("Card already exists!");
         }
         cardRepository.save(card);
@@ -64,7 +82,7 @@ public class CardService {
     //remove card from db
     public void deleteCardFromDatabase(String cardId) {
         //check id
-        if(cardRepository.findById(cardId).isEmpty()) {
+        if (cardRepository.findById(cardId).isEmpty()) {
             throw new IllegalStateException("Card does not exist!");
         }
         cardRepository.deleteById(cardId);
@@ -73,7 +91,7 @@ public class CardService {
     //edit card data
     public void editCardData(Card card) {
         // check id
-        if(cardRepository.findById(card.getId()).isEmpty()) {
+        if (cardRepository.findById(card.getId()).isEmpty()) {
             throw new IllegalStateException("Card does not exist!");
         }
         cardRepository.save(card);

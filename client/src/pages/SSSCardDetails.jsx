@@ -1,11 +1,13 @@
 import { useParams } from "react-router";
 import SSSNavbar from "../components/SSSNavbar.jsx";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { Card } from "react-bootstrap";
 
 function SSSCardDetails() {
     const { id } = useParams();
     const [card, setCard] = useState(null);
+    const navigate = useNavigate();
 
     const colorStyles = {
         red: { border: 'danger', hex: '#dc3545' },
@@ -22,8 +24,10 @@ function SSSCardDetails() {
             const response = await fetch(`http://localhost:8080/card/id/${id}`);
             const cardData = await response.json();
             setCard(cardData);
+            console.log(card)
         }
         fetchCard();
+        
     }, [id]);
 
     if (!card) return <div>Loading...</div>;
@@ -33,7 +37,7 @@ function SSSCardDetails() {
 
     return (
         <>
-            <SSSNavbar />
+            
             <div style={{ 
                 display: 'flex', 
                 justifyContent: 'center', 
@@ -48,17 +52,16 @@ function SSSCardDetails() {
                         borderWidth: '3px'
                     }}
                 >
-                    {/* Placeholder Image */}
-                    <div style={{
+                    <img src={`http://localhost:8080/card/image/${id}`} alt={card.name} 
+                     style={{
                         height: '250px',
                         backgroundColor: '#f0f0f0',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         borderBottom: `3px solid ${colorStyle.hex}`
-                    }}>
-     
-                    </div>
+                    }} />
+
 
                     <Card.Header 
                         style={{ 

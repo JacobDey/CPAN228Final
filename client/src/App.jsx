@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import MainMenu from "./pages/MainMenu.jsx";
 import './App.css'
@@ -11,6 +10,7 @@ import SSSCards from "./pages/SSSCards.jsx";
 import SSSBattle from "./pages/SSSBattle.jsx";
 import SSSCardDetails from "./pages/SSSCardDetails.jsx";
 import SSSDeckDetail from './pages/SSSDeckDetail.jsx';
+import CardManage from './pages/admin/CardManage.jsx';
 
 function App() {
   return (
@@ -28,6 +28,7 @@ function App() {
             <Route path="/cards" element={<SSSCards />} />
             <Route path="/battle" element={<SSSBattle />} />
             <Route path="/card/:id" element={<SSSCardDetails />} />
+            <Route path="/admin/edit/cards" element={<CardManage />} />
           </Routes>
         </div>
       </div>

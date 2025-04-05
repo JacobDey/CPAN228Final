@@ -1,11 +1,16 @@
 package com.humber.CardGame.controllers.card;
 
 import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.services.card.CardService;
+import org.springframework.http.CacheControl;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @CrossOrigin
 @RestController
@@ -21,7 +26,7 @@ public class CardController {
 
     //get all cards
     @GetMapping("/cards")
-    public ResponseEntity<List<Card>> getCards() {
+    public ResponseEntity<List<CardDTO>> getCards() {
         return ResponseEntity.ok(cardService.getAllCard());
     }
 
@@ -37,8 +42,8 @@ public class CardController {
 
     //get filtered card
     @GetMapping("/name/{name}")
-    public ResponseEntity<List<Card>> getCardByName(@PathVariable String name) {
-        List<Card> cards = cardService.getCardByName(name);
+    public ResponseEntity<List<CardDTO>> getCardByName(@PathVariable String name) {
+        List<CardDTO> cards = cardService.getCardByName(name);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -46,8 +51,8 @@ public class CardController {
     }
 
     @GetMapping("/colour/{colour}")
-    public ResponseEntity<List<Card>> getCardByColour(@PathVariable String colour) {
-        List<Card> cards = cardService.getCardByColour(colour);
+    public ResponseEntity<List<CardDTO>> getCardByColour(@PathVariable String colour) {
+        List<CardDTO> cards = cardService.getCardByColour(colour);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -55,8 +60,8 @@ public class CardController {
     }
 
     @GetMapping("/power/{power}")
-    public ResponseEntity<List<Card>> getCardByPower(@PathVariable int power) {
-        List<Card> cards = cardService.getCardByPower(power);
+    public ResponseEntity<List<CardDTO>> getCardByPower(@PathVariable int power) {
+        List<CardDTO> cards = cardService.getCardByPower(power);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -64,8 +69,8 @@ public class CardController {
     }
 
     @GetMapping("/power/{minPower}/{maxPower}")
-    public ResponseEntity<List<Card>> getCardByPower(@PathVariable int minPower, @PathVariable int maxPower) {
-        List<Card> cards = cardService.getCardByPower(minPower, maxPower);
+    public ResponseEntity<List<CardDTO>> getCardByPower(@PathVariable int minPower, @PathVariable int maxPower) {
+        List<CardDTO> cards = cardService.getCardByPower(minPower, maxPower);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -73,8 +78,8 @@ public class CardController {
     }
 
     @GetMapping("/power/min/{power}")
-    public ResponseEntity<List<Card>> getCardByMinPower(@PathVariable int power) {
-        List<Card> cards = cardService.getCardByMinPower(power);
+    public ResponseEntity<List<CardDTO>> getCardByMinPower(@PathVariable int power) {
+        List<CardDTO> cards = cardService.getCardByMinPower(power);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
@@ -82,14 +87,22 @@ public class CardController {
     }
 
     @GetMapping("/power/max/{power}")
-    public ResponseEntity<List<Card>> getCardByMaxPower(@PathVariable int power) {
-        List<Card> cards = cardService.getCardByMaxPower(power);
+    public ResponseEntity<List<CardDTO>> getCardByMaxPower(@PathVariable int power) {
+        List<CardDTO> cards = cardService.getCardByMaxPower(power);
         if (cards.isEmpty()) {
             throw new IllegalStateException("No card meets the criteria");
         }
         return ResponseEntity.ok(cards);
     }
 
-
+    //get image data
+    @GetMapping("/image/{id}")
+    public ResponseEntity<byte[]> getCardImage(@PathVariable String id) {
+        Card card = cardService.getCardById(id).orElseThrow();
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(card.getImageType()))
+                .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS)) // Cache for 30 days
+                .body(card.getImageData());
+    }
 
 }
