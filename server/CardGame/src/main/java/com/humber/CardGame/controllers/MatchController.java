@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/matches")
@@ -15,6 +16,12 @@ public class MatchController {
 
     @Autowired
     MatchService matchService;
+
+@GetMapping
+public ResponseEntity<List<Match>> getAllMatches() {
+    List<Match> matches = matchService.getAllMatches();
+    return ResponseEntity.ok(matches);
+}
 
     @PostMapping("/create")
     public ResponseEntity<Match> createMatch(Principal principal) {

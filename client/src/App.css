@@ -6,7 +6,9 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 10px;
+  text-decoration: none; /* Removes the underline */
+  color: inherit; /* Ensures the link inherits the text color */
 }
 
 .read-the-docs {

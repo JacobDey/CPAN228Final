@@ -27,7 +27,7 @@ public class MatchService {
         if (player1.getSelectedDeck() == null) {
             throw new IllegalArgumentException("Player has no selected deck");
         }
-        //create match
+        //create a new match as player 1
         Match match = new Match();
         match.setPlayer1(player1Username);
         match.setPlayer1Deck(convertDeckToCard(player1.getSelectedDeck())); //set deck
@@ -44,11 +44,18 @@ public class MatchService {
         return matchRepository.save(match);
     }
 
-    //join match
+                //get all matches
+                public List<Match> getAllMatches() {
+                    return matchRepository.findAll();
+                }
+
+    //join match that has not yet started as player 2
     public Match joinMatch(String matchId, String player2Username) {
         Match match = matchRepository.findById(matchId)
                 .orElseThrow(() -> new RuntimeException("Match not found"));
 
+
+        // removing this for now, i think that you should be able to rejoin a match if you disconnect for
         //check if start
         if(match.getStatus() != MatchStatus.WAITING || match.getPlayer2() != null) {
             throw new RuntimeException("Match is already started");
@@ -68,6 +75,16 @@ public class MatchService {
         match.setCurrentPhase(GamePhase.BEGIN);
         return matchRepository.save(match);
     }
+
+        //join an ongoing match as player 1 or 2
+        public Match joinOngoingMatch(String matchId, String username) {
+            Match match = matchRepository.findById(matchId)
+                    .orElseThrow(() -> new RuntimeException("Match not found"));
+    
+            // this is a stub right now it doesn't really do anything
+
+            return matchRepository.save(match);
+        }
 
     //start turn
     public Match startTurn(String matchId, String username) {
