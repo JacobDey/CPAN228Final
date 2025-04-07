@@ -34,6 +34,10 @@ function SSSDecks() {
                 });
                 setSelectedDeck(selectedResponse.data?.id);
             } catch (err) {
+                if(err.status === 400) {
+                    alert("Please Login");
+                    navigate("/login");
+                }
                 setError(err.response?.data || "Failed to load decks");
             } finally {
                 setIsLoading(false);

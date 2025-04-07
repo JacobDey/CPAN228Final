@@ -45,24 +45,32 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
         }));
     };
 
-    const handleFileChange = (e) => {
+    const handleFileChange = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
+        
+        try {
+          // Resize the image
+          const resized = await resizeImage(file);
+          
+          // Convert blob to array for storage
+          const reader = new FileReader();
+          reader.onloadend = () => {
             const arrayBuffer = reader.result;
             const uint8Array = new Uint8Array(arrayBuffer);
             
             setFormData(prev => ({
-                ...prev,
-                imageType: file.type,
-                imageData: Array.from(uint8Array) //convert to regular array for json
+              ...prev,
+              imageType: file.type,
+              imageData: Array.from(uint8Array)
             }));
-            setPreviewImage(URL.createObjectURL(file));
-        };
-        reader.readAsArrayBuffer(file);
-    };
+            setPreviewImage(URL.createObjectURL(resized.blob));
+          };
+          reader.readAsArrayBuffer(resized.blob);
+        } catch (error) {
+          console.error("Error resizing image:", error);
+        }
+      };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -112,6 +120,49 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
             setIsSubmitting(false);
         }
     };
+
+    const resizeImage = (file, maxWidth = 325, maxHeight = 180) => {
+        return new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const img = new Image();
+            img.onload = () => {
+              // Calculate new dimensions while maintaining aspect ratio
+              let width = img.width;
+              let height = img.height;
+              
+              if (width > height) {
+                if (width > maxWidth) {
+                  height = Math.round(height * (maxWidth / width));
+                  width = maxWidth;
+                }
+              } else {
+                if (height > maxHeight) {
+                  width = Math.round(width * (maxHeight / height));
+                  height = maxHeight;
+                }
+              }
+              
+              // Create canvas and resize
+              const canvas = document.createElement('canvas');
+              canvas.width = width;
+              canvas.height = height;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, width, height);
+              
+              // Convert to blob
+              canvas.toBlob((blob) => {
+                resolve({
+                  blob,
+                  type: file.type
+                });
+              }, file.type);
+            };
+            img.src = event.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">

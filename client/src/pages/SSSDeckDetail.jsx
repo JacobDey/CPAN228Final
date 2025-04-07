@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Container, Button, Card, Form, Row, Col, Alert, Badge, Spinner } from "react-bootstrap";
+import { Button, Form, Alert, Badge, Spinner, Container } from "react-bootstrap";
 import axios from "axios";
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import SSSCard from "../components/SSSCard.jsx";
 
 function SSSDeckDetail() {
     const { deckId } = useParams();
@@ -15,8 +16,8 @@ function SSSDeckDetail() {
     const [isLoading, setIsLoading] = useState(true);
     const [isDirty, setIsDirty] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
-    const [deckCards, setDeckCards] = useState([]); // Array of cards in deck (expanded from counts)
-    const [availableCards, setAvailableCards] = useState([]); // Array of available cards
+    const [deckCards, setDeckCards] = useState([]);
+    const [availableCards, setAvailableCards] = useState([]);
     const SERVER_URL = "http://localhost:8080";
     
     // Max cards allowed in deck
@@ -306,17 +307,12 @@ function SSSDeckDetail() {
 
     if (isLoading) {
         return (
-            <div className="deck-editor-container position-fixed vw-100 vh-100 d-flex flex-column bg-light">
-                <div className="deck-editor-header p-3 bg-white border-bottom shadow-sm d-flex align-items-center">
-                    <Button variant="light" onClick={() => navigate(-1)} className="me-3">
-                        &larr; Back to Decks
-                    </Button>
-                    <h4 className="mb-0">Loading Deck...</h4>
-                </div>
-                <div className="d-flex justify-content-center align-items-center h-100">
+            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
+                <div className="text-center">
                     <Spinner animation="border" variant="primary" />
+                    <p className="mt-3">Loading deck details...</p>
                 </div>
-            </div>
+            </Container>
         );
     }
 
@@ -376,7 +372,7 @@ function SSSDeckDetail() {
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="deck-editor-content d-flex flex-grow-1 overflow-hidden">
                     {/* Left Panel - Deck Cards */}
-                    <div className="deck-editor-card-list p-4 overflow-auto">
+                    <div className="deck-editor-card-list p-4 overflow-auto" style={{ width: '50%' }}>
                         <h3 className="mb-3">
                             Deck Cards
                             <small className="text-muted ms-2">
@@ -388,7 +384,7 @@ function SSSDeckDetail() {
                                 <div
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
-                                    className={`deck-cards-container mb-4 ${snapshot.isDraggingOver ? 'bg-light-blue' : ''}`}
+                                    className={`deck-cards-container ${snapshot.isDraggingOver ? 'bg-light-blue' : ''}`}
                                     style={{ 
                                         minHeight: '500px',
                                         backgroundColor: snapshot.isDraggingOver ? '#e6f7ff' : '#f8f9fa',
@@ -414,42 +410,29 @@ function SSSDeckDetail() {
                                                         ref={provided.innerRef}
                                                         {...provided.draggableProps}
                                                         {...provided.dragHandleProps}
-                                                        className="mb-3"
                                                     >
-                                                        <Card 
-                                                            className={`shadow-sm hover-effect ${snapshot.isDragging ? 'shadow' : ''}`}
-                                                            style={{
-                                                                transform: snapshot.isDragging ? 'rotate(3deg)' : 'none',
-                                                                border: snapshot.isDragging ? '2px solid #4361ee' : ''
-                                                            }}
-                                                        >
-                                                            <Card.Body className="d-flex justify-content-between align-items-center p-3">
-                                                                <div className="d-flex align-items-center">
-                                                                    <div 
-                                                                        className="card-color-indicator me-3" 
-                                                                        style={{ 
-                                                                            width: '16px', 
-                                                                            height: '36px', 
-                                                                            backgroundColor: getColorCode(card.colour),
-                                                                            borderRadius: '4px'
-                                                                        }}
-                                                                    ></div>
-                                                                    <div>
-                                                                        <Card.Title className="mb-0 h5">{card.name}</Card.Title>
-                                                                        <div className="text-muted small">
-                                                                            Power: {card.power} | Color: {card.colour}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <Button
-                                                                    variant="outline-danger"
-                                                                    size="sm"
-                                                                    onClick={() => handleRemoveCard(index)}
-                                                                >
-                                                                    Remove
-                                                                </Button>
-                                                            </Card.Body>
-                                                        </Card>
+                                                        <div className="position-relative mb-2">
+                                                            <SSSCard data={card} compact={true} />
+                                                            <Button
+                                                                variant="danger"
+                                                                size="sm"
+                                                                className="position-absolute"
+                                                                style={{ 
+                                                                    top: '8px', 
+                                                                    right: '8px',
+                                                                    borderRadius: '50%',
+                                                                    width: '24px',
+                                                                    height: '24px',
+                                                                    padding: '0',
+                                                                    display: 'flex',
+                                                                    alignItems: 'center',
+                                                                    justifyContent: 'center'
+                                                                }}
+                                                                onClick={() => handleRemoveCard(index)}
+                                                            >
+                                                                &times;
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </Draggable>
@@ -462,7 +445,7 @@ function SSSDeckDetail() {
                     </div>
 
                     {/* Right Panel - Available Cards */}
-                    <div className="deck-editor-available-cards p-4 overflow-auto bg-white border-start">
+                    <div className="deck-editor-available-cards p-4 overflow-auto bg-white border-start" style={{ width: '50%' }}>
                         <h3 className="mb-3">
                             Your Cards 
                             <small className="text-muted ms-2">
@@ -500,38 +483,16 @@ function SSSDeckDetail() {
                                                         ref={provided.innerRef}
                                                         {...provided.draggableProps}
                                                         {...provided.dragHandleProps}
-                                                        className="mb-3"
+                                                        className="position-relative mb-2"
                                                     >
-                                                        <Card 
-                                                            className={`shadow-sm hover-effect ${snapshot.isDragging ? 'shadow' : ''}`}
-                                                            style={{
-                                                                transform: snapshot.isDragging ? 'rotate(3deg)' : 'none',
-                                                                border: snapshot.isDragging ? '2px solid #4361ee' : ''
-                                                            }}
+                                                        <SSSCard data={card} compact={true} />
+                                                        <Badge 
+                                                            bg="secondary"
+                                                            className="position-absolute"
+                                                            style={{ top: '8px', right: '8px' }}
                                                         >
-                                                            <Card.Body className="d-flex justify-content-between align-items-center p-3">
-                                                                <div className="d-flex align-items-center">
-                                                                    <div 
-                                                                        className="card-color-indicator me-3" 
-                                                                        style={{ 
-                                                                            width: '16px', 
-                                                                            height: '36px', 
-                                                                            backgroundColor: getColorCode(card.colour),
-                                                                            borderRadius: '4px'
-                                                                        }}
-                                                                    ></div>
-                                                                    <div>
-                                                                        <Card.Title className="mb-0 h5">{card.name}</Card.Title>
-                                                                        <div className="text-muted small">
-                                                                            Power: {card.power} | Color: {card.colour}
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                                <Badge bg="secondary">
-                                                                    {card.availableCopies} available
-                                                                </Badge>
-                                                            </Card.Body>
-                                                        </Card>
+                                                            {card.availableCopies}
+                                                        </Badge>
                                                     </div>
                                                 )}
                                             </Draggable>
@@ -546,20 +507,6 @@ function SSSDeckDetail() {
             </DragDropContext>
         </div>
     );
-}
-
-// Helper function to get CSS color code from card color name
-function getColorCode(colour) {
-    const colorMap = {
-        'RED': '#dc3545',
-        'BLUE': '#0d6efd',
-        'GREEN': '#198754',
-        'YELLOW': '#ffc107',
-        'BLACK': '#212529',
-        'WHITE': '#f8f9fa'
-    };
-    
-    return colorMap[colour?.toUpperCase()] || '#6c757d';
 }
 
 export default SSSDeckDetail;

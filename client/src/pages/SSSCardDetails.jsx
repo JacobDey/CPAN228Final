@@ -1,103 +1,100 @@
 import { useParams } from "react-router";
-import SSSNavbar from "../components/SSSNavbar.jsx";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { Card } from "react-bootstrap";
+import { Container, Button } from "react-bootstrap";
+import SSSCard from "../components/SSSCard.jsx";
 
 function SSSCardDetails() {
     const { id } = useParams();
     const [card, setCard] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
-
-    const colorStyles = {
-        red: { border: 'danger', hex: '#dc3545' },
-        blue: { border: 'primary', hex: '#0d6efd' },
-        yellow: { border: 'warning', hex: '#ffc107' },
-        purple: { border: 'secondary', hex: '#6f42c1' },
-        green: { border: 'success', hex: '#198754' },
-        orange: { border: 'warning', hex: '#fd7e14' },
-        white: { border: 'light', hex: '#f8f9fa' }
-    };
 
     useEffect(() => {
         const fetchCard = async () => {
-            const response = await fetch(`http://localhost:8080/card/id/${id}`);
-            const cardData = await response.json();
-            setCard(cardData);
-            console.log(card)
-        }
-        fetchCard();
+            try {
+                setLoading(true);
+                const response = await fetch(`http://localhost:8080/card/id/${id}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Error fetching card: ${response.status}`);
+                }
+                
+                const cardData = await response.json();
+                setCard(cardData);
+                setError(null);
+            } catch (err) {
+                console.error("Error fetching card:", err);
+                setError(err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
         
+        fetchCard();
     }, [id]);
 
-    if (!card) return <div>Loading...</div>;
+    const handleGoBack = () => {
+        navigate(-1);
+    };
 
-    const cardColour = card.colour.toLowerCase();
-    const colorStyle = colorStyles[cardColour] || colorStyles.purple;
+    if (loading) {
+        return (
+            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
+                <div className="text-center">
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-3">Loading card details...</p>
+                </div>
+            </Container>
+        );
+    }
+
+    if (error) {
+        return (
+            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
+                <div className="text-center">
+                    <div className="alert alert-danger" role="alert">
+                        {error}
+                    </div>
+                    <Button variant="primary" onClick={handleGoBack}>
+                        Go Back
+                    </Button>
+                </div>
+            </Container>
+        );
+    }
+
+    if (!card) {
+        return (
+            <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
+                <div className="text-center">
+                    <div className="alert alert-warning" role="alert">
+                        Card not found
+                    </div>
+                    <Button variant="primary" onClick={handleGoBack}>
+                        Go Back
+                    </Button>
+                </div>
+            </Container>
+        );
+    }
 
     return (
-        <>
-            
-            <div style={{ 
-                display: 'flex', 
-                justifyContent: 'center', 
-                padding: '40px',
-                minHeight: '80vh'
-            }}>
-                <Card 
-                    border={colorStyle.border}
-                    style={{ 
-                        width: '400px',
-                        boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-                        borderWidth: '3px'
-                    }}
-                >
-                    <img src={`http://localhost:8080/card/image/${id}`} alt={card.name} 
-                     style={{
-                        height: '250px',
-                        backgroundColor: '#f0f0f0',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        borderBottom: `3px solid ${colorStyle.hex}`
-                    }} />
-
-
-                    <Card.Header 
-                        style={{ 
-                            backgroundColor: 'rgba(0,0,0,0.03)',
-                            borderBottom: `3px solid ${colorStyle.hex}`,
-                            fontWeight: 'bold',
-                            fontSize: '1.5rem',
-                            textAlign: 'center'
-                        }}
-                    >
-                        {card.name}
-                    </Card.Header>
-                    <Card.Body>
-                        <Card.Text><strong>Power:</strong> {card.power}</Card.Text>
-                        <Card.Text><strong>Effect:</strong> {card.description ? card.description : "None"}</Card.Text>
-                        <Card.Text>
-                            <strong>Colour:</strong> 
-                            <span 
-                                style={{
-                                    display: 'inline-block',
-                                    width: '20px',
-                                    height: '20px',
-                                    backgroundColor: colorStyle.hex,
-                                    marginLeft: '10px',
-                                    border: '1px solid #000',
-                                    verticalAlign: 'middle',
-                                    borderRadius: '50%'
-                                }}
-                                title={cardColour}
-                            ></span>
-                        </Card.Text>
-                    </Card.Body>
-                </Card>
+        <Container>
+            <div className="my-4">
+                <Button variant="outline-primary" onClick={handleGoBack} className="mb-4">
+                    &larr; Back
+                </Button>
+                
+                <div className="d-flex justify-content-center">
+                    <SSSCard data={card} />
+                </div>
             </div>
-        </>
-    )
+        </Container>
+    );
 }
 
 export default SSSCardDetails;

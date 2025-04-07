@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Card } from "react-bootstrap";
+import { Card, Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-function SSSCard({ data }) {
+function SSSCard({ data, compact = false }) {
     const [cardName] = useState(data.name);
     const [cardPower] = useState(data.power);
     const [cardDescription] = useState(data.description);
@@ -20,6 +20,56 @@ function SSSCard({ data }) {
     };
 
     const colorStyle = colorStyles[cardColour] || colorStyles.purple;
+
+      // Compact mode for use in lists or deck builder
+      if (compact) {
+        return (
+            <Card 
+                border={colorStyle.border}
+                style={{ 
+                    width: '100%',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                    borderRadius: '8px',
+                    borderWidth: '2px',
+                    marginBottom: '10px',
+                    transition: 'transform 0.15s, box-shadow 0.15s',
+                    cursor: 'pointer'
+                }}
+                className="hover-card"
+            >
+                <Card.Body className="d-flex align-items-center p-2">
+                    <div 
+                        className="color-indicator me-2" 
+                        style={{ 
+                            width: '16px', 
+                            height: '36px', 
+                            backgroundColor: colorStyle.hex,
+                            borderRadius: '4px'
+                        }}
+                    ></div>
+                    <div className="flex-grow-1">
+                        <div className="d-flex justify-content-between align-items-center">
+                            <Card.Title className="mb-0 h6">{cardName}</Card.Title>
+                            <Badge 
+                                bg={colorStyle.border} 
+                                style={{ 
+                                    fontSize: '1rem',
+                                    fontWeight: 'bold'
+                                }}
+                            >
+                                {cardPower}
+                            </Badge>
+                        </div>
+                        {cardDescription && (
+                            <small className="text-muted text-truncate d-block" style={{ maxWidth: '200px' }}>
+                                {cardDescription}
+                            </small>
+                        )}
+                    </div>
+                </Card.Body>
+            </Card>
+        );
+    }
 
     return (
         <div style={{ 

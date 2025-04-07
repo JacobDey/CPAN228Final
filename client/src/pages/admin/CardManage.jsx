@@ -31,7 +31,7 @@ const CardManage = () => {
 
     const fetchCards = async () => {
         try {
-            const response = await axios.get(`${SERVER_URL}/card/cards`);
+            const response = await axios.get(`${SERVER_URL}/card/allCards`);
             setCards(response.data);
             setLoading(false);
         } catch (err) {
