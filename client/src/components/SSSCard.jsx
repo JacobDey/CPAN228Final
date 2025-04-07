@@ -61,7 +61,7 @@ function SSSCard({ data, compact = false }) {
                             </Badge>
                         </div>
                         {cardDescription && (
-                            <small className="text-muted text-truncate d-block" style={{ maxWidth: '200px' }}>
+                            <small className="text-muted text-truncate d-block">
                                 {cardDescription}
                             </small>
                         )}
