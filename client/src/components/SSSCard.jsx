@@ -33,6 +33,7 @@ function SSSCard({ data, compact = false }) {
                     borderWidth: '2px',
                     marginBottom: '10px',
                     transition: 'transform 0.15s, box-shadow 0.15s',
+                    backgroundColor: colorStyle.bg,
                     cursor: 'pointer'
                 }}
                 className="hover-card"
