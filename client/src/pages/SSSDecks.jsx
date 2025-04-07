@@ -34,7 +34,7 @@ function SSSDecks() {
                 });
                 setSelectedDeck(selectedResponse.data?.id);
             } catch (err) {
-                if(err.status === 400) {
+                if (err.status === 400) {
                     alert("Please Login");
                     navigate("/login");
                 }
@@ -46,7 +46,11 @@ function SSSDecks() {
         fetchDecks();
     }, []);
 
-    const handleSelectDeck = async (deckId) => {
+    const handleSelectDeck = async (deckId, cardCount) => {
+        if(cardCount != 21) {
+            setError("You can only select deck with 21 cards");
+            return;
+        }
         try {
             await axios.put(`${SERVER_URL}/users/selectDeck/${deckId}`, {}, {
                 headers: {
@@ -107,12 +111,12 @@ function SSSDecks() {
                 }
             });
             setDecks(response.data);
-            
+
             // If the deleted deck was the selected one, clear selection
             if (selectedDeck === deckToDelete) {
                 setSelectedDeck(null);
             }
-            
+
             setShowDeleteModal(false);
             setDeckToDelete(null);
         } catch (err) {
@@ -170,42 +174,45 @@ function SSSDecks() {
                 </Card>
             ) : (
                 <Row className="g-4">
-                    {decks.map(deck => (
-                        <Col key={deck.id}>
-                            <Card
-                                className={`deck-card shadow-sm h-100 ${selectedDeck === deck.id ? 'border-success border-3' : ''}`}
-                                onClick={() => navigate(`/decks/${deck.id}`)}
-                            >
-                                <Card.Body className="d-flex flex-column">
-                                    <Card.Title className="text-truncate">{deck.name}</Card.Title>
-                                    <Card.Text className="text-muted mb-3">
-                                        {Object.values(deck.cardList || {}).reduce((sum, count) => sum + count, 0)} cards
-                                    </Card.Text>
-                                    <div className="mt-auto d-flex flex-column gap-2">
-                                        <Button
-                                            variant={selectedDeck === deck.id ? "success" : "outline-primary"}
-                                            size="sm"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleSelectDeck(deck.id);
-                                            }}
-                                        >
-                                            {selectedDeck === deck.id ? "✓ Selected" : "Select Deck"}
-                                        </Button>
-                                        <Button
-                                            variant="outline-danger"
-                                            size="sm"
-                                            onClick={(e) => promptDeleteDeck(deck.id, e)}
-                                        >
-                                            Delete Deck
-                                        </Button>
-                                    </div>
-                                </Card.Body>
-                            </Card>
-                        </Col>
-                    ))}
+                    {decks.map(deck => {
+                        const cardCount = Object.values(deck.cardList || {}).reduce((sum, count) => sum + count, 0);
+                        return (
+                            <Col key={deck.id}>
+                                <Card
+                                    className={`deck-card shadow-sm h-100 ${selectedDeck === deck.id ? 'border-success border-3' : ''}`}
+                                    onClick={() => navigate(`/decks/${deck.id}`)}
+                                >
+                                    <Card.Body className="d-flex flex-column">
+                                        <Card.Title className="text-truncate">{deck.name}</Card.Title>
+                                        <Card.Text className="text-muted mb-3">
+                                            {Object.values(deck.cardList || {}).reduce((sum, count) => sum + count, 0)} cards
+                                        </Card.Text>
+                                        <div className="mt-auto d-flex flex-column gap-2">
+                                            <Button
+                                                variant={selectedDeck === deck.id ? "success" : "outline-primary"}
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSelectDeck(deck.id, cardCount);
+                                                }}
+                                            >
+                                                {selectedDeck === deck.id ? "✓ Selected" : "Select Deck"}
+                                            </Button>
+                                            <Button
+                                                variant="outline-danger"
+                                                size="sm"
+                                                onClick={(e) => promptDeleteDeck(deck.id, e)}
+                                            >
+                                                Delete Deck
+                                            </Button>
+                                        </div>
+                                    </Card.Body>
+                                </Card>
+                            </Col>
+                        )
+                    })}
                 </Row>
-            )}
+                )}
 
             {/* Create Deck Modal */}
             <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)}>

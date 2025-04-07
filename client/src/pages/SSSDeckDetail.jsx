@@ -154,6 +154,10 @@ function SSSDeckDetail() {
     };
 
     const saveDeckToServer = async () => {
+        if( deckCards.length != MAX_DECK_SIZE) {
+            setError("Deck must contain exactly " + MAX_DECK_SIZE + " cards");
+            return;
+        }
         try {
             setIsSaving(true);
 
