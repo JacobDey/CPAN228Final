@@ -1,6 +1,7 @@
 package com.humber.CardGame.models.game;
 
 import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.CardDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -11,16 +12,16 @@ import java.util.List;
 public class Tower {
     private int id;
     private int victoryPoints;
-    private List<Card> player1Cards;
-    private List<Card> player2Cards;
+    private List<CardDTO> player1Cards;
+    private List<CardDTO> player2Cards;
 
     public int getControllingPlayerId() {
         int p1Power = 0;
-        for (Card card : player1Cards) {
+        for (CardDTO card : player1Cards) {
             p1Power += card.getPower();
         }
         int p2Power = 0;
-        for (Card card : player2Cards) {
+        for (CardDTO card : player2Cards) {
             p2Power += card.getPower();
         }
 
