@@ -55,6 +55,13 @@ public class CardController {
         return ResponseEntity.ok(card);
     }
 
+    //get cards by id
+    @PostMapping("/cardByIds")
+    public ResponseEntity<List<CardDTO>> getCardsByIds(@RequestBody List<String> cardIds) {
+        List<CardDTO> cards = cardService.getCardsByIds(cardIds);
+        return ResponseEntity.ok(cards);
+    }
+
     //get random card
     @GetMapping("/random/{count}")
     public ResponseEntity<List<CardDTO>> getRandomCards(@PathVariable int count) {

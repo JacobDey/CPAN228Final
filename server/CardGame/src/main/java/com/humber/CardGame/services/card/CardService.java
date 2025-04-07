@@ -71,6 +71,12 @@ public class CardService {
         return cardRepository.findById(id);
     }
 
+    //get multiple card with multiple ids
+    public List<CardDTO> getCardsByIds(List<String> cardIds) {
+        List<Card> cards = cardRepository.findAllById(cardIds);
+        return convertCards(cards);
+    }
+
     //get filtered card
     public Page<CardDTO> getCardByName(String name,Pageable pageable) {
         return paginated(pageable, cardRepository.findByNameContainingIgnoreCase(name));
@@ -176,5 +182,6 @@ public class CardService {
         });
         return cards;
     }
+
 
 }
