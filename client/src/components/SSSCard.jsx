@@ -10,13 +10,13 @@ function SSSCard({ data, compact = false }) {
 
     // Color mapping to Bootstrap variants and hex codes
     const colorStyles = {
-        red: { border: 'danger', hex: '#dc3545' },
-        blue: { border: 'primary', hex: '#0d6efd' },
-        yellow: { border: 'warning', hex: '#ffc107' },
-        purple: { border: 'secondary', hex: '#6f42c1' },
-        green: { border: 'success', hex: '#198754' },
-        orange: { border: 'warning', hex: '#fd7e14' },
-        white: { border: 'light', hex: '#f8f9fa' }
+        red: { border: 'danger', hex: '#dc3545', bg: '#fcd9dc' },
+        blue: { border: 'primary', hex: '#0d6efd', bg: '#d9edfc' },
+        yellow: { border: 'warning', hex: '#ffc107', bg: '#fcfbd9' },
+        purple: { border: 'secondary', hex: '#6f42c1', bg: '#f5d9fc' },
+        green: { border: 'success', hex: '#198754', bg: '#dafcd9' },
+        orange: { border: 'warning', hex: '#fd7e14', bg: '#fce8d9' },
+        white: { border: 'light', hex: '#f8f9fa', bg: '#fff' }
     };
 
     const colorStyle = colorStyles[cardColour] || colorStyles.purple;
@@ -85,7 +85,7 @@ function SSSCard({ data, compact = false }) {
                         height: '550px',
                         boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
                         borderRadius: '10px',
-                        // backgroundColor: 'rgba(0,0,0,0.05)',
+                        backgroundColor: colorStyle.bg,
                         transition: 'transform 0.2s',
                         cursor: 'pointer',
                         borderWidth: '3px',
