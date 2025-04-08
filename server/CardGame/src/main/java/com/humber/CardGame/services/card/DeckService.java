@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -42,6 +43,35 @@ public class DeckService {
         //add deck to user deck list
         user.getDecks().add(savedDeck);
         userRepository.save(user);
+    }
+
+    //edit deck
+    public void editDeck(String username, String deckId, Map<String,Integer> cardData) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
+        if(deckOp.isEmpty()) {
+            throw new RuntimeException("deck not found");
+        }
+        Deck deck = deckOp.get();
+
+        Map<String,Integer> userCards = userOp.get().getCards();
+
+        //check if user have enough cards
+        for(Map.Entry<String,Integer> entry : cardData.entrySet()) {
+            String cardId = entry.getKey();
+            int number = entry.getValue();
+            if(!userCards.containsKey(cardId) || userCards.get(cardId) < number) {
+                throw new RuntimeException("user do not have sufficient cards");
+            }
+        }
+
+        //save deck to db
+        deck.setCardList(cardData);
+        deckRepository.save(deck);
+
     }
 
     //delete deck

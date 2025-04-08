@@ -32,6 +32,14 @@ public class DeckController {
         return ResponseEntity.ok(deck);
     }
 
+    //edit deck
+    @PutMapping("/{deckId}/edit")
+    public ResponseEntity<String> editDeck(Principal principal,@PathVariable String deckId, @RequestBody Map<String, Integer> cardsData) {
+        String username = principal.getName();
+        deckService.editDeck(username,deckId,cardsData);
+        return ResponseEntity.ok("Deck edited successfully");
+    }
+
     //add card to deck
     @PutMapping("/addDeck/{deckId}/{cardId}")
     public ResponseEntity<String> AddCardToDeck(Principal principal, @PathVariable String cardId, @PathVariable String deckId) {

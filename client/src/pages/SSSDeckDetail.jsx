@@ -2,8 +2,146 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button, Form, Alert, Badge, Spinner, Container } from "react-bootstrap";
 import axios from "axios";
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
+import { DndProvider, useDrag, useDrop } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import SSSCard from "../components/SSSCard.jsx";
+
+// Card drag item component
+const DraggableCard = ({ card, index, moveCard, removeCard, isDeckCard, availableCopies }) => {
+    const ref = React.useRef(null);
+    
+    const [{ isDragging }, drag] = useDrag({
+        type: isDeckCard ? 'deck-card' : 'available-card',
+        item: () => ({ 
+            id: card.tempId, 
+            index, 
+            card,
+            sourceType: isDeckCard ? 'deck-cards' : 'available-cards'
+        }),
+        collect: (monitor) => ({
+            isDragging: monitor.isDragging(),
+        }),
+    });
+    
+    const [, drop] = useDrop({
+        accept: isDeckCard ? 'deck-card' : ['deck-card', 'available-card'],
+        hover(item, monitor) {
+            if (!ref.current) {
+                return;
+            }
+            
+            // Only handle moving cards within the same list
+            if (item.sourceType !== (isDeckCard ? 'deck-cards' : 'available-cards')) {
+                return;
+            }
+            
+            const dragIndex = item.index;
+            const hoverIndex = index;
+            
+            // Don't replace items with themselves
+            if (dragIndex === hoverIndex) {
+                return;
+            }
+            
+            // Get rectangle on screen
+            const hoverBoundingRect = ref.current.getBoundingClientRect();
+            // Get vertical middle
+            const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+            // Get mouse position
+            const clientOffset = monitor.getClientOffset();
+            // Get pixels to the top
+            const hoverClientY = clientOffset.y - hoverBoundingRect.top;
+            
+            // Dragging downwards
+            if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+                return;
+            }
+            
+            // Dragging upwards
+            if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+                return;
+            }
+            
+            // Move the card
+            moveCard(dragIndex, hoverIndex);
+            
+            // Update item index for the moving item
+            item.index = hoverIndex;
+        },
+    });
+    
+    drag(drop(ref));
+    
+    const opacity = isDragging ? 0.4 : 1;
+    
+    return (
+        <div ref={ref} style={{ opacity }} className="position-relative mb-2">
+            <SSSCard data={card} compact={true} />
+            {isDeckCard ? (
+                <Button
+                    variant="danger"
+                    size="sm"
+                    className="position-absolute"
+                    style={{
+                        top: '8px',
+                        right: '8px',
+                        borderRadius: '50%',
+                        width: '24px',
+                        height: '24px',
+                        padding: '0',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}
+                    onClick={() => removeCard(index)}
+                >
+                    &times;
+                </Button>
+            ) : (
+                <Badge
+                    bg="secondary"
+                    className="position-absolute"
+                    style={{ top: '8px', right: '8px' }}
+                >
+                    {availableCopies}
+                </Badge>
+            )}
+        </div>
+    );
+};
+
+// Drop target component for the card lists
+const CardDropArea = ({ children, onDrop, isDeckArea }) => {
+    const [{ isOver }, drop] = useDrop({
+        accept: isDeckArea ? ['deck-card', 'available-card'] : 'deck-card',
+        drop: (item, monitor) => {
+            if (item.sourceType !== (isDeckArea ? 'deck-cards' : 'available-cards')) {
+                onDrop(item);
+            }
+        },
+        collect: (monitor) => ({
+            isOver: monitor.isOver(),
+        }),
+    });
+    
+    return (
+        <div 
+            ref={drop} 
+            style={{
+                minHeight: '500px',
+                backgroundColor: isOver ? '#e6f7ff' : isDeckArea ? '#f8f9fa' : '#fff',
+                borderRadius: '8px',
+                padding: '16px',
+                border: '2px dashed ' + (isOver ? '#4361ee' : '#dee2e6')
+            }}
+        >
+            {children}
+        </div>
+    );
+};
+
+// Import React for refs
+import React from 'react';
 
 function SSSDeckDetail() {
     const { deckId } = useParams();
@@ -154,60 +292,25 @@ function SSSDeckDetail() {
     };
 
     const saveDeckToServer = async () => {
-        if( deckCards.length != MAX_DECK_SIZE) {
+        if (deckCards.length != MAX_DECK_SIZE) {
             setError("Deck must contain exactly " + MAX_DECK_SIZE + " cards");
             return;
         }
         try {
             setIsSaving(true);
 
-            // First, determine what cards need to be added/removed
-            const currentDeckState = {};
+            //change deck state to Map<String,Integer> to make it simple for backend
+            const cardListUpdate = {};
             deckCards.forEach(card => {
-                currentDeckState[card.originalId] = (currentDeckState[card.originalId] || 0) + 1;
+                cardListUpdate[card.id] = (cardListUpdate[card.id] || 0) + 1;
             });
 
-            const originalDeckState = deck.cardList || {};
-
-            // Cards to remove first (to avoid conflicts)
-            for (const [cardId, count] of Object.entries(originalDeckState)) {
-                const currentCount = currentDeckState[cardId] || 0;
-                const removeCount = count - currentCount;
-
-                if (removeCount > 0) {
-                    // Remove cards one by one
-                    for (let i = 0; i < removeCount; i++) {
-                        await axios.delete(`${SERVER_URL}/decks/removeDeck/${deckId}/${cardId}`, {
-                            headers: {
-                                Authorization: `Bearer ${localStorage.getItem('token')}`
-                            }
-                        });
-                    }
+            //send request to backend
+            await axios.put(`${SERVER_URL}/decks/${deckId}/edit`, cardListUpdate, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
                 }
-            }
-
-            // Cards to add
-            for (const [cardId, count] of Object.entries(currentDeckState)) {
-                const originalCount = originalDeckState[cardId] || 0;
-                const addCount = count - originalCount;
-
-                if (addCount > 0) {
-                    // Add cards one by one
-                    for (let i = 0; i < addCount; i++) {
-                        await axios.put(`${SERVER_URL}/decks/addDeck/${deckId}/${cardId}`, {}, {
-                            headers: {
-                                Authorization: `Bearer ${localStorage.getItem('token')}`
-                            }
-                        });
-                    }
-                }
-            }
-
-            // Update the deck object with new card list
-            setDeck(prev => ({
-                ...prev,
-                cardList: { ...currentDeckState }
-            }));
+            });
 
             setIsDirty(false);
             setError("Deck saved successfully");
@@ -219,56 +322,42 @@ function SSSDeckDetail() {
         }
     };
 
-    const onDragEnd = (result) => {
-        const { source, destination } = result;
+    // Handle card movement within the same list
+    const moveCard = (listType, dragIndex, hoverIndex) => {
+        if (listType === 'deck-cards') {
+            const newDeckCards = [...deckCards];
+            const dragCard = newDeckCards[dragIndex];
+            newDeckCards.splice(dragIndex, 1);
+            newDeckCards.splice(hoverIndex, 0, dragCard);
+            setDeckCards(newDeckCards);
+        } else {
+            const newAvailableCards = [...availableCards];
+            const dragCard = newAvailableCards[dragIndex];
+            newAvailableCards.splice(dragIndex, 1);
+            newAvailableCards.splice(hoverIndex, 0, dragCard);
+            setAvailableCards(newAvailableCards);
+        }
+    };
 
-        // If dropped outside droppable area
-        if (!destination) return;
-
-        // Check if moving between areas or reordering
-        const sourceId = source.droppableId;
-        const destId = destination.droppableId;
-
-        // Get source and destination arrays
-        let sourceArray = sourceId === 'deck-cards' ? [...deckCards] : [...availableCards];
-        let destArray = destId === 'deck-cards' ? [...deckCards] : [...availableCards];
-
-        // Moving within same array (reordering)
-        if (sourceId === destId) {
-            const [removed] = sourceArray.splice(source.index, 1);
-            sourceArray.splice(destination.index, 0, removed);
-
-            if (sourceId === 'deck-cards') {
-                setDeckCards(sourceArray);
-            } else {
-                setAvailableCards(sourceArray);
-            }
+    // Handle dropping card to deck
+    const handleDropToDeck = (item, index = deckCards.length) => {
+        // Check if maximum deck size reached
+        if (deckCards.length >= MAX_DECK_SIZE) {
+            setError(`Maximum deck size (${MAX_DECK_SIZE} cards) reached`);
+            setTimeout(() => setError(null), 3000);
             return;
         }
 
-        // Moving between arrays
-        if (sourceId === 'available-cards' && destId === 'deck-cards') {
-            // Adding card to deck
-
-            // Check if maximum deck size reached
-            if (deckCards.length >= MAX_DECK_SIZE) {
-                setError(`Maximum deck size (${MAX_DECK_SIZE} cards) reached`);
-                setTimeout(() => setError(null), 3000);
-                return;
-            }
-
-            // Get card from available cards
-            const cardToAdd = availableCards[source.index];
+        // Coming from available cards
+        if (item.sourceType === 'available-cards') {
             const newCardId = Date.now().toString(); // Generate unique temp ID
-
-            // Add card to deck with new temp ID
             const newCard = {
-                ...cardToAdd,
-                tempId: `${cardToAdd.originalId}-${newCardId}`
+                ...item.card,
+                tempId: `${item.card.originalId}-${newCardId}`
             };
 
             const newDeckCards = [...deckCards];
-            newDeckCards.splice(destination.index, 0, newCard);
+            newDeckCards.splice(index, 0, newCard);
             setDeckCards(newDeckCards);
 
             // Update available cards
@@ -279,23 +368,27 @@ function SSSDeckDetail() {
             );
 
             setIsDirty(true);
-            return;
         }
+    };
 
-        if (sourceId === 'deck-cards' && destId === 'available-cards') {
-            // Removing card from deck
-            const [removedCard] = deckCards.splice(source.index, 1);
-            setDeckCards([...deckCards]);
+    // Handle dropping card from deck to available cards
+    const handleDropToAvailable = (item) => {
+        if (item.sourceType === 'deck-cards') {
+            const newDeckCards = [...deckCards];
+            const index = newDeckCards.findIndex(card => card.tempId === item.id);
+            if (index !== -1) {
+                newDeckCards.splice(index, 1);
+                setDeckCards(newDeckCards);
 
-            // Update available cards
-            updateAvailableCards(
-                [...deckCards],
-                cards,
-                userCards
-            );
+                // Update available cards
+                updateAvailableCards(
+                    newDeckCards,
+                    cards,
+                    userCards
+                );
 
-            setIsDirty(true);
-            return;
+                setIsDirty(true);
+            }
         }
     };
 
@@ -314,6 +407,27 @@ function SSSDeckDetail() {
         setIsDirty(true);
     };
 
+    // Handle empty deck button click
+    const handleEmptyDeck = () => {
+        if (deckCards.length === 0) {
+            setError("Deck is already empty");
+            setTimeout(() => setError(null), 3000);
+            return;
+        }
+
+        // Confirm before emptying deck
+        if (window.confirm("Are you sure you want to remove all cards from your deck?")) {
+            setDeckCards([]);
+            
+            // Update available cards
+            updateAvailableCards([], cards, userCards);
+            
+            setIsDirty(true);
+            setError("Deck has been emptied");
+            setTimeout(() => setError(null), 3000);
+        }
+    };
+
     if (isLoading) {
         return (
             <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
@@ -326,59 +440,68 @@ function SSSDeckDetail() {
     }
 
     return (
-        <div className="deck-editor-container position-fixed vw-100 vh-100 d-flex flex-column bg-light">
-            {/* Header */}
-            <div className="deck-editor-header p-3 bg-white border-bottom shadow-sm d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                    <Button variant="light" onClick={() => navigate(-1)} className="me-3">
-                        &larr; Back to Decks
-                    </Button>
-                    <h4 className="mb-0 me-3">Editing: {deckName}</h4>
-                    <Form.Group className="d-flex align-items-center mb-0">
-                        <Form.Control
-                            type="text"
-                            value={deckName}
-                            onChange={(e) => setDeckName(e.target.value)}
-                            className="me-2"
-                            style={{ width: '200px' }}
-                        />
-                        <Button
-                            variant="outline-primary"
-                            onClick={handleSaveName}
-                            disabled={isSaving}
-                        >
-                            {isSaving ? 'Saving...' : 'Save Name'}
+        <DndProvider backend={HTML5Backend}>
+            <div className="deck-editor-container position-fixed vw-100 vh-100 d-flex flex-column bg-light">
+                {/* Header */}
+                <div className="deck-editor-header p-3 bg-white border-bottom shadow-sm d-flex justify-content-between align-items-center">
+                    <div className="d-flex align-items-center">
+                        <Button variant="light" onClick={() => navigate(-1)} className="me-3">
+                            &larr; Back to Decks
                         </Button>
-                    </Form.Group>
+                        <h4 className="mb-0 me-3">Editing: {deckName}</h4>
+                        <Form.Group className="d-flex align-items-center mb-0">
+                            <Form.Control
+                                type="text"
+                                value={deckName}
+                                onChange={(e) => setDeckName(e.target.value)}
+                                className="me-2"
+                                style={{ width: '200px' }}
+                            />
+                            <Button
+                                variant="outline-primary"
+                                onClick={handleSaveName}
+                                disabled={isSaving}
+                            >
+                                {isSaving ? 'Saving...' : 'Save Name'}
+                            </Button>
+                        </Form.Group>
+                    </div>
+                    <div className="d-flex align-items-center">
+                        <Badge bg={deckCards.length > MAX_DECK_SIZE ? "danger" : "info"} className="fs-6 me-3">
+                            {deckCards.length} / {MAX_DECK_SIZE} cards
+                        </Badge>
+                        {/* Empty Deck Button */}
+                        <Button
+                            variant="warning"
+                            onClick={handleEmptyDeck}
+                            disabled={deckCards.length === 0 || isSaving}
+                            className="me-3"
+                        >
+                            Empty Deck
+                        </Button>
+                        <Button
+                            variant="success"
+                            onClick={saveDeckToServer}
+                            disabled={!isDirty || isSaving}
+                        >
+                            {isSaving ? 'Saving...' : 'Save Deck'}
+                        </Button>
+                    </div>
                 </div>
-                <div className="d-flex align-items-center">
-                    <Badge bg={deckCards.length > MAX_DECK_SIZE ? "danger" : "info"} className="fs-6 me-3">
-                        {deckCards.length} / {MAX_DECK_SIZE} cards
-                    </Badge>
-                    <Button
-                        variant="success"
-                        onClick={saveDeckToServer}
-                        disabled={!isDirty || isSaving}
+
+                {/* Notification Area */}
+                {error && (
+                    <Alert
+                        variant={error.includes("successfully") || error.includes("emptied") ? "success" : "danger"}
+                        onClose={() => setError(null)}
+                        dismissible
+                        className="m-2 mb-0"
                     >
-                        {isSaving ? 'Saving...' : 'Save Deck'}
-                    </Button>
-                </div>
-            </div>
+                        {error}
+                    </Alert>
+                )}
 
-            {/* Notification Area */}
-            {error && (
-                <Alert
-                    variant={error.includes("successfully") ? "success" : "danger"}
-                    onClose={() => setError(null)}
-                    dismissible
-                    className="m-2 mb-0"
-                >
-                    {error}
-                </Alert>
-            )}
-
-            {/* Main Content */}
-            <DragDropContext onDragEnd={onDragEnd}>
+                {/* Main Content */}
                 <div className="deck-editor-content d-flex flex-grow-1 overflow-hidden">
                     {/* Left Panel - Deck Cards */}
                     <div className="deck-editor-card-list p-4 overflow-auto" style={{ width: '50%' }}>
@@ -388,69 +511,25 @@ function SSSDeckDetail() {
                                 (Drag & drop to reorder)
                             </small>
                         </h3>
-                        <Droppable droppableId="deck-cards">
-                            {(provided, snapshot) => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                    className={`deck-cards-container ${snapshot.isDraggingOver ? 'bg-light-blue' : ''}`}
-                                    style={{
-                                        minHeight: '500px',
-                                        backgroundColor: snapshot.isDraggingOver ? '#e6f7ff' : '#f8f9fa',
-                                        borderRadius: '8px',
-                                        padding: '16px',
-                                        border: '2px dashed ' + (snapshot.isDraggingOver ? '#4361ee' : '#dee2e6')
-                                    }}
-                                >
-                                    {deckCards.length === 0 ? (
-                                        <div className="text-center text-muted p-5">
-                                            <i className="bi bi-card-list fs-1"></i>
-                                            <p className="mt-3">Drag cards here to build your deck</p>
-                                        </div>
-                                    ) : (
-                                        deckCards.map((card, index) => (
-                                            <Draggable
-                                                key={card.tempId}
-                                                draggableId={card.tempId}
-                                                index={index}
-                                            >
-                                                {(provided, snapshot) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                    >
-                                                        <div className="position-relative mb-2">
-                                                            <SSSCard data={card} compact={true} />
-                                                            <Button
-                                                                variant="danger"
-                                                                size="sm"
-                                                                className="position-absolute"
-                                                                style={{
-                                                                    top: '8px',
-                                                                    right: '8px',
-                                                                    borderRadius: '50%',
-                                                                    width: '24px',
-                                                                    height: '24px',
-                                                                    padding: '0',
-                                                                    display: 'flex',
-                                                                    alignItems: 'center',
-                                                                    justifyContent: 'center'
-                                                                }}
-                                                                onClick={() => handleRemoveCard(index)}
-                                                            >
-                                                                &times;
-                                                            </Button>
-                                                        </div>
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))
-                                    )}
-                                    {provided.placeholder}
+                        <CardDropArea onDrop={handleDropToDeck} isDeckArea={true}>
+                            {deckCards.length === 0 ? (
+                                <div className="text-center text-muted p-5">
+                                    <i className="bi bi-card-list fs-1"></i>
+                                    <p className="mt-3">Drag cards here to build your deck</p>
                                 </div>
+                            ) : (
+                                deckCards.map((card, index) => (
+                                    <DraggableCard
+                                        key={card.tempId}
+                                        card={card}
+                                        index={index}
+                                        moveCard={(dragIndex, hoverIndex) => moveCard('deck-cards', dragIndex, hoverIndex)}
+                                        removeCard={handleRemoveCard}
+                                        isDeckCard={true}
+                                    />
+                                ))
                             )}
-                        </Droppable>
+                        </CardDropArea>
                     </div>
 
                     {/* Right Panel - Available Cards */}
@@ -461,60 +540,29 @@ function SSSDeckDetail() {
                                 (Drag to add to deck)
                             </small>
                         </h3>
-                        <Droppable droppableId="available-cards">
-                            {(provided, snapshot) => (
-                                <div
-                                    {...provided.droppableProps}
-                                    ref={provided.innerRef}
-                                    className={`available-cards-container ${snapshot.isDraggingOver ? 'bg-light-blue' : ''}`}
-                                    style={{
-                                        minHeight: '500px',
-                                        backgroundColor: snapshot.isDraggingOver ? '#e6f7ff' : '#fff',
-                                        borderRadius: '8px',
-                                        padding: '16px',
-                                        border: '2px dashed ' + (snapshot.isDraggingOver ? '#4361ee' : '#dee2e6')
-                                    }}
-                                >
-                                    {availableCards.length === 0 ? (
-                                        <div className="text-center text-muted p-5">
-                                            <i className="bi bi-collection fs-1"></i>
-                                            <p className="mt-3">No more cards available to add</p>
-                                        </div>
-                                    ) : (
-                                        availableCards.map((card, index) => (
-                                            <Draggable
-                                                key={card.tempId}
-                                                draggableId={card.tempId}
-                                                index={index}
-                                            >
-                                                {(provided, snapshot) => (
-                                                    <div
-                                                        ref={provided.innerRef}
-                                                        {...provided.draggableProps}
-                                                        {...provided.dragHandleProps}
-                                                        className="position-relative mb-2"
-                                                    >
-                                                        <SSSCard data={card} compact={true} />
-                                                        <Badge
-                                                            bg="secondary"
-                                                            className="position-absolute"
-                                                            style={{ top: '8px', right: '8px' }}
-                                                        >
-                                                            {card.availableCopies}
-                                                        </Badge>
-                                                    </div>
-                                                )}
-                                            </Draggable>
-                                        ))
-                                    )}
-                                    {provided.placeholder}
+                        <CardDropArea onDrop={handleDropToAvailable} isDeckArea={false}>
+                            {availableCards.length === 0 ? (
+                                <div className="text-center text-muted p-5">
+                                    <i className="bi bi-collection fs-1"></i>
+                                    <p className="mt-3">No more cards available to add</p>
                                 </div>
+                            ) : (
+                                availableCards.map((card, index) => (
+                                    <DraggableCard
+                                        key={card.tempId}
+                                        card={card}
+                                        index={index}
+                                        moveCard={(dragIndex, hoverIndex) => moveCard('available-cards', dragIndex, hoverIndex)}
+                                        isDeckCard={false}
+                                        availableCopies={card.availableCopies}
+                                    />
+                                ))
                             )}
-                        </Droppable>
+                        </CardDropArea>
                     </div>
                 </div>
-            </DragDropContext>
-        </div>
+            </div>
+        </DndProvider>
     );
 }
 
