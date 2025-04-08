@@ -77,6 +77,13 @@ public class UserController {
         return ResponseEntity.ok("Card added successfully");
     }
 
+    //add cards to user cards
+    @PutMapping("/addCards")
+    public ResponseEntity<String> addCards(Principal principal, @RequestBody List<String> cardIds) {
+        String username = principal.getName();
+        userService.addCards(username,cardIds);
+        return ResponseEntity.ok("Cards added successfully");
+    }
 
 }
 

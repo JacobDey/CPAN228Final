@@ -420,3 +420,203 @@ button:focus-visible {
   transform: translateY(-5px);
    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
+
+.booster-pack-container {
+  padding: 2rem;
+  min-height: 80vh;
+}
+
+.glow-button {
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+  }
+}
+
+.glow-button:hover {
+  transform: translateY(-3px);
+}
+
+/* Booster Pack Modal Styles */
+.booster-modal .modal-content {
+  background-color: #f8f9fa;
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.booster-modal-title {
+  font-family: 'Bangers', cursive;
+  font-size: 1.8rem;
+  color: #16213e;
+  display: flex;
+  align-items: center;
+}
+
+.booster-icon {
+  margin-right: 10px;
+  font-size: 2rem;
+}
+
+.booster-animation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+}
+
+.booster-pack {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.booster-pack-card {
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  position: relative;
+}
+
+.pack-shine {
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    top: -100%;
+    left: -100%;
+  }
+  20% {
+    top: 100%;
+    left: 100%;
+  }
+  100% {
+    top: 100%;
+    left: 100%;
+  }
+}
+
+.pack-content {
+  text-align: center;
+  z-index: 1;
+}
+
+.pack-icon {
+  font-size: 4rem;
+  margin: 1rem 0;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.cards-reveal-container {
+  padding: 1rem;
+  min-height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cards-reveal {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  perspective: 1000px;
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.card-slot {
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+  animation: cardAppear 0.8s forwards;
+}
+
+@keyframes cardAppear {
+  0% {
+    transform: scale(0.5) rotateY(180deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05) rotateY(0deg);
+  }
+  100% {
+    transform: scale(1) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+.shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+/* Custom footer and buttons */
+.modal-footer-custom {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 0 0 15px 15px;
+}
+
+.action-button {
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+}
+
+.action-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.button-icon {
+  margin-right: 8px;
+  font-size: 1.2rem;
+}

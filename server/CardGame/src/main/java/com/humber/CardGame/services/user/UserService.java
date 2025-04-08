@@ -157,4 +157,21 @@ public class UserService {
         //save to db
         userRepository.save(user);
     }
+
+    //add cards to user cards (Open booster pack)
+    public void addCards(String username, List<String> cardIds) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if (userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        for(String cardId : cardIds) {
+            Optional<Card> cardOp = cardRepository.findById(cardId);
+            if (cardOp.isEmpty()) {
+                throw new RuntimeException("card not found");
+            }
+            user.getCards().put(cardId, user.getCards().getOrDefault(cardId, 0) + 1);
+        }
+        userRepository.save(user);
+    }
 }

@@ -11,6 +11,7 @@ import SSSBattle from "./pages/SSSBattle.jsx";
 import SSSCardDetails from "./pages/SSSCardDetails.jsx";
 import SSSDeckDetail from './pages/SSSDeckDetail.jsx';
 import CardManage from './pages/admin/CardManage.jsx';
+import SSSBoosterPack from './pages/SSSBoosterPack.jsx';
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="/cards" element={<SSSCards />} />
             <Route path="/battle" element={<SSSBattle />} />
             <Route path="/card/:id" element={<SSSCardDetails />} />
+            <Route path="/booster" element={<SSSBoosterPack />} />
             <Route path="/admin/edit/cards" element={<CardManage />} />
           </Routes>
         </div>

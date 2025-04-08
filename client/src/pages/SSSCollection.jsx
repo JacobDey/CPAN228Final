@@ -36,7 +36,10 @@ function SSSCollection() {
           </Card.Text>
           <div className="mt-3">
             <Button as={Link} to="/cards" variant="primary" className="me-2">Browse All Cards</Button>
-            <Button as={Link} to="/decks" variant="outline-light">View Decks</Button>
+            <Button as={Link} to="/decks" variant="outline-light" className="me-2">View Decks</Button>
+            <Button as={Link} to="/booster" variant="warning">
+              <span className="me-2">🎁</span>Open Booster Pack
+            </Button>
           </div>
         </Card.ImgOverlay>
       </Card>
