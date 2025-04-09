@@ -1,3 +1,4 @@
+@import "tailwindcss";
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -54,6 +55,57 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.nav-link-custom {
+  padding: 0.5rem 1rem;
+  margin: 0 0.2rem;
+  border-radius: 5px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link-custom:hover {
+  background: rgba(76, 201, 240, 0.1);
+  transform: translateY(-2px);
+}
+
+.nav-link-custom.active {
+  color: #4cc9f0 !important;
+  font-weight: bold;
+}
+
+.nav-icon {
+  margin-right: 8px;
+  filter: drop-shadow(0 0 2px rgba(76, 201, 240, 0.7));
+}
+
+
+/* Hover effects */
+.hover-effect:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 7px 20px rgba(67, 97, 238, 0.2);
+}
+
+/* Form input focus states */
+.form-control:focus {
+  border-color: #4361ee !important;
+  box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15) !important;
+  background-color: white !important;
+}
+
+/* Smooth transitions */
+.auth-container, .form-control, .btn {
+  transition: all 0.3s ease;
+}
+
+@media (max-width: 992px) {
+  .nav-link-custom {
+      margin: 0.2rem 0;
+      padding: 0.8rem 1rem;
+  }
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
@@ -65,4 +117,506 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.deck-card {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  height: 100%;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(145deg, #ffffff, #f8f9fa);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.deck-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.selected-deck {
+  border: 3px solid #198754 !important;
+  background: linear-gradient(145deg, #f0fff4, #e6ffed);
+  position: relative;
+}
+
+.selected-deck::after {
+  content: "✓";
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #198754;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.decks-container {
+  padding: 2rem 0;
+}
+
+.deck-header {
+  background: linear-gradient(to right, #4361ee, #3a0ca3);
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.deck-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 0;
+}
+
+.deck-card-body {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.deck-card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #2b2d42;
+}
+
+.deck-card-count {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.deck-card-button {
+  margin-top: auto;
+  width: 100%;
+  border-radius: 8px;
+  padding: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.create-deck-button {
+  background: linear-gradient(to right, #4361ee, #3a0ca3);
+  border: none;
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.create-deck-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Deck creation modal */
+.deck-modal .modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.deck-modal .modal-header {
+  border-bottom: none;
+  padding: 1.5rem;
+  background: linear-gradient(to right, #4361ee, #3a0ca3);
+  color: white;
+  border-radius: 12px 12px 0 0;
+}
+
+.deck-modal .modal-body {
+  padding: 1.5rem;
+}
+
+.deck-modal .modal-footer {
+  border-top: none;
+  padding: 1rem 1.5rem;
+}
+
+.deck-input {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  border: 1px solid #dee2e6;
+  transition: all 0.3s ease;
+}
+
+.deck-input:focus {
+  border-color: #4361ee;
+  box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.25);
+}
+
+/* Drag and Drop */
+.draggable-card {
+  background-color: white;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .deck-card {
+      margin-bottom: 20px;
+  }
+}
+.deck-cards-container,
+.available-cards-container {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  border: 2px dashed #dee2e6;
+  border-radius: 8px;
+  padding: 16px;
+  min-height: 500px;
+}
+
+.deck-cards-container {
+  background-color: #f8f9fa;
+}
+
+.available-cards-container {
+  background-color: #fff;
+}
+
+.bg-light-blue {
+  background-color: #e6f7ff !important;
+  border-color: #4361ee !important;
+}
+
+[data-rbd-drag-handle-context-id] {
+  cursor: grab;
+}
+
+[data-rbd-drag-handle-context-id]:active {
+  cursor: grabbing;
+}
+
+[data-rbd-draggable-context-id] {
+  transition: transform 0.2s ease;
+}
+
+/* Dragging state */
+[data-rbd-draggable-context-id][data-rbd-draggable-id]:active {
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Placeholder styling */
+[data-rbd-placeholder-context-id] {
+  background-color: #e9ecef;
+  border-radius: 4px;
+}
+
+/* Loading spinner */
+.deck-loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+}
+
+.deck-spinner {
+  width: 3rem;
+  height: 3rem;
+  color: #4361ee;
+}
+
+/* Empty state */
+.deck-empty-state {
+  text-align: center;
+  padding: 3rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+  margin: 2rem 0;
+}
+
+.deck-empty-icon {
+  font-size: 3rem;
+  color: #6c757d;
+  margin-bottom: 1rem;
+}
+
+.deck-empty-text {
+  color: #6c757d;
+  margin-bottom: 1.5rem;
+}
+
+/* Full Screen Deck Editor */
+.deck-editor-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8f9fa;
+  z-index: 1050;
+}
+
+.deck-editor-header {
+  padding: 1rem 2rem;
+  background-color: white;
+  border-bottom: 1px solid #dee2e6;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  z-index: 10;
+}
+
+.deck-editor-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.deck-editor-card-list {
+  flex: 3;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+.deck-editor-available-cards {
+  flex: 2;
+  padding: 1.5rem;
+  overflow-y: auto;
+  background-color: white;
+  border-left: 1px solid #dee2e6;
+  box-shadow: -2px 0 4px rgba(0,0,0,0.05);
+}
+
+/* Card Styles */
+.deck-card-item {
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+}
+
+.deck-card-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Responsive Layout */
+@media (max-width: 992px) {
+  .deck-editor-content {
+    flex-direction: column;
+  }
+  
+  .deck-editor-available-cards {
+    border-left: none;
+    border-top: 1px solid #dee2e6;
+  }
+}
+
+.hover-card:hover {
+  transform: translateY(-5px);
+   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+
+.booster-pack-container {
+  padding: 2rem;
+  min-height: 80vh;
+}
+
+.glow-button {
+  animation: pulse 2s infinite;
+  box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(255, 193, 7, 0.9);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.6);
+  }
+}
+
+.glow-button:hover {
+  transform: translateY(-3px);
+}
+
+/* Booster Pack Modal Styles */
+.booster-modal .modal-content {
+  background-color: #f8f9fa;
+  border-radius: 15px;
+  border: none;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.booster-modal-title {
+  font-family: 'Bangers', cursive;
+  font-size: 1.8rem;
+  color: #16213e;
+  display: flex;
+  align-items: center;
+}
+
+.booster-icon {
+  margin-right: 10px;
+  font-size: 2rem;
+}
+
+.booster-animation-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 500px;
+}
+
+.booster-pack {
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.booster-pack-card {
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  position: relative;
+}
+
+.pack-shine {
+  position: absolute;
+  top: -100%;
+  left: -100%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: rotate(30deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% {
+    top: -100%;
+    left: -100%;
+  }
+  20% {
+    top: 100%;
+    left: 100%;
+  }
+  100% {
+    top: 100%;
+    left: 100%;
+  }
+}
+
+.pack-content {
+  text-align: center;
+  z-index: 1;
+}
+
+.pack-icon {
+  font-size: 4rem;
+  margin: 1rem 0;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.cards-reveal-container {
+  padding: 1rem;
+  min-height: 500px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.cards-reveal {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  perspective: 1000px;
+  width: 100%;
+  padding: 1rem 0;
+}
+
+.card-slot {
+  transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform-style: preserve-3d;
+  animation: cardAppear 0.8s forwards;
+}
+
+@keyframes cardAppear {
+  0% {
+    transform: scale(0.5) rotateY(180deg);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.05) rotateY(0deg);
+  }
+  100% {
+    transform: scale(1) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+.shake {
+  animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+  20%, 40%, 60%, 80% { transform: translateX(5px); }
+}
+
+@keyframes glow {
+  0% {
+    opacity: 0;
+    transform: scale(0.1);
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(2);
+  }
+}
+
+/* Custom footer and buttons */
+.modal-footer-custom {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 0 0 15px 15px;
+}
+
+.action-button {
+  padding: 0.5rem 1.5rem;
+  font-weight: 600;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 180px;
+}
+
+.action-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.button-icon {
+  margin-right: 8px;
+  font-size: 1.2rem;
 }

@@ -1,6 +1,13 @@
-package com.humber.CardGame.services;
+package com.humber.CardGame.services.game;
 
-import com.humber.CardGame.models.*;
+import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.CardDTO;
+import com.humber.CardGame.models.card.Deck;
+import com.humber.CardGame.models.game.GamePhase;
+import com.humber.CardGame.models.game.Match;
+import com.humber.CardGame.models.game.MatchStatus;
+import com.humber.CardGame.models.game.Tower;
+import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.repositories.CardRepository;
 import com.humber.CardGame.repositories.MatchRepository;
 import com.humber.CardGame.repositories.UserRepository;
@@ -102,7 +109,7 @@ public class MatchService {
         //find user
         boolean isPlayer1 = username.equals(match.getPlayer1());
         //Find card in player hand
-        List<Card> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
+        List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
         playerHand.addFirst(drawCard(isPlayer1 ? match.getPlayer1Deck() : match.getPlayer2Deck()));
 
         return matchRepository.save(match);
@@ -128,16 +135,16 @@ public class MatchService {
         boolean isPlayer1 = username.equals(match.getPlayer1());
 
         //Find card in player hand
-        List<Card> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
+        List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
 
-        Optional<Card> cardToPlay = playerHand.stream().filter(c -> c.getId().equals(cardId)).findFirst();
+        Optional<CardDTO> cardToPlay = playerHand.stream().filter(c -> c.getId().equals(cardId)).findFirst();
         if(cardToPlay.isEmpty()) {
             throw new RuntimeException("Card not in hand");
         }
 
         //play card to tower
         Tower tower = match.getTowers().get(towerId-1);
-        List<Card> towerCard = isPlayer1 ? tower.getPlayer1Cards() : tower.getPlayer2Cards();
+        List<CardDTO> towerCard = isPlayer1 ? tower.getPlayer1Cards() : tower.getPlayer2Cards();
         towerCard.addFirst(cardToPlay.get());
 
         //remove card from player hand
@@ -161,7 +168,7 @@ public class MatchService {
         //find user
         boolean isPlayer1 = username.equals(match.getPlayer1());
         //discard down to 7 cards
-        List<Card> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
+        List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
         while(playerHand.size() >= 7) {
             playerHand.removeLast();
         }
@@ -205,8 +212,8 @@ public class MatchService {
     }
 
     //convert deck to List of Card
-    public List<Card> convertDeckToCard(Deck deck) {
-        List<Card> cards = new LinkedList<>();
+    public List<CardDTO> convertDeckToCard(Deck deck) {
+        List<CardDTO> cards = new LinkedList<>();
         Map<String, Integer> deckContents = deck.getCardList();
         for(Map.Entry<String,Integer> entry : deckContents.entrySet()) {
             String cardId = entry.getKey();
@@ -214,8 +221,16 @@ public class MatchService {
 
             //add the card N time based on quantity
             for(int i = 0;i<value;i++) {
-                cards.add(cardRepository.findById(cardId)
-                        .orElseThrow(() -> new RuntimeException("Card not found")));
+                Card card = cardRepository.findById(cardId)
+                        .orElseThrow(() -> new RuntimeException("Card not found"));
+
+                cards.add(new CardDTO(
+                        card.getId(),
+                        card.getName(),
+                        card.getDescription(),
+                        card.getColour(),
+                        card.getPower()
+                ));
             }
         }
 
@@ -225,8 +240,8 @@ public class MatchService {
     }
 
     //draw initial hand
-    public List<Card> drawInitialHand(List<Card> deck) {
-        List<Card> hand = new ArrayList<>();
+    public List<CardDTO> drawInitialHand(List<CardDTO> deck) {
+        List<CardDTO> hand = new ArrayList<>();
         for(int i = 0;i<3 && !deck.isEmpty();i++) {
             hand.add(deck.removeFirst());
         }
@@ -234,7 +249,7 @@ public class MatchService {
     }
 
     //draw card
-    public Card drawCard(List<Card> deck) {
+    public CardDTO drawCard(List<CardDTO> deck) {
         return deck.removeFirst(); //return null if empty
     }
 

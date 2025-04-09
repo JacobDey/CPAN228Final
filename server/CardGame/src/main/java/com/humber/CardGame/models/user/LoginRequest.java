@@ -1,4 +1,4 @@
-package com.humber.CardGame.models;
+package com.humber.CardGame.models.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

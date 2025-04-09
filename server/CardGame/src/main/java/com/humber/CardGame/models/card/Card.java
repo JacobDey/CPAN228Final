@@ -1,4 +1,4 @@
-package com.humber.CardGame.models;
+package com.humber.CardGame.models.card;
 
 
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ public class Card {
     private String description;
     private String colour;
     private int power;
-    private String image;
-    //private byte[] imageData;
-    //private String imageType;
+
+    private byte[] imageData;
+    private String imageType;
 }

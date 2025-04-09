@@ -1,5 +1,7 @@
-package com.humber.CardGame.models;
+package com.humber.CardGame.models.game;
 
+import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.CardDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,15 +33,15 @@ public class Match {
     //user1
     private String player1;
     private int player1Score;
-    private List<Card> player1Hand;
-    private List<Card> player1Deck;
+    private List<CardDTO> player1Hand;
+    private List<CardDTO> player1Deck;
 //    private List<Card> player1Field;
 
     //user2
     private String player2;
     private int player2Score;
-    private List<Card> player2Hand;
-    private List<Card> player2Deck;
+    private List<CardDTO> player2Hand;
+    private List<CardDTO> player2Deck;
 //    private List<Card> player2Field;
 
 

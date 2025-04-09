@@ -1,8 +1,8 @@
-package com.humber.CardGame.services;
+package com.humber.CardGame.services.card;
 
-import com.humber.CardGame.models.Card;
-import com.humber.CardGame.models.Deck;
-import com.humber.CardGame.models.MyUser;
+import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.Deck;
+import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.repositories.CardRepository;
 import com.humber.CardGame.repositories.DeckRepository;
 import com.humber.CardGame.repositories.UserRepository;
@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -33,7 +34,7 @@ public class DeckService {
 
         //create new deck
         Deck deck = new Deck();
-        deck.setOwner(user);
+        deck.setOwner(username);
         deck.setName(deckName);
         deck.setIcon("default");
         deck.setCardList(new HashMap<>());
@@ -41,6 +42,36 @@ public class DeckService {
 
         //add deck to user deck list
         user.getDecks().add(savedDeck);
+        userRepository.save(user);
+    }
+
+    //edit deck
+    public void editDeck(String username, String deckId, Map<String,Integer> cardData) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
+        if(deckOp.isEmpty()) {
+            throw new RuntimeException("deck not found");
+        }
+        Deck deck = deckOp.get();
+
+        Map<String,Integer> userCards = userOp.get().getCards();
+
+        //check if user have enough cards
+        for(Map.Entry<String,Integer> entry : cardData.entrySet()) {
+            String cardId = entry.getKey();
+            int number = entry.getValue();
+            if(!userCards.containsKey(cardId) || userCards.get(cardId) < number) {
+                throw new RuntimeException("user do not have sufficient cards");
+            }
+        }
+
+        //save deck to db
+        deck.setCardList(cardData);
+        deckRepository.save(deck);
+
     }
 
     //delete deck
@@ -50,8 +81,12 @@ public class DeckService {
             throw new RuntimeException("username not found");
         }
         MyUser user = userOp.get();
+        //user cannot remove select deck
+        if(user.getSelectedDeck().getId().equals(deckId)) {
+            throw new RuntimeException("You cannot delete selected deck");
+        }
         //check if deck exists
-        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
             throw new RuntimeException("deck not found");
         }
@@ -72,7 +107,7 @@ public class DeckService {
         MyUser user = userOp.get();
 
         //check if deck exists
-        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
             throw new RuntimeException("user does not have a deck with ID:" + deckId);
         }
@@ -104,10 +139,8 @@ public class DeckService {
             throw new RuntimeException("username or card id not found");
         }
 
-        MyUser user = userOp.get();
-
         //check if deck exists
-        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,user);
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
         if(deckOp.isEmpty()) {
             throw new RuntimeException("user does not have a deck with ID:" + deckId);
         }
@@ -130,4 +163,35 @@ public class DeckService {
         //save to db
         deckRepository.save(deck);
     }
+
+    //get deck by id
+    public Deck getDeckById(String username, String deckId) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        //check if deck exists
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
+        if(deckOp.isEmpty()) {
+            throw new RuntimeException("deck not found");
+        }
+
+        return deckOp.get();
+    }
+
+    //change deck name
+    public void updateDeckName(String username, String deckId, String newDeckName) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if(userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        Optional<Deck> deckOp = deckRepository.findByIdAndOwner(deckId,username);
+        if(deckOp.isEmpty()) {
+            throw new RuntimeException("deck not found");
+        }
+        Deck deck = deckOp.get();
+        deck.setName(newDeckName);
+        deckRepository.save(deck);
+    }
+
 }
