@@ -620,3 +620,113 @@ button:focus-visible {
   margin-right: 8px;
   font-size: 1.2rem;
 }
+
+.main-menu-item {
+  font-size: 2rem; /* Increased font size for larger buttons */
+  margin: 1.5rem 0; /* Adjusted spacing */
+  padding: 1rem 2rem; /* Added padding for larger clickable area */
+  cursor: pointer;
+  transition: transform 0.2s ease, background-color 0.3s ease;
+  border: 2px solid #fff; /* Added border for better visibility */
+  border-radius: 8px; /* Rounded corners */
+  background-color: transparent; /* Transparent background */
+}
+
+.main-menu-item:hover {
+  transform: scale(1.1); /* Slightly enlarges button on hover */
+  background-color: rgba(255, 255, 255, 0.1); /* Adds a subtle background color */
+}
+
+.main-menu-item:active {
+  transform: scale(0.95); /* Shrinks button slightly on click */
+  background-color: rgba(255, 255, 255, 0.2); /* Darker background on click */
+}
+
+.main-menu-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 80vh; /* Adjusted height to raise the container */
+  color: #fff;
+  overflow: hidden;
+}
+
+.main-menu-title {
+  font-size: 4rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  position: relative;
+  opacity: 0;
+  color: black;
+  transform: translateY(-100%);
+  transition: transform 0.5s ease, opacity 0.5s ease;
+}
+
+.animate-title {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.main-menu-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.main-menu-button {
+  padding: 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.main-menu-button:hover {
+  transform: scale(1.05);
+}
+
+.play-button {
+  background-color: #dc3545;
+  color: #fff;
+}
+
+.collection-button {
+  background-color: #f3b808;
+  color: #fff;
+}
+
+.login-button {
+  background-color: #0d6efd;
+  color: #fff;
+}
+
+.register-button {
+  background-color: #6c757d;
+  color: #fff;
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+@keyframes vibrate {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-5px);
+  }
+}
+
+.animate-title + .main-menu-buttons {
+  animation: vibrate 0.3s ease;
+}
