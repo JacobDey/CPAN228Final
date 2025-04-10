@@ -12,6 +12,7 @@ import SSSCardDetails from "./pages/SSSCardDetails.jsx";
 import SSSDeckDetail from './pages/SSSDeckDetail.jsx';
 import CardManage from './pages/admin/CardManage.jsx';
 import SSSBoosterPack from './pages/SSSBoosterPack.jsx';
+import SSSGame from './pages/SSSGame.jsx';
 import SSSBackground from './components/SSSBackground.jsx';
 import SSSProfile from './pages/SSSProfile.jsx';
 
@@ -39,6 +40,7 @@ function App() {
             <Route path="/card/:id" element={<SSSCardDetails />} />
             <Route path="/booster" element={<SSSBoosterPack />} />
             <Route path="/admin/edit/cards" element={<CardManage />} />
+            <Route path="/game/:matchId" element={<SSSGame />} />
             <Route path="/profile" element={<SSSProfile />} />
           </Routes>
         </div>

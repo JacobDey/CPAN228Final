@@ -23,7 +23,7 @@ function SSSCards() {
     const fetchCards = useCallback(async (filters = {}, page = 0, size = 6, sortField = "colour", sortDirection = "asc") => {
         try {
             setLoading(true);
-            
+
             // Clear current data immediately to show loading state
             setCardData([]);
 
@@ -99,9 +99,20 @@ function SSSCards() {
     }, [fetchCards, activeFilters, pagination.size, sortConfig.field, sortConfig.direction]);
 
     return (
-        <Container>
+        <Container style={{
+            borderRadius: '15px',
+            backgroundColor: 'white',
+            boxShadow: '0 5px 15px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #e0e0e0'
+        }}>
             <div style={{ padding: '20px' }}>
-                <h1 style={{ textAlign: 'center', marginBottom: '30px' }}>Card Collection</h1>
+                <h1 style={{
+                    textAlign: 'center', marginBottom: '30px', textAlign: 'center',
+                    color: '#4361ee',
+                    marginBottom: '30px',
+                    fontFamily: "'Poppins', sans-serif",
+                    fontWeight: '600'
+                }}>Card Collection</h1>
 
                 <SSSCardFilter applyFilters={applyFilters} />
 
