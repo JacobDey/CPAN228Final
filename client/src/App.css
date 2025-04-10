@@ -96,3 +96,47 @@
   background-color: #d39e00;
   transform: scale(1.05);
 }
+
+/* Game Styles */
+.game-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.game-status-bar {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.game-board {
+  min-height: 600px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tower-card {
+  width: 200px;
+}
+
+.tower {
+  transition: all 0.3s ease;
+}
+
+.tower:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.opponent-area {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.player-hand-area {
+  margin-top: 20px;
+  padding: 15px;
+  border-top: 1px solid #dee2e6;
+}
