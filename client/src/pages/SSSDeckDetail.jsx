@@ -199,6 +199,10 @@ function SSSDeckDetail() {
             // Process data once we have everything
             processCardData(deckResponse.data, cardsResponse.data, userCardsResponse.data);
         } catch (err) {
+            if (err.status === 400) {
+                alert("Please Login");
+                navigate("/login");
+            }
             console.log(err);
             setError(err.response?.data || "Failed to load deck data");
         } finally {

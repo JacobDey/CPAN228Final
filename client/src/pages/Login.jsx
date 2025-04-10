@@ -19,7 +19,7 @@ const Login = () => {
                 username,
                 password
             });
-            logIn(response.data);
+            logIn(response.data, username);
             navigate('/');
         } catch (error) {
             setError(error.response?.data || "Login failed");
