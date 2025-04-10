@@ -58,6 +58,14 @@ function MainMenu() {
                         Build powerful decks, engage in strategic battles, and become the ultimate card master in this thrilling card game!
                     </p>
 
+                    {isLogIn && (
+                        <div className="mt-8 mb-8">
+                            <span className="inline-block bg-blue-500 text-white text-xl px-6 py-3 rounded-full shadow-lg">
+                                Welcome back, {username}!
+                            </span>
+                        </div>
+                    )}
+
                     <div className="flex flex-wrap justify-center gap-4 md:gap-6">
                         {isLogIn ? (
                             <>
@@ -104,13 +112,7 @@ function MainMenu() {
                         )}
                     </div>
 
-                    {isLogIn && (
-                        <div className="mt-8">
-                            <span className="inline-block bg-blue-500 text-white text-xl px-6 py-3 rounded-full shadow-lg">
-                                Welcome back, {username}!
-                            </span>
-                        </div>
-                    )}
+
                 </div>
             </div>
         </div>
