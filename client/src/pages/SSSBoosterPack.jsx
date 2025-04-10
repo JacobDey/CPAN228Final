@@ -30,6 +30,7 @@ function SSSBoosterPack() {
   const openBoosterPack = async () => {
     if (!getToken()) {
       setError("Please login to open booster packs");
+      navigate("/");
       return;
     }
 
@@ -64,6 +65,10 @@ function SSSBoosterPack() {
       await authAxios.put(`${SERVER_URL}/users/addCards`, cardIds);
       console.log("Cards added to collection successfully");
     } catch (err) {
+      if (err.status === 400) {
+        alert("Please Login");
+        navigate("/login");
+    }
       console.error("Error adding cards to collection:", err);
       setError("Cards obtained but failed to add to collection. Please check your connection.");
     }
