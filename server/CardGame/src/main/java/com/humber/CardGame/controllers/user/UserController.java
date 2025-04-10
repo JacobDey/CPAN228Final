@@ -3,6 +3,7 @@ package com.humber.CardGame.controllers.user;
 import com.humber.CardGame.models.card.Deck;
 import com.humber.CardGame.models.user.LoginRequest;
 import com.humber.CardGame.models.user.MyUser;
+import com.humber.CardGame.models.user.UserProfileDTO;
 import com.humber.CardGame.services.user.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -83,6 +84,13 @@ public class UserController {
         String username = principal.getName();
         userService.addCards(username,cardIds);
         return ResponseEntity.ok("Cards added successfully");
+    }
+
+    //get user profile
+    @GetMapping("/profile")
+    public ResponseEntity<UserProfileDTO> getUserProfile(Principal principal) {
+        String username = principal.getName();
+        return ResponseEntity.ok(userService.getUserProfile(username));
     }
 
 }

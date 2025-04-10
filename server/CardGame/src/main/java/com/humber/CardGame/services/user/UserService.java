@@ -5,6 +5,7 @@ import com.humber.CardGame.config.JwtUtil;
 import com.humber.CardGame.models.card.Card;
 import com.humber.CardGame.models.card.Deck;
 import com.humber.CardGame.models.user.MyUser;
+import com.humber.CardGame.models.user.UserProfileDTO;
 import com.humber.CardGame.repositories.CardRepository;
 import com.humber.CardGame.repositories.DeckRepository;
 import com.humber.CardGame.repositories.UserRepository;
@@ -173,5 +174,26 @@ public class UserService {
             user.getCards().put(cardId, user.getCards().getOrDefault(cardId, 0) + 1);
         }
         userRepository.save(user);
+    }
+
+    //get user profile
+    public UserProfileDTO getUserProfile(String username) {
+        //find user by username
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if (userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        //return new DTO for user
+        return new UserProfileDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getCreatedAt(),
+                user.getCards(),
+                user.getDecks(),
+                user.getSelectedDeck(),
+                user.getMatchesHistory()
+        );
     }
 }
