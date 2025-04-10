@@ -12,14 +12,21 @@ import SSSCardDetails from "./pages/SSSCardDetails.jsx";
 import SSSDeckDetail from './pages/SSSDeckDetail.jsx';
 import CardManage from './pages/admin/CardManage.jsx';
 import SSSBoosterPack from './pages/SSSBoosterPack.jsx';
+import SSSBackground from './components/SSSBackground.jsx';
 import SSSProfile from './pages/SSSProfile.jsx';
 
 function App() {
   return (
     <Router>
-      <div>
-        <SSSNavbar />
-        <div style={{ marginTop: '60px'}}>
+      <div className='relative'>
+        {/* BG */}
+        <SSSBackground />
+        {/* Nav Bar */}
+        <div className=''>
+          <SSSNavbar />
+        </div>
+        {/* Routes */}
+        <div className="relative z-10" style={{ marginTop: '60px' }}>
           <Routes>
             <Route path="/" element={<MainMenu />} />
             <Route path="/login" element={<Login />} />

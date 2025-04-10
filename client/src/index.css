@@ -621,75 +621,6 @@ button:focus-visible {
   font-size: 1.2rem;
 }
 
-.main-menu-item {
-  font-size: 2rem; /* Increased font size for larger buttons */
-  margin: 1.5rem 0; /* Adjusted spacing */
-  padding: 1rem 2rem; /* Added padding for larger clickable area */
-  cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.3s ease;
-  border: 2px solid #fff; /* Added border for better visibility */
-  border-radius: 8px; /* Rounded corners */
-  background-color: transparent; /* Transparent background */
-}
-
-.main-menu-item:hover {
-  transform: scale(1.1); /* Slightly enlarges button on hover */
-  background-color: rgba(255, 255, 255, 0.1); /* Adds a subtle background color */
-}
-
-.main-menu-item:active {
-  transform: scale(0.95); /* Shrinks button slightly on click */
-  background-color: rgba(255, 255, 255, 0.2); /* Darker background on click */
-}
-
-.main-menu-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 80vh; /* Adjusted height to raise the container */
-  color: #fff;
-  overflow: hidden;
-}
-
-.main-menu-title {
-  font-size: 4rem;
-  font-weight: bold;
-  margin-bottom: 2rem;
-  text-transform: uppercase;
-  position: relative;
-  opacity: 0;
-  color: black;
-  transform: translateY(-100%);
-  transition: transform 0.5s ease, opacity 0.5s ease;
-}
-
-.animate-title {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.main-menu-buttons {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-  width: 100%;
-}
-
-.main-menu-button {
-  padding: 1rem;
-  font-size: 1.5rem;
-  font-weight: bold;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.main-menu-button:hover {
-  transform: scale(1.05);
-}
-
 .play-button {
   background-color: #dc3545;
   color: #fff;
@@ -751,3 +682,70 @@ button:focus-visible {
 .animate-pulse-slow { animation: pulse-slow 3s infinite; }
 .opacity-15 { opacity: 0.15; }
 .font-bangers { font-family: 'Bangers', cursive; }
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+.hero-buttons button:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.2) !important;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.15) !important;
+}
+
+.mouse-icon {
+  width: 25px;
+  height: 40px;
+  border: 2px solid white;
+  border-radius: 15px;
+  position: relative;
+  margin: 0 auto;
+}
+
+.wheel {
+  width: 3px;
+  height: 8px;
+  background-color: white;
+  position: absolute;
+  top: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 3px;
+  animation: wheel 1.5s infinite;
+}
+
+@keyframes wheel {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(15px);
+  }
+}
+
+.arrow-down {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+

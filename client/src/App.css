@@ -5,6 +5,11 @@
   text-align: center;
 }
 
+.main-menu-container {
+  margin: -2rem;
+  width: calc(100% + 4rem);
+}
+
 .card {
   padding: 10px;
   text-decoration: none; /* Removes the underline */
