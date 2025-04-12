@@ -33,27 +33,36 @@ function SSSMatchBrowser() {
         fetchMatches();
     }, [username]);
 
-    const handleJoinMatch = async (matchId) => {
-        try {
-            const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8080/matches/${matchId}/join`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+    // SSSMatchBrowser.jsx - Add a loading state and prevent multiple requests
+const [isJoining, setIsJoining] = useState(false);
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+const handleJoinMatch = async (matchId) => {
+    if (isJoining) return; // Prevent multiple clicks
+    
+    try {
+        setIsJoining(true);
+        const token = localStorage.getItem("token");
+        const response = await fetch(`http://localhost:8080/matches/${matchId}/join`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
 
-            const match = await response.json();
-            alert(`Successfully joined match: ${match.id}`);
-        } catch (error) {
-            console.error("Error joining match:", error);
-            alert("Failed to join match. Please try again.");
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    };
+
+        const match = await response.json();
+        // Redirect to game instead of showing alert
+        window.location.href = `/game/${matchId}`;
+    } catch (error) {
+        console.error("Error joining match:", error);
+        alert("Failed to join match. Please try again.");
+    } finally {
+        setIsJoining(false);
+    }
+};
 
     return (
         <div className="match-browser-container">

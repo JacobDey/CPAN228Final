@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Spinner, Alert } from "react-bootstrap";
 import SSSNavbar from "../components/SSSNavbar";
@@ -12,7 +12,7 @@ function SSSGame() {
     const [match, setMatch] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [refreshInterval, setRefreshInterval] = useState(null);
+    const intervalRef = useRef(null);
 
     // Fetch match data
     const fetchMatchData = async () => {
@@ -32,16 +32,7 @@ function SSSGame() {
             setMatch(data);
             setError(null);
             
-            // Check if both players have joined
-            if (data.player1 && data.player2) {
-                // Set up auto-refresh when both players are in
-                if (!refreshInterval) {
-                    const interval = setInterval(() => {
-                        fetchMatchData();
-                    }, 3000); // Refresh every 3 seconds
-                    setRefreshInterval(interval);
-                }
-            }
+            // Don't create intervals here - that's handled in the useEffect
         } catch (err) {
             console.error("Error fetching match data:", err);
             setError(err.message);
@@ -50,17 +41,30 @@ function SSSGame() {
         }
     };
 
-    // Fetch data on component mount
+    // Set up polling interval
     useEffect(() => {
+        // Initial fetch
         fetchMatchData();
+        
+        // Clean up any existing interval first
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
 
-        // Clean up interval on unmount
+        // Set up a new interval
+        intervalRef.current = setInterval(() => {
+            fetchMatchData();
+        }, 3000);
+        
+        // Clean up on unmount or when matchId changes
         return () => {
-            if (refreshInterval) {
-                clearInterval(refreshInterval);
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
             }
         };
-    }, [matchId]);
+    }, [matchId]); // Only re-run when matchId changes
 
     // Leave/Exit game
     const handleExitGame = () => {
