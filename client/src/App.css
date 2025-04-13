@@ -122,7 +122,29 @@
 }
 
 .tower-card {
-  width: 200px;
+  width: 235px; /* Increased from 200px to accommodate gameplay cards */
+}
+
+/* Tower card stack styles */
+.tower-cards-container {
+  position: relative;
+  min-height: 180px;
+  margin: 20px 0;
+  /* Height will be set dynamically via inline styles */
+}
+
+.stacked-card {
+  position: absolute;
+  transition: transform 0.3s ease;
+  transform-origin: center top;
+  width: 100%;
+  z-index: 1;
+}
+
+.stacked-card:hover {
+  transform: translateY(-20px) scale(1.05);
+  z-index: 100 !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
 .tower {

@@ -48,7 +48,7 @@ function SSSDecks() {
 
     const handleSelectDeck = async (deckId, cardCount) => {
         if(cardCount != 21) {
-            setError("You can only select deck with 21 cards");
+            setError("You can only select a deck with 21 cards");
             return;
         }
         try {

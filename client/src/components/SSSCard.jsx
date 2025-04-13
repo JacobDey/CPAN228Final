@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, Badge } from "react-bootstrap";
 import { Link } from "react-router-dom";
 
-function SSSCard({ data, compact = false }) {
+function SSSCard({ data, compact = false, gameplay = false }) {
     const [cardName] = useState(data.name);
     const [cardPower] = useState(data.power);
     const [cardDescription] = useState(data.description);
@@ -21,8 +21,79 @@ function SSSCard({ data, compact = false }) {
 
     const colorStyle = colorStyles[cardColour] || colorStyles.purple;
 
-      // Compact mode for use in lists or deck builder
-      if (compact) {
+    // Gameplay mode for in-game hand display
+    if (gameplay) {
+        return (
+            <Card 
+                border={colorStyle.border}
+                style={{ 
+                    width: '180px',
+                    height: '280px',
+                    boxShadow: '0 3px 6px rgba(0,0,0,0.15)',
+                    borderRadius: '8px',
+                    borderWidth: '2px',
+                    backgroundColor: colorStyle.bg,
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    cursor: 'grab'
+                }}
+                className="gameplay-card"
+            >
+                {/* Small Image */}
+                <img 
+                    src={`http://localhost:8080/card/image/${data.id}`} 
+                    alt={cardName} 
+                    style={{
+                        height: '100px',
+                        backgroundColor: '#f0f0f0',
+                        objectFit: 'cover',
+                        borderBottom: `2px solid ${colorStyle.hex}`
+                    }} 
+                />
+                
+                <Card.Header style={{ 
+                    padding: '5px',
+                    backgroundColor: 'rgba(0,0,0,0.03)',
+                    fontWeight: 'bold',
+                    fontSize: '0.9rem',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                }}>
+                    {cardName}
+                </Card.Header>
+                
+                <Card.Body style={{ padding: '8px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                        <Badge bg={colorStyle.border} style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>
+                            {cardPower}
+                        </Badge>
+                        <span 
+                            style={{
+                                display: 'inline-block',
+                                width: '14px',
+                                height: '14px',
+                                backgroundColor: colorStyle.hex,
+                                border: '1px solid #000',
+                                borderRadius: '50%'
+                            }}
+                            title={cardColour}
+                        ></span>
+                    </div>
+                    <Card.Text style={{ 
+                        fontSize: '0.8rem',
+                        overflow: 'hidden',
+                        flex: 1,
+                        marginBottom: 0
+                    }}>
+                        {cardDescription}
+                    </Card.Text>
+                </Card.Body>
+            </Card>
+        );
+    }
+
+    // Compact mode for use in lists or deck builder
+    if (compact) {
         return (
             <Card 
                 border={colorStyle.border}

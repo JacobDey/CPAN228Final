@@ -749,3 +749,27 @@ button:focus-visible {
   }
 }
 
+/* Scrollbar hiding for player hand */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Add hover effect to scroll zones */
+.scroll-zone {
+  opacity: 0.3;
+  transition: opacity 0.3s ease;
+}
+
+.scroll-zone:hover {
+  opacity: 0.6;
+}
+
+/* Game UI improvements */
+.player-hand-fixed {
+  transition: transform 0.3s ease;
+}
+
+.game-container {
+  min-height: calc(100vh - 340px);
+}
+
