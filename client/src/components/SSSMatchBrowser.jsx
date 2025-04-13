@@ -42,7 +42,9 @@ const handleJoinMatch = async (matchId) => {
     try {
         setIsJoining(true);
         const token = localStorage.getItem("token");
-        const response = await fetch(`http://localhost:8080/matches/${matchId}/join`, {
+        
+        // Use joinOngoing endpoint for matches in progress
+        const response = await fetch(`http://localhost:8080/matches/${matchId}/joinOngoing`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`,

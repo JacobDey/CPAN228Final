@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
 const AuthContext = createContext();
@@ -6,6 +6,22 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [username, setUsername] = useState(null);
   const [isLogIn, SetIsLogIn] = useState(localStorage.getItem('token'));
+
+  // Initialize username from token when component mounts
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decodedToken = jwtDecode(token);
+        setUsername(decodedToken.sub);
+      } catch (error) {
+        console.error("Error decoding token:", error);
+        // Invalid token, remove it
+        localStorage.removeItem('token');
+        SetIsLogIn(false);
+      }
+    }
+  }, []);
 
   const logIn = (token, username) => {
     localStorage.setItem('token', token);

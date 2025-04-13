@@ -36,6 +36,13 @@ public ResponseEntity<List<Match>> getAllMatches() {
         Match match = matchService.joinMatch(matchId, username);
         return ResponseEntity.ok(match);
     }
+    
+    @PostMapping("/{matchId}/joinOngoing")
+    public ResponseEntity<Match> joinOngoingMatch(Principal principal, @PathVariable String matchId) {
+        String username = principal.getName();
+        Match match = matchService.joinOngoingMatch(matchId, username);
+        return ResponseEntity.ok(match);
+    }
 
     @PutMapping("/{matchId}/startTurn")
     public ResponseEntity<Match> startTurn(Principal principal, @PathVariable String matchId) {

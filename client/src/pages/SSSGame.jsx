@@ -1,9 +1,65 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Spinner, Alert } from "react-bootstrap";
+import { DndProvider, useDrop } from "react-dnd";
+import { HTML5Backend } from "react-dnd-html5-backend";
 import SSSNavbar from "../components/SSSNavbar";
 import { useAuth } from "../components/SSSAuth";
 import SSSPlayerHand from "../components/SSSPlayerHand";
+
+// Tower component with drop target functionality
+const Tower = ({ tower, index, onCardPlayed, disabled }) => {
+    const [{ isOver, canDrop }, drop] = useDrop({
+        accept: "CARD",
+        canDrop: () => !disabled,
+        drop: (item) => onCardPlayed(item.card, index),
+        collect: (monitor) => ({
+            isOver: !!monitor.isOver(),
+            canDrop: !!monitor.canDrop(),
+        }),
+    });
+  
+    // Style for the tower based on drag state
+    const borderStyle = isOver && canDrop 
+        ? "3px solid green" 
+        : isOver && !canDrop 
+            ? "3px solid red"
+            : tower.controllingPlayerId === 1 
+                ? "border-danger" 
+                : tower.controllingPlayerId === 2 
+                    ? "border-primary" 
+                    : "";
+  
+    return (
+        <div 
+            ref={drop} 
+            key={index} 
+            className="tower-card text-center"
+        >
+            <Card className={`tower ${borderStyle}`} style={{
+                transform: isOver && canDrop ? 'scale(1.05)' : 'scale(1)',
+                transition: 'transform 0.2s',
+                opacity: disabled ? 0.7 : 1
+            }}>
+                <Card.Header>Tower {index + 1}</Card.Header>
+                <Card.Body>
+                    <div className="mb-2">Victory Points: {tower.victoryPoints}</div>
+                    <div className="mb-2">
+                        Player 1 Cards: {tower.player1Cards?.length || 0}
+                    </div>
+                    <div>
+                        Player 2 Cards: {tower.player2Cards?.length || 0}
+                    </div>
+                    {disabled && (
+                        <div className="text-muted mt-2">
+                            {isOver ? "Cannot play card here" : ""}
+                        </div>
+                    )}
+                </Card.Body>
+            </Card>
+        </div>
+    );
+};
 
 function SSSGame() {
     const { matchId } = useParams();
@@ -13,6 +69,8 @@ function SSSGame() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const intervalRef = useRef(null);
+    const [cardsPlayedThisTurn, setCardsPlayedThisTurn] = useState(0);
+    const [playStatus, setPlayStatus] = useState({ message: "", type: "" });
 
     // Fetch match data
     const fetchMatchData = async () => {
@@ -32,7 +90,16 @@ function SSSGame() {
             setMatch(data);
             setError(null);
             
-            // Don't create intervals here - that's handled in the useEffect
+            // Update the local counter with the server's value when it's your turn
+            if (data.currentTurnPlayer === username) {
+                // Use the server's counter value
+                setCardsPlayedThisTurn(data.cardPlayedThisTurn || 0);
+            }
+            
+            // Automatically start turn if it's BEGIN phase and player's turn
+            if (data.currentTurnPlayer === username && data.currentPhase === "BEGIN") {
+                handleStartTurn();
+            }
         } catch (err) {
             console.error("Error fetching match data:", err);
             setError(err.message);
@@ -64,7 +131,107 @@ function SSSGame() {
                 intervalRef.current = null;
             }
         };
-    }, [matchId]); // Only re-run when matchId changes
+    }, [matchId, username]); // Now depends on username as well
+
+    // Handle playing a card on a tower
+    const handlePlayCard = async (card, towerIndex) => {
+        try {
+            // If we've already played 3 cards, don't allow playing another
+            if (cardsPlayedThisTurn >= 3) {
+                setPlayStatus({ 
+                    message: "Maximum 3 cards per turn reached", 
+                    type: "warning" 
+                });
+                setTimeout(() => setPlayStatus({ message: "", type: "" }), 3000);
+                return;
+            }
+            
+            setPlayStatus({ message: "Playing card...", type: "info" });
+            
+            // Ensure we have a valid card ID - prioritize uid, but use id if uid is not available
+            const cardId = card.uid || card.id;
+            if (!cardId) {
+                throw new Error("Invalid card: Missing identifier");
+            }
+            
+            // Optimistically update the UI counter for immediate feedback
+            setCardsPlayedThisTurn(prev => prev + 1);
+            
+            const token = localStorage.getItem("token");
+            const response = await fetch(`http://localhost:8080/matches/${matchId}/play?cardId=${cardId}&towerId=${towerIndex + 1}`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                // If the server rejected the move, roll back our optimistic update
+                setCardsPlayedThisTurn(prev => prev - 1);
+                const errorText = await response.text();
+                throw new Error(errorText || `Failed to play card: ${response.statusText}`);
+            }
+            
+            // Get updated match data
+            const updatedMatch = await response.json();
+            
+            // Update the match state with new data
+            setMatch(updatedMatch);
+            
+            // Clear status after successful play
+            setPlayStatus({ message: "Card played successfully!", type: "success" });
+            setTimeout(() => setPlayStatus({ message: "", type: "" }), 3000);
+            
+        } catch (err) {
+            console.error("Error playing card:", err);
+            setPlayStatus({ 
+                message: err.message || "Failed to play card", 
+                type: "danger" 
+            });
+            setTimeout(() => setPlayStatus({ message: "", type: "" }), 5000);
+        }
+    };
+
+    // Start the player's turn
+    const handleStartTurn = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            await fetch(`http://localhost:8080/matches/${matchId}/startTurn`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            
+            // Reset cards played counter
+            setCardsPlayedThisTurn(0);
+            
+            // Refresh match data
+            fetchMatchData();
+        } catch (err) {
+            console.error("Error starting turn:", err);
+            setError(err.message);
+        }
+    };
+
+    // End the player's turn
+    const handleEndTurn = async () => {
+        try {
+            const token = localStorage.getItem("token");
+            await fetch(`http://localhost:8080/matches/${matchId}/end`, {
+                method: "PUT",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            
+            // Refresh match data
+            fetchMatchData();
+        } catch (err) {
+            console.error("Error ending turn:", err);
+            setError(err.message);
+        }
+    };
 
     // Leave/Exit game
     const handleExitGame = () => {
@@ -81,9 +248,9 @@ function SSSGame() {
 
     // Determine if it's the current player's turn
     const isMyTurn = () => {
-        return match && match.currentTurnPlayer === username;
+        return match && match.currentTurnPlayer === username && match.currentPhase === "MAIN";
     };
-
+    
     // Get opponent username
     const getOpponentName = () => {
         if (!match || !username) return "Opponent";
@@ -137,9 +304,10 @@ function SSSGame() {
     }
 
     const playerRole = getPlayerRole();
+    const myTurn = isMyTurn();
 
     return (
-        <>
+        <DndProvider backend={HTML5Backend}>
             <SSSNavbar />
             <Container fluid className="game-container py-3">
                 <Row className="mb-3">
@@ -159,7 +327,7 @@ function SSSGame() {
                         <div className="game-status-bar d-flex justify-content-between bg-light p-2 rounded">
                             <div>
                                 <strong>Turn:</strong> {match.turn}
-                                {isMyTurn() && (
+                                {myTurn && (
                                     <span className="badge bg-success ms-2">Your Turn</span>
                                 )}
                             </div>
@@ -173,7 +341,18 @@ function SSSGame() {
                     </Col>
                 </Row>
 
-                {/* Game Board Area - This is where you'll implement the actual gameplay UI */}
+                {/* Status messages */}
+                {playStatus.message && (
+                    <Row className="mb-3">
+                        <Col>
+                            <Alert variant={playStatus.type} dismissible onClose={() => setPlayStatus({ message: "", type: "" })}>
+                                {playStatus.message}
+                            </Alert>
+                        </Col>
+                    </Row>
+                )}
+
+                {/* Game Board Area */}
                 <Row className="mb-3">
                     <Col>
                         <Card className="game-board">
@@ -187,24 +366,24 @@ function SSSGame() {
                                     <p>Deck: {match.player1 === username ? match.player2Deck?.length : match.player1Deck?.length} cards</p>
                                 </div>
 
-                                {/* Towers */}
+                                {/* Towers with drop targets */}
                                 <div className="towers-area d-flex justify-content-around my-5">
                                     {match.towers?.map((tower, index) => (
-                                        <div key={index} className="tower-card text-center">
-                                            <Card className={`tower ${tower.controllingPlayerId === 1 ? 'border-danger' : tower.controllingPlayerId === 2 ? 'border-primary' : ''}`}>
-                                                <Card.Header>Tower {index + 1}</Card.Header>
-                                                <Card.Body>
-                                                    <div className="mb-2">Victory Points: {tower.victoryPoints}</div>
-                                                    <div className="mb-2">
-                                                        Player 1 Cards: {tower.player1Cards?.length || 0}
-                                                    </div>
-                                                    <div>
-                                                        Player 2 Cards: {tower.player2Cards?.length || 0}
-                                                    </div>
-                                                </Card.Body>
-                                            </Card>
-                                        </div>
+                                        <Tower 
+                                            key={index}
+                                            tower={tower}
+                                            index={index}
+                                            onCardPlayed={handlePlayCard}
+                                            disabled={!myTurn || cardsPlayedThisTurn >= 3}
+                                        />
                                     ))}
+                                </div>
+                                
+                                {/* Cards played counter */}
+                                <div className="text-center mb-3">
+                                    <span className="badge bg-info">
+                                        Cards played this turn: {cardsPlayedThisTurn} / 3
+                                    </span>
                                 </div>
 
                                 {/* Player's Hand */}
@@ -213,6 +392,12 @@ function SSSGame() {
                                     <SSSPlayerHand 
                                         matchId={matchId} 
                                         player={playerRole} 
+                                        isMyTurn={myTurn}
+                                        cardsPlayedThisTurn={cardsPlayedThisTurn}
+                                        gamePhase={match.currentPhase}
+                                        username={username}
+                                        currentTurnPlayer={match.currentTurnPlayer}
+                                        match={match}
                                     />
                                 </div>
                             </Card.Body>
@@ -223,16 +408,17 @@ function SSSGame() {
                 {/* Game Controls */}
                 <Row>
                     <Col className="d-flex justify-content-center gap-3">
-                        <Button variant="outline-primary" disabled={!isMyTurn()}>
-                            Start Turn
-                        </Button>
-                        <Button variant="outline-success" disabled={!isMyTurn()}>
+                        <Button 
+                            variant="outline-success" 
+                            disabled={!myTurn}
+                            onClick={handleEndTurn}
+                        >
                             End Turn
                         </Button>
                     </Col>
                 </Row>
             </Container>
-        </>
+        </DndProvider>
     );
 }
 

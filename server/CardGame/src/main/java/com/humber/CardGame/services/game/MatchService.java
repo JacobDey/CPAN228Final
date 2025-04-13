@@ -88,9 +88,22 @@ public class MatchService {
             Match match = matchRepository.findById(matchId)
                     .orElseThrow(() -> new RuntimeException("Match not found"));
     
-            // this is a stub right now it doesn't really do anything
-
-            return matchRepository.save(match);
+            // Verify the user is one of the players in this match
+            if (!username.equals(match.getPlayer1()) && !username.equals(match.getPlayer2())) {
+                throw new RuntimeException("You are not a player in this match");
+            }
+            
+            // Check if the match is in PLAYING status
+            if (match.getStatus() != MatchStatus.PLAYING) {
+                // If the match is in WAITING status and the user is player1, just return the match
+                if (match.getStatus() == MatchStatus.WAITING && username.equals(match.getPlayer1())) {
+                    return match;
+                }
+                throw new RuntimeException("This match cannot be joined at this time");
+            }
+    
+            // No need to modify the match state, just return it
+            return match;
         }
 
     //start turn
@@ -111,6 +124,9 @@ public class MatchService {
         //Find card in player hand
         List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
         playerHand.addFirst(drawCard(isPlayer1 ? match.getPlayer1Deck() : match.getPlayer2Deck()));
+        
+        // Set phase to MAIN after drawing
+        match.setCurrentPhase(GamePhase.MAIN);
 
         return matchRepository.save(match);
     }
@@ -137,7 +153,8 @@ public class MatchService {
         //Find card in player hand
         List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
 
-        Optional<CardDTO> cardToPlay = playerHand.stream().filter(c -> c.getId().equals(cardId)).findFirst();
+        // Using card's uid instead of id for finding the specific card instance
+        Optional<CardDTO> cardToPlay = playerHand.stream().filter(c -> c.getUid().equals(cardId)).findFirst();
         if(cardToPlay.isEmpty()) {
             throw new RuntimeException("Card not in hand");
         }
