@@ -5,6 +5,7 @@ import com.humber.CardGame.models.user.LoginRequest;
 import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.models.user.UserProfileDTO;
 import com.humber.CardGame.services.user.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,7 +26,7 @@ public class UserController {
 
     //register
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody MyUser user) {
+    public ResponseEntity<String> register(@Valid @RequestBody MyUser user) {
         userService.saveUser(user);
         return ResponseEntity.ok("User registered successfully");
     }

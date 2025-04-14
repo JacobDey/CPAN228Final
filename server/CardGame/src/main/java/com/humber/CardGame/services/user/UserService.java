@@ -189,6 +189,7 @@ public class UserService {
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
+                user.getRole(),
                 user.getCreatedAt(),
                 user.getCards(),
                 user.getDecks(),

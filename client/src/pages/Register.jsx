@@ -9,13 +9,19 @@ const Register = () => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const navigate = useNavigate();
-    const [error, setError] = useState(null);
+    const [errors, setErrors] = useState({});
+    const [generalError, setGeneralError] = useState(null);
     const SERVER_URL = "http://localhost:8080";
 
     const handleRegister = async (e) => {
         e.preventDefault();
+
+        //clear error
+        setErrors({});
+        setGeneralError(null);
+
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
+            setErrors({ confirmPassword: "Passwords do not match" });
             return;
         }
         try {
@@ -27,7 +33,18 @@ const Register = () => {
             alert("Registration successful!");
             navigate("/login");
         } catch (error) {
-            setError(error.response?.data || "Registration failed");
+            if (error.response?.status === 400 && error.response?.data) {
+                //validation error
+                if (typeof error.response.data === 'object') {
+                    setErrors(error.response.data);
+                } else {
+                    //general error
+                    setGeneralError(error.response.data);
+                }
+            } else {
+                // For other errors
+                setGeneralError(error.response?.data || "Registration failed");
+            }
         }
     }
 
@@ -56,6 +73,7 @@ const Register = () => {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                         required
+                        isInvalid={!!errors.username}
                         style={{
                             backgroundColor: '#f8f9fa',
                             border: '1px solid #ddd',
@@ -64,6 +82,9 @@ const Register = () => {
                             borderRadius: '8px'
                         }}
                     />
+                    <Form.Control.Feedback type="invalid">
+                        {errors.username}
+                    </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group className="mb-3">
@@ -73,6 +94,7 @@ const Register = () => {
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
+                        isInvalid={!!errors.email}
                         style={{
                             backgroundColor: '#f8f9fa',
                             border: '1px solid #ddd',
@@ -81,6 +103,9 @@ const Register = () => {
                             borderRadius: '8px'
                         }}
                     />
+                    <Form.Control.Feedback type="invalid">
+                        {errors.email}
+                    </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group className="mb-3">
@@ -90,6 +115,7 @@ const Register = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                        isInvalid={!!errors.password}
                         style={{
                             backgroundColor: '#f8f9fa',
                             border: '1px solid #ddd',
@@ -98,6 +124,9 @@ const Register = () => {
                             borderRadius: '8px'
                         }}
                     />
+                    <Form.Control.Feedback type="invalid">
+                        {errors.password}
+                    </Form.Control.Feedback>
                 </Form.Group>
 
                 <Form.Group className="mb-4">
@@ -107,6 +136,7 @@ const Register = () => {
                         value={confirmPassword}
                         onChange={(e) => setConfirmPassword(e.target.value)}
                         required
+                        isInvalid={!!errors.confirmPassword}
                         style={{
                             backgroundColor: '#f8f9fa',
                             border: '1px solid #ddd',
@@ -115,9 +145,12 @@ const Register = () => {
                             borderRadius: '8px'
                         }}
                     />
+                    <Form.Control.Feedback type="invalid">
+                        {errors.confirmPassword}
+                    </Form.Control.Feedback>
                 </Form.Group>
 
-                {error && <Alert variant="danger" className="text-center" style={{ borderRadius: '8px' }}>{error}</Alert>}
+                {generalError && <Alert variant="danger" className="text-center" style={{ borderRadius: '8px' }}>{generalError}</Alert>}
 
                 <Button 
                     variant="primary" 
