@@ -83,7 +83,7 @@ const CardManage = () => {
                     <button
                         onClick={() => setSelectedCard({
                             name: '',
-                            description: '',
+                            abilityText: '',
                             colour: '',
                             power: 0,
                             image: '',
@@ -106,7 +106,7 @@ const CardManage = () => {
                                 />
 
                                 <h3 className="font-bold text-lg">{card.name}</h3>
-                                <p className="text-gray-600">{card.description}</p>
+                                <p className="text-gray-600">{card.abilityText}</p>
                                 <div className="flex justify-between mt-2">
                                     <span className="text-sm">Power: {card.power}</span>
                                     <span className="text-sm">Color: {card.colour}</span>

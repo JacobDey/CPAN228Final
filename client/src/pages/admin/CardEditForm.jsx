@@ -6,7 +6,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
     const [formData, setFormData] = useState({
         id: card.id || '',
         name: card.name || '',
-        description: card.description || '',
+        abilityText: card.abilityText || '',
         colour: card.colour || '',
         power: card.power || 0,
         image: card.image || '',
@@ -80,7 +80,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
             const cardData = {
                 id: formData.id || null,
                 name: formData.name,
-                description: formData.description,
+                abilityText: formData.abilityText, // Map the form's abilityText field to abilityText
                 colour: formData.colour,
                 power: formData.power,
                 imageType: formData.imageType
@@ -106,7 +106,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                     'Content-Type': 'multipart/form-data'
                 }
             };
-    
+            
             const endpoint = formData.id 
                 ? `${SERVER_URL}/admin/editCard` 
                 : `${SERVER_URL}/admin/addCard`;
@@ -205,10 +205,10 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                     </div>
 
                     <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700">Description</label>
+                        <label className="block text-sm font-medium text-gray-700">Ability Text</label>
                         <textarea
-                            name="description"
-                            value={formData.description}
+                            name="abilityText"
+                            value={formData.abilityText}
                             onChange={handleChange}
                             rows="3"
                             className="mt-1 block w-full border border-gray-300 rounded-md p-2"

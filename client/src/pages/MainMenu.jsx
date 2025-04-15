@@ -239,7 +239,7 @@ function MainMenu() {
                   </div>
                   <Card.Body>
                     <Card.Title>{feature.title}</Card.Title>
-                    <Card.Text>{feature.description}</Card.Text>
+                    <Card.Text>{feature.abilityText}</Card.Text>
                   </Card.Body>
                 </Card>
               </Col>

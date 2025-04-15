@@ -244,9 +244,10 @@ public class MatchService {
                 cards.add(new CardDTO(
                         card.getId(),
                         card.getName(),
-                        card.getDescription(),
+                        card.getAbilityText(),
                         card.getColour(),
-                        card.getPower()
+                        card.getPower(),
+                        card.getAbilities()
                 ));
             }
         }

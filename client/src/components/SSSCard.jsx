@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 function SSSCard({ data, compact = false, gameplay = false }) {
     const [cardName] = useState(data.name);
     const [cardPower] = useState(data.power);
-    const [cardDescription] = useState(data.description);
+    const [cardAbilityText] = useState(data.abilityText || data.description); // Support both fields during transition
     const [cardColour] = useState(data.colour.toLowerCase());
 
     // Color mapping to Bootstrap variants and hex codes
@@ -85,7 +85,7 @@ function SSSCard({ data, compact = false, gameplay = false }) {
                         flex: 1,
                         marginBottom: 0
                     }}>
-                        {cardDescription}
+                        {cardAbilityText}
                     </Card.Text>
                 </Card.Body>
             </Card>
@@ -132,9 +132,9 @@ function SSSCard({ data, compact = false, gameplay = false }) {
                                 {cardPower}
                             </Badge>
                         </div>
-                        {cardDescription && (
+                        {cardAbilityText && (
                             <small className="text-muted text-truncate d-block">
-                                {cardDescription}
+                                {cardAbilityText}
                             </small>
                         )}
                     </div>
@@ -192,8 +192,8 @@ function SSSCard({ data, compact = false, gameplay = false }) {
                                 color: colorStyle.hex == '#f8f9fa'? '#000': colorStyle.hex,
                                 textShadow: '1px 1px 2px rgba(0,0,0,0.3)'
                             }}>{cardPower}</span></Card.Text>
-                        <Card.Text >
-                            {cardDescription}
+                        <Card.Text>
+                            {cardAbilityText}
                         </Card.Text>
                         <Card.Text>
                             <strong>Colour:</strong> 

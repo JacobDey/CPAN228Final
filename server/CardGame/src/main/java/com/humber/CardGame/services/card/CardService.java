@@ -39,9 +39,10 @@ public class CardService {
                 .map(card -> new CardDTO(
                         card.getId(),
                         card.getName(),
-                        card.getDescription(),
+                        card.getAbilityText(),
                         card.getColour(),
-                        card.getPower()
+                        card.getPower(),
+                        card.getAbilities() // Pass abilities directly to constructor
                 ))
                 .collect(Collectors.toList());
     }
