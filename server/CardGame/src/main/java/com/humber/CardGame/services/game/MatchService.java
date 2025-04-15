@@ -237,8 +237,8 @@ public class MatchService {
         MyUser player2 = userRepository.findByUsername(match.getPlayer2())
                 .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer2() + " not found"));
 
-        player1.getMatchesHistory().add(match);
-        player2.getMatchesHistory().add(match);
+        player1.getMatchesHistory().addFirst(match);
+        player2.getMatchesHistory().addFirst(match);
 
         userRepository.save(player1);
         userRepository.save(player2);
