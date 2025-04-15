@@ -1,28 +1,28 @@
-package com.humber.CardGame.config;
+// package com.humber.CardGame.config;
 
-import com.humber.CardGame.models.card.Card;
-import com.humber.CardGame.models.card.CardAbility;
-import com.humber.CardGame.repositories.CardRepository;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import com.mongodb.client.model.Updates;
-import org.bson.Document;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.data.mongodb.core.MongoTemplate;
+// import com.humber.CardGame.models.card.Card;
+// import com.humber.CardGame.models.card.CardAbility;
+// import com.humber.CardGame.repositories.CardRepository;
+// import com.mongodb.client.MongoCollection;
+// import com.mongodb.client.MongoDatabase;
+// import com.mongodb.client.model.Updates;
+// import org.bson.Document;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.boot.CommandLineRunner;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
+// import org.springframework.data.mongodb.core.MongoTemplate;
 
-import java.util.*;
+// import java.util.*;
 
-@Configuration
-public class DataMigrationRunner {
+// @Configuration
+// public class DataMigrationRunner {
 
-    @Autowired
-    private CardRepository cardRepository;
+    // @Autowired
+    // private CardRepository cardRepository;
     
-    @Autowired
-    private MongoTemplate mongoTemplate;
+    // @Autowired
+    // private MongoTemplate mongoTemplate;
 
     // @Bean
     // public CommandLineRunner removeDescriptionField() {
@@ -69,7 +69,7 @@ public class DataMigrationRunner {
     //                     card.setAbilityText("On enter, blue cards here get -1. On death, blue cards here get +1.");
     //                     break;
     //                 case "Flame Belcher":
-    //                     card.setAbilityText("On enter, destroy uncovered enemy blue card at target tower.");
+    //                     card.setAbilityText("On enter, destroy opposing uncovered blue card");
     //                     break;
     //                 case "Savage Patriot":
     //                     card.setAbilityText("On enter, Savage Patriot destroys the card it's covering if it is blue.");
@@ -136,7 +136,7 @@ public class DataMigrationRunner {
     //                     card.setAbilityText("On enter, opponent discards a random card.");
     //                     break;
     //                 case "Whirlwind Tornado":
-    //                     card.setAbilityText("On enter, move uncovered enemy card here to the tower with the fewest cards.");
+    //                     card.setAbilityText("On enter, move opposing uncovered card here to the tower with the fewest cards.");
     //                     break;
                         
     //                 // White card
@@ -163,190 +163,189 @@ public class DataMigrationRunner {
     //     };
     // }
     
-    private Map<String, List<CardAbility>> createCardAbilityMap() {
-        Map<String, List<CardAbility>> map = new HashMap<>();
+//     private Map<String, List<CardAbility>> createCardAbilityMap() {
+//         Map<String, List<CardAbility>> map = new HashMap<>();
         
-        // RED CARDS
-        // Define abilities for each card
-        map.put("Clumsy Dragon", Collections.singletonList(
-            new CardAbility("TURN_START", "effect", "DESTROY_SELF")
-        ));
+//         // RED CARDS
+//         // Define abilities for each card
+//         map.put("Clumsy Dragon", Collections.singletonList(
+//             new CardAbility("TURN_START", "effect", "DESTROY_SELF")
+//         ));
         
-        // Multiple abilities for Hotheaded Loudmouth with separate parameters
-        List<CardAbility> hotheadedAbilities = new ArrayList<>();
-        hotheadedAbilities.add(new CardAbility("ON_ENTER", Map.of(
-            "effect", "POWER_CHANGE",
-            "target", "BLUE_CARDS_HERE", 
-            "value", -1
-        )));
-        hotheadedAbilities.add(new CardAbility("ON_DEATH", Map.of(
-            "effect", "POWER_CHANGE",
-            "target", "BLUE_CARDS_HERE",
-            "value", 1
-        )));
-        map.put("Hotheaded Loudmouth", hotheadedAbilities);
+//         // Multiple abilities for Hotheaded Loudmouth with separate parameters
+//         List<CardAbility> hotheadedAbilities = new ArrayList<>();
+//         hotheadedAbilities.add(new CardAbility("ON_ENTER", Map.of(
+//             "effect", "POWER_CHANGE",
+//             "target", "BLUE_CARDS_HERE", 
+//             "value", -1
+//         )));
+//         hotheadedAbilities.add(new CardAbility("ON_DEATH", Map.of(
+//             "effect", "POWER_CHANGE",
+//             "target", "BLUE_CARDS_HERE",
+//             "value", 1
+//         )));
+//         map.put("Hotheaded Loudmouth", hotheadedAbilities);
         
-        map.put("Flame Belcher", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DESTROY_CARD",
-                "target", "ENEMY_UNCOVERED_BLUE",
-                "location", "TARGET_TOWER"
-            ))
-        ));
+//         map.put("Flame Belcher", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DESTROY_CARD",
+//                 "target", "OPPOSING_UNCOVERED_BLUE"
+//             ))
+//         ));
         
-        map.put("Savage Patriot", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DESTROY_IF_COLOR",
-                "target", "CARD_BELOW",
-                "targetColor", "BLUE"
-            ))
-        ));
+//         map.put("Savage Patriot", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DESTROY_IF_COLOR",
+//                 "target", "CARD_BELOW",
+//                 "targetColor", "BLUE"
+//             ))
+//         ));
         
-        map.put("Magmatic Boxer", Collections.emptyList());  // No special abilities
+//         map.put("Magmatic Boxer", Collections.emptyList());  // No special abilities
         
-        // BLUE CARDS
-        // Multiple abilities for Icy Manipulator with separate parameters
-        List<CardAbility> icyManipulatorAbilities = new ArrayList<>();
-        icyManipulatorAbilities.add(new CardAbility("ON_ENTER", Map.of(
-            "effect", "POWER_CHANGE",
-            "target", "RED_CARDS_HERE",
-            "value", -1
-        )));
-        icyManipulatorAbilities.add(new CardAbility("ON_DEATH", Map.of(
-            "effect", "POWER_CHANGE",
-            "target", "RED_CARDS_HERE",
-            "value", 1
-        )));
-        map.put("Icy Manipulator", icyManipulatorAbilities);
+//         // BLUE CARDS
+//         // Multiple abilities for Icy Manipulator with separate parameters
+//         List<CardAbility> icyManipulatorAbilities = new ArrayList<>();
+//         icyManipulatorAbilities.add(new CardAbility("ON_ENTER", Map.of(
+//             "effect", "POWER_CHANGE",
+//             "target", "RED_CARDS_HERE",
+//             "value", -1
+//         )));
+//         icyManipulatorAbilities.add(new CardAbility("ON_DEATH", Map.of(
+//             "effect", "POWER_CHANGE",
+//             "target", "RED_CARDS_HERE",
+//             "value", 1
+//         )));
+//         map.put("Icy Manipulator", icyManipulatorAbilities);
         
-        map.put("Sacral Healer", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "POWER_CHANGE",
-                "target", "YOUR_CARDS_HERE_WITH_POWER_LESS_THAN",
-                "powerThreshold", 2,
-                "value", 1
-            ))
-        ));
+//         map.put("Sacral Healer", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "POWER_CHANGE",
+//                 "target", "YOUR_CARDS_HERE_WITH_POWER_LESS_THAN",
+//                 "powerThreshold", 2,
+//                 "value", 1
+//             ))
+//         ));
         
-        map.put("Inspiring Squid", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "POWER_CHANGE",
-                "target", "YOUR_CARDS_HERE",
-                "value", 1
-            ))
-        ));
+//         map.put("Inspiring Squid", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "POWER_CHANGE",
+//                 "target", "YOUR_CARDS_HERE",
+//                 "value", 1
+//             ))
+//         ));
         
-        map.put("Gentle Whale", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DESTROY_SELF_IF_COLOR_HERE",
-                "targetColor", "RED"
-            ))
-        ));
+//         map.put("Gentle Whale", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DESTROY_SELF_IF_COLOR_HERE",
+//                 "targetColor", "RED"
+//             ))
+//         ));
         
-        map.put("Tiger Shark", Collections.emptyList());  // No special abilities
+//         map.put("Tiger Shark", Collections.emptyList());  // No special abilities
         
-        // YELLOW CARDS
-        map.put("Martyr's Spirit", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DESTROY_CARD",
-                "target", "CARD_BELOW"
-            ))
-        ));
+//         // YELLOW CARDS
+//         map.put("Martyr's Spirit", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DESTROY_CARD",
+//                 "target", "CARD_BELOW"
+//             ))
+//         ));
         
-        map.put("Vengeful Force", Collections.singletonList(
-            new CardAbility("ON_CARD_DESTROYED", Map.of(
-                "effect", "POWER_CHANGE",
-                "target", "SELF",
-                "value", 1
-            ))
-        ));
+//         map.put("Vengeful Force", Collections.singletonList(
+//             new CardAbility("ON_CARD_DESTROYED", Map.of(
+//                 "effect", "POWER_CHANGE",
+//                 "target", "SELF",
+//                 "value", 1
+//             ))
+//         ));
         
-        map.put("Golden Heart of Balance", Collections.singletonList(
-            new CardAbility("ON_CARD_DESTROYED", Map.of(
-                "effect", "DESTROY_SELF"
-            ))
-        ));
+//         map.put("Golden Heart of Balance", Collections.singletonList(
+//             new CardAbility("ON_CARD_DESTROYED", Map.of(
+//                 "effect", "DESTROY_SELF"
+//             ))
+//         ));
         
-        map.put("East Wind", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "MOVE_CARDS",
-                "target", "ALL_CARDS_HERE",
-                "direction", "RIGHT",
-                "distance", 1
-            ))
-        ));
+//         map.put("East Wind", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "MOVE_CARDS",
+//                 "target", "ALL_CARDS_HERE",
+//                 "direction", "RIGHT",
+//                 "distance", 1
+//             ))
+//         ));
         
-        map.put("West Wind", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "MOVE_CARDS",
-                "target", "ALL_CARDS_HERE",
-                "direction", "LEFT",
-                "distance", 2
-            ))
-        ));
+//         map.put("West Wind", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "MOVE_CARDS",
+//                 "target", "ALL_CARDS_HERE",
+//                 "direction", "LEFT",
+//                 "distance", 2
+//             ))
+//         ));
         
-        // PURPLE CARDS
-        map.put("Mad King", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DESTROY_CARDS",
-                "target", "ALL_UNCOVERED_CARDS"
-            ))
-        ));
+//         // PURPLE CARDS
+//         map.put("Mad King", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DESTROY_CARDS",
+//                 "target", "ALL_UNCOVERED_CARDS"
+//             ))
+//         ));
         
-        map.put("Bloodthirsty Tactician", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DESTROY_CARD",
-                "target", "OPPOSING_UNCOVERED_CARD"
-            ))
-        ));
+//         map.put("Bloodthirsty Tactician", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DESTROY_CARD",
+//                 "target", "OPPOSING_UNCOVERED_CARD"
+//             ))
+//         ));
         
-        // GREEN CARDS
-        map.put("Feeble Elder", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DRAW_CARDS",
-                "count", 4
-            ))
-        ));
+//         // GREEN CARDS
+//         map.put("Feeble Elder", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DRAW_CARDS",
+//                 "count", 4
+//             ))
+//         ));
         
-        map.put("Studied Wizard", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DRAW_CARDS",
-                "count", 2
-            ))
-        ));
+//         map.put("Studied Wizard", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DRAW_CARDS",
+//                 "count", 2
+//             ))
+//         ));
         
-        map.put("Virile Apprentice", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "DRAW_CARDS",
-                "count", 1
-            ))
-        ));
+//         map.put("Virile Apprentice", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "DRAW_CARDS",
+//                 "count", 1
+//             ))
+//         ));
         
-        // ORANGE CARDS
-        map.put("Lightning Bolt", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "OPPONENT_DISCARD",
-                "count", 1,
-                "random", true
-            ))
-        ));
+//         // ORANGE CARDS
+//         map.put("Lightning Bolt", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "OPPONENT_DISCARD",
+//                 "count", 1,
+//                 "random", true
+//             ))
+//         ));
         
-        map.put("Whirlwind Tornado", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "MOVE_CARD",
-                "target", "OPPOSING_UNCOVERED_CARD",
-                "destination", "TOWER_WITH_FEWEST_CARDS"
-            ))
-        ));
+//         map.put("Whirlwind Tornado", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "MOVE_CARD",
+//                 "target", "OPPOSING_UNCOVERED_CARD",
+//                 "destination", "TOWER_WITH_FEWEST_CARDS"
+//             ))
+//         ));
         
-        // WHITE CARD
-        map.put("Yaldabaoth", Collections.singletonList(
-            new CardAbility("ON_ENTER", Map.of(
-                "effect", "SWAP_CONTROL",
-                "target", "ALL_CARDS"
-            ))
-        ));
+//         // WHITE CARD
+//         map.put("Yaldabaoth", Collections.singletonList(
+//             new CardAbility("ON_ENTER", Map.of(
+//                 "effect", "SWAP_CONTROL",
+//                 "target", "ALL_CARDS"
+//             ))
+//         ));
         
-        return map;
-    }
-}
+//         return map;
+//     }
+// }
