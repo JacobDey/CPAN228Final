@@ -51,6 +51,14 @@ function SSSNavbar() {
                             </Nav.Link>
                             <Nav.Link
                                 as={Link}
+                                to="/guide"
+                                className="nav-link-custom"
+                                onClick={() => setExpanded(false)}
+                            >
+                                <span className="nav-icon">🎯</span> How to play
+                            </Nav.Link>
+                            <Nav.Link
+                                as={Link}
                                 to="/collection"
                                 className="nav-link-custom"
                                 onClick={() => setExpanded(false)}
@@ -82,6 +90,14 @@ function SSSNavbar() {
                     :
                     <Navbar.Collapse id="responsive-navbar-nav">
                         <Nav className="ms-auto">
+                            <Nav.Link
+                                as={Link}
+                                to="/guide"
+                                className="nav-link-custom"
+                                onClick={() => setExpanded(false)}
+                            >
+                                <span className="nav-icon">🎯</span> How to play
+                            </Nav.Link>
                             <Nav.Link
                                 as={Link}
                                 to="/cards"
