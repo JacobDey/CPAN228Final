@@ -206,8 +206,19 @@ public class MatchService {
 
     //find Winner
     private void determineWinner(Match match) {
+
+        MyUser player1 = userRepository.findByUsername(match.getPlayer1())
+                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer1() + " not found"));
+
+        MyUser player2 = userRepository.findByUsername(match.getPlayer2())
+                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer2() + " not found"));
+
         int player1Score = 0;
         int player2Score = 0;
+
+        int winnerCredit = 300;
+        int loserCredit = 3;
+        int drawCredit = 30;
 
         for (Tower tower : match.getTowers()) {
             int controller = tower.getControllingPlayerId();
@@ -220,10 +231,16 @@ public class MatchService {
 
         if (player1Score > player2Score) {
             match.setStatus(MatchStatus.PLAYER1_WIN);
+            player1.setCredit(player1.getCredit()+winnerCredit);
+            player2.setCredit(player2.getCredit()+loserCredit);
         } else if (player2Score > player1Score) {
             match.setStatus(MatchStatus.PLAYER2_WIN);
+            player1.setCredit(player1.getCredit()+loserCredit);
+            player2.setCredit(player2.getCredit()+winnerCredit);
         } else {
             match.setStatus(MatchStatus.DRAW);
+            player1.setCredit(player1.getCredit()+drawCredit);
+            player2.setCredit(player2.getCredit()+drawCredit);
         }
 
         //save score to match
@@ -231,12 +248,6 @@ public class MatchService {
         match.setPlayer2Score(player2Score);
 
         //save match to user history
-        MyUser player1 = userRepository.findByUsername(match.getPlayer1())
-                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer1() + " not found"));
-
-        MyUser player2 = userRepository.findByUsername(match.getPlayer2())
-                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer2() + " not found"));
-
         player1.getMatchesHistory().addFirst(match);
         player2.getMatchesHistory().addFirst(match);
 

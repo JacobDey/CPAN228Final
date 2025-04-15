@@ -22,6 +22,7 @@ public class UserProfileDTO {
     private String email;
     private String role;
     private Date createdAt;
+    private int credits;
     private Map<String, Integer> cards;
     private List<Deck> decks;
     private Deck selectedDeck;
