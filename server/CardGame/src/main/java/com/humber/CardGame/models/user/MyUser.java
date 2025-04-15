@@ -47,6 +47,7 @@ public class MyUser {
     private Deck selectedDeck;
 
     //match history
+    @DBRef
     private List<Match> matchesHistory = new ArrayList<>();
 
 }

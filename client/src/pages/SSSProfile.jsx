@@ -36,11 +36,12 @@ function SSSProfile() {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        setProfile(profileResponse.data);
+        const profileData = profileResponse.data;
+        setProfile(profileData);
         
         // Calculate match statistics
-        if (profileResponse.data.matchesHistory && profileResponse.data.matchesHistory.length > 0) {
-          calculateMatchStats(profileResponse.data.matchesHistory);
+        if (profileData.matchesHistory && profileData.matchesHistory.length > 0) {
+          calculateMatchStats(profileData.matchesHistory, profileData.username);
         }
         
         // Fetch card details for cards in user's collection
@@ -68,14 +69,15 @@ function SSSProfile() {
     fetchProfile();
   }, [navigate]);
 
-  const calculateMatchStats = (matches) => {
+  const calculateMatchStats = (matches, username) => {
     let wins = 0;
     let losses = 0;
     let draws = 0;
     
     matches.forEach(match => {
+      console.log(match);
       // Determine if the user is player1 or player2
-      const isPlayer1 = match.player1 === profile.username;
+      const isPlayer1 = match.player1 === username;
       
       if (match.status === 'PLAYER1_WIN' && isPlayer1) wins++;
       else if (match.status === 'PLAYER2_WIN' && !isPlayer1) wins++;
@@ -152,7 +154,7 @@ function SSSProfile() {
     <Container className="mt-4">
       {profile && (
         <>
-          <Row className="mb-4">
+          <Row className="mb-5">
             <Col>
               <Card className="profile-header shadow">
                 <Card.Body>
