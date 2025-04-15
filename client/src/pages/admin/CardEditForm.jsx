@@ -892,7 +892,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                         <button
                             type="button"
                             onClick={handleAddAbility}
-                            className="px-3 py-1 bg-green-500 text-white rounded-md text-sm"
+                            className="btn btn-dark"
                         >
                             Add Ability
                         </button>
@@ -939,14 +939,14 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                     <button
                         type="button"
                         onClick={onCancel}
-                        className="px-4 py-2 border border-gray-300 rounded-md text-gray-700"
+                        className="btn btn-danger"
                         disabled={isSubmitting}
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
-                        className="px-4 py-2 bg-blue-500 text-white rounded-md"
+                        className="btn btn-success"
                         disabled={isSubmitting}
                     >
                         {isSubmitting ? 'Saving...' : 'Save Card'}
