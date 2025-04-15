@@ -29,7 +29,7 @@ function MainMenu() {
   return (
     <Container fluid className="p-0 main-menu-container">
       {/* Hero Section */}
-      <div 
+      <div
         className="hero-section -mt-6 text-white text-center d-flex flex-column justify-content-center align-items-center"
         style={{
           height: "92vh",
@@ -41,7 +41,7 @@ function MainMenu() {
         {/* Animated card background */}
         <div className="floating-cards">
           {["red", "blue", "yellow", "purple", "green"].map((color, index) => (
-            <div 
+            <div
               key={index}
               className="floating-card"
               style={{
@@ -63,7 +63,7 @@ function MainMenu() {
         </div>
 
         <div className="hero-content" style={{ zIndex: 1, padding: "0 20px" }}>
-          <h1 
+          <h1
             className="game-title mb-4"
             style={{
               fontFamily: "'Bangers', cursive",
@@ -75,7 +75,7 @@ function MainMenu() {
           >
             Triple Siege
           </h1>
-          
+
           <p className="lead mb-5" style={{ maxWidth: "700px", margin: "0 auto" }}>
             Build powerful decks, engage in strategic battles, and become the ultimate card master in this thrilling card game!
           </p>
@@ -87,43 +87,43 @@ function MainMenu() {
               </Badge>
             </div>
           )}
-          
+
           <div className="hero-buttons">
             {isLogIn ? (
               <>
-                <Button 
-                  as={Link} 
-                  to="/battle" 
-                  variant="danger" 
-                  size="lg" 
+                <Button
+                  as={Link}
+                  to="/battle"
+                  variant="danger"
+                  size="lg"
                   className="me-3 px-4 py-2"
-                  style={{ 
+                  style={{
                     boxShadow: "0 0 15px rgba(220, 53, 69, 0.5)",
                     transition: "all 0.3s"
                   }}
                 >
                   <span className="me-2">⚔️</span> Battle Now
                 </Button>
-                <Button 
-                  as={Link} 
-                  to="/collection" 
-                  variant="primary" 
-                  size="lg" 
+                <Button
+                  as={Link}
+                  to="/collection"
+                  variant="primary"
+                  size="lg"
                   className="me-3 px-4 py-2"
-                  style={{ 
+                  style={{
                     boxShadow: "0 0 15px rgba(13, 110, 253, 0.5)",
                     transition: "all 0.3s"
                   }}
                 >
                   <span className="me-2">🃏</span> My Collection
                 </Button>
-                <Button 
-                  as={Link} 
-                  to="/booster" 
-                  variant="warning" 
-                  size="lg" 
+                <Button
+                  as={Link}
+                  to="/booster"
+                  variant="warning"
+                  size="lg"
                   className="px-4 py-2"
-                  style={{ 
+                  style={{
                     boxShadow: "0 0 15px rgba(255, 193, 7, 0.5)",
                     transition: "all 0.3s"
                   }}
@@ -133,51 +133,64 @@ function MainMenu() {
               </>
             ) : (
               <>
-                <Button 
-                  as={Link} 
-                  to="/register" 
-                  variant="danger" 
-                  size="lg" 
-                  className="me-3 px-4 py-2"
-                  style={{ 
-                    boxShadow: "0 0 15px rgba(220, 53, 69, 0.5)",
-                    transition: "all 0.3s"
-                  }}
-                >
-                  Register Now
-                </Button>
-                <Button 
-                  as={Link} 
-                  to="/login" 
-                  variant="primary" 
-                  size="lg" 
-                  className="me-3 px-4 py-2"
-                  style={{ 
-                    boxShadow: "0 0 15px rgba(13, 110, 253, 0.5)",
-                    transition: "all 0.3s"
-                  }}
-                >
-                  Login
-                </Button>
-                <Button 
-                  as={Link} 
-                  to="/cards" 
-                  variant="outline-light" 
-                  size="lg" 
-                  className="px-4 py-2"
-                  style={{ 
-                    transition: "all 0.3s"
-                  }}
-                >
-                  Preview Cards
-                </Button>
+                <div>
+                  <Button
+                    as={Link}
+                    to="/register"
+                    variant="danger"
+                    size="lg"
+                    className="me-3 px-4 py-2"
+                    style={{
+                      boxShadow: "0 0 15px rgba(220, 53, 69, 0.5)",
+                      transition: "all 0.3s"
+                    }}
+                  >
+                    Register Now
+                  </Button>
+                  <Button
+                    as={Link}
+                    to="/login"
+                    variant="primary"
+                    size="lg"
+                    className="me-3 px-4 py-2"
+                    style={{
+                      boxShadow: "0 0 15px rgba(13, 110, 253, 0.5)",
+                      transition: "all 0.3s"
+                    }}
+                  >
+                    Login
+                  </Button>
+                  <Button
+                    as={Link}
+                    to="/cards"
+                    variant="warning"
+                    size="lg"
+                    className="px-4 py-2"
+                    style={{
+                      transition: "all 0.3s"
+                    }}
+                  >
+                    Preview Cards
+                  </Button>
+                </div>
+                <div>
+                  <Button
+                    as={Link}
+                    to="/guide"
+                    variant="success"
+                    size="lg"
+                    className="me-3 px-4 py-3 mt-15"
+                  >
+                    How To Play
+                  </Button>
+                </div>
               </>
             )}
           </div>
-          
+
 
         </div>
-        
+
         <div className="scroll-indicator" style={{ position: "absolute", bottom: "20px" }}>
           <div className="mouse-icon">
             <div className="wheel"></div>
@@ -187,36 +200,36 @@ function MainMenu() {
           </div>
         </div>
       </div>
-      
+
       {/* Game Features Section */}
       <section className="py-5 bg-light">
         <Container>
           <h2 className="text-center mb-5">Game Features</h2>
           <Row className="g-4">
             {[
-              { 
-                title: "Strategic Battles", 
-                icon: "⚔️", 
+              {
+                title: "Strategic Battles",
+                icon: "⚔️",
                 color: "#dc3545",
-                description: "Engage in thrilling card battles using strategy and powerful card combinations." 
+                description: "Engage in thrilling card battles using strategy and powerful card combinations."
               },
-              { 
-                title: "Collect Rare Cards", 
-                icon: "🃏", 
+              {
+                title: "Collect Rare Cards",
+                icon: "🃏",
                 color: "#0d6efd",
-                description: "Expand your collection with rare and powerful cards from booster packs." 
+                description: "Expand your collection with rare and powerful cards from booster packs."
               },
-              { 
-                title: "Build Custom Decks", 
-                icon: "🎮", 
+              {
+                title: "Build Custom Decks",
+                icon: "🎮",
                 color: "#198754",
-                description: "Create and customize decks to match your unique playstyle and strategies." 
+                description: "Create and customize decks to match your unique playstyle and strategies."
               }
             ].map((feature, index) => (
               <Col md={4} key={index}>
-                <Card 
+                <Card
                   className="h-100 text-center feature-card"
-                  style={{ 
+                  style={{
                     borderRadius: "12px",
                     transition: "transform 0.3s, box-shadow 0.3s",
                     overflow: "hidden",
@@ -224,8 +237,8 @@ function MainMenu() {
                     boxShadow: "0 5px 15px rgba(0,0,0,0.1)"
                   }}
                 >
-                  <div 
-                    className="icon-wrapper d-flex align-items-center justify-content-center mb-3 mt-4" 
+                  <div
+                    className="icon-wrapper d-flex align-items-center justify-content-center mb-3 mt-4"
                     style={{
                       width: "80px",
                       height: "80px",
@@ -247,7 +260,7 @@ function MainMenu() {
           </Row>
         </Container>
       </section>
-      
+
       {/* Featured Cards Carousel */}
       <section className="py-5" style={{ background: "linear-gradient(135deg, #f6f6f6 0%, #eaeaea 100%)" }}>
         <Container>
@@ -283,11 +296,11 @@ function MainMenu() {
           </Row>
         </Container>
       </section>
-      
+
       {/* Call to Action */}
-      <section 
+      <section
         className="py-5 text-center text-white"
-        style={{ 
+        style={{
           background: "linear-gradient(135deg, #16213e 0%, #1a1a2e 100%)"
         }}
       >
@@ -296,29 +309,29 @@ function MainMenu() {
           <p className="lead mb-4">Join thousands of players in the ultimate card battle experience</p>
           {!isLogIn ? (
             <div>
-              <Button 
-                as={Link} 
-                to="/register" 
-                variant="danger" 
-                size="lg" 
+              <Button
+                as={Link}
+                to="/register"
+                variant="danger"
+                size="lg"
                 className="me-3"
               >
                 Create Account
               </Button>
-              <Button 
-                as={Link} 
-                to="/login" 
-                variant="outline-light" 
+              <Button
+                as={Link}
+                to="/login"
+                variant="outline-light"
                 size="lg"
               >
                 Login
               </Button>
             </div>
           ) : (
-            <Button 
-              as={Link} 
-              to="/battle" 
-              variant="danger" 
+            <Button
+              as={Link}
+              to="/battle"
+              variant="danger"
               size="lg"
             >
               Start Playing Now
