@@ -156,7 +156,7 @@ function SSSDeckDetail() {
     const [isSaving, setIsSaving] = useState(false);
     const [deckCards, setDeckCards] = useState([]);
     const [availableCards, setAvailableCards] = useState([]);
-    const SERVER_URL = "http://localhost:8080";
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     // Max cards allowed in deck
     const MAX_DECK_SIZE = 21;

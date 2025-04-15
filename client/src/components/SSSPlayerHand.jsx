@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import SSSCard from "./SSSCard.jsx";
 import { useDrag } from "react-dnd";
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
+
 // Create a draggable card component that wraps SSSCard
 const DraggableCard = ({ card, isMyTurn, cardsPlayedThisTurn, gamePhase, isCurrentPlayer }) => {
   const [{ isDragging }, drag] = useDrag({
@@ -114,7 +116,7 @@ function PlayerHand({ matchId, player, isMyTurn, cardsPlayedThisTurn = 0, gamePh
         return;
       }
 
-      const response = await fetch(`http://localhost:8080/matches/${matchId}`, {
+      const response = await fetch(`${SERVER_URL}/matches/${matchId}`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }

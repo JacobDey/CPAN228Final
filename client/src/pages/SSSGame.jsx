@@ -20,12 +20,13 @@ function SSSGame() {
     const [cardsPlayedThisTurn, setCardsPlayedThisTurn] = useState(0);
     const [playStatus, setPlayStatus] = useState({ message: "", type: "" });
     const [showResultModal, setShowResultModal] = useState(false);
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     // Fetch match data
     const fetchMatchData = async () => {
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8080/matches/${matchId}`, {
+            const response = await fetch(`${SERVER_URL}/matches/${matchId}`, {
                 headers: {
                     "Authorization": `Bearer ${token}`
                 }
@@ -113,7 +114,7 @@ function SSSGame() {
             setCardsPlayedThisTurn(prev => prev + 1);
 
             const token = localStorage.getItem("token");
-            const response = await fetch(`http://localhost:8080/matches/${matchId}/play?cardId=${cardId}&towerId=${towerIndex + 1}`, {
+            const response = await fetch(`${SERVER_URL}/matches/${matchId}/play?cardId=${cardId}&towerId=${towerIndex + 1}`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -151,7 +152,7 @@ function SSSGame() {
     const handleStartTurn = async () => {
         try {
             const token = localStorage.getItem("token");
-            await fetch(`http://localhost:8080/matches/${matchId}/startTurn`, {
+            await fetch(`${SERVER_URL}/matches/${matchId}/startTurn`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`
@@ -173,7 +174,7 @@ function SSSGame() {
     const handleEndTurn = async () => {
         try {
             const token = localStorage.getItem("token");
-            await fetch(`http://localhost:8080/matches/${matchId}/end`, {
+            await fetch(`${SERVER_URL}/matches/${matchId}/end`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`

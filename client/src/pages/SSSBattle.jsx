@@ -14,6 +14,7 @@ function SSSBattle(){
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [createdMatch, setCreatedMatch] = useState(null);
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     const handleCreateMatch = async () => {
         try {
@@ -21,7 +22,7 @@ function SSSBattle(){
             setError(null);
             
             const token = localStorage.getItem('token');
-            const response = await fetch('http://localhost:8080/matches/create', {
+            const response = await fetch(`${SERVER_URL}/matches/create`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
@@ -53,7 +54,7 @@ function SSSBattle(){
             setError(null);
             
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/matches/${matchId}/join`, {
+            const response = await fetch(`${SERVER_URL}/matches/${matchId}/join`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`

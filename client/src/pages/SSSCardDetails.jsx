@@ -10,12 +10,13 @@ function SSSCardDetails() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const navigate = useNavigate();
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     useEffect(() => {
         const fetchCard = async () => {
             try {
                 setLoading(true);
-                const response = await fetch(`http://localhost:8080/card/id/${id}`);
+                const response = await fetch(`${SERVER_URL}/card/id/${id}`);
                 
                 if (!response.ok) {
                     throw new Error(`Error fetching card: ${response.status}`);
