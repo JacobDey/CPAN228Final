@@ -24,6 +24,7 @@ public final class GameConstants {
     public static final String EFFECT_POWER_CHANGE = "POWER_CHANGE";
     public static final String EFFECT_DESTROY_CARD = "DESTROY_CARD";
     public static final String EFFECT_DESTROY_SELF = "DESTROY_SELF";
+    public static final String EFFECT_DESTROY_SELF_IF_OWNERS_TURN = "DESTROY_SELF_IF_OWNERS_TURN";
     public static final String EFFECT_DESTROY_IF_COLOR = "DESTROY_IF_COLOR";
     public static final String EFFECT_DRAW_CARDS = "DRAW_CARDS";
     public static final String EFFECT_MOVE_CARD = "MOVE_CARD";
