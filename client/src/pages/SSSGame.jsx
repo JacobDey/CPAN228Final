@@ -22,6 +22,11 @@ function SSSGame() {
     const [showResultModal, setShowResultModal] = useState(false);
     const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
+    const MAX_CARDS_PER_TURN = 3;
+    const FETCH_INTERVAL = 3000;
+    const MAX_TURN = 10;
+
+
     // Fetch match data
     const fetchMatchData = async () => {
         try {
@@ -93,12 +98,12 @@ function SSSGame() {
     const handlePlayCard = async (card, towerIndex) => {
         try {
             // If we've already played 3 cards, don't allow playing another
-            if (cardsPlayedThisTurn >= 3) {
+            if (cardsPlayedThisTurn >= MAX_CARDS_PER_TURN) {
                 setPlayStatus({
                     message: "Maximum 3 cards per turn reached",
                     type: "warning"
                 });
-                setTimeout(() => setPlayStatus({ message: "", type: "" }), 3000);
+                setTimeout(() => setPlayStatus({ message: "", type: "" }), FETCH_INTERVAL);
                 return;
             }
 
@@ -136,7 +141,7 @@ function SSSGame() {
 
             // Clear status after successful play
             setPlayStatus({ message: "Card played successfully!", type: "success" });
-            setTimeout(() => setPlayStatus({ message: "", type: "" }), 3000);
+            setTimeout(() => setPlayStatus({ message: "", type: "" }), FETCH_INTERVAL);
 
         } catch (err) {
             console.error("Error playing card:", err);
@@ -144,7 +149,7 @@ function SSSGame() {
                 message: err.message || "Failed to play card",
                 type: "danger"
             });
-            setTimeout(() => setPlayStatus({ message: "", type: "" }), 5000);
+            setTimeout(() => setPlayStatus({ message: "", type: "" }), FETCH_INTERVAL+2000);
         }
     };
 
@@ -282,7 +287,7 @@ function SSSGame() {
                         </div>
                         <div className="game-status-bar d-flex justify-content-between bg-light p-2 rounded">
                             <div>
-                                <strong>Turn:</strong> {match.turn}
+                                <strong>Turn:</strong> {match.turn} / {MAX_TURN}
                                 {myTurn && (
                                     <span className="badge bg-success ms-2">Your Turn</span>
                                 )}
@@ -330,7 +335,7 @@ function SSSGame() {
                                             tower={tower}
                                             index={index}
                                             onCardPlayed={handlePlayCard}
-                                            disabled={!myTurn || cardsPlayedThisTurn >= 3}
+                                            disabled={!myTurn || cardsPlayedThisTurn >= MAX_CARDS_PER_TURN}
                                         />
                                     ))}
                                 </div>
@@ -338,7 +343,7 @@ function SSSGame() {
                                 {/* Cards played counter */}
                                 <div className="text-center mb-3">
                                     <span className="badge bg-info">
-                                        Cards played this turn: {cardsPlayedThisTurn} / 3
+                                        Cards played this turn: {cardsPlayedThisTurn} / {MAX_CARDS_PER_TURN}
                                     </span>
                                 </div>
                             </Card.Body>
