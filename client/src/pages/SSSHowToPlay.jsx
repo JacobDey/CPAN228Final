@@ -298,7 +298,6 @@ function SSSHowToPlay() {
                                         </div>
                                         <ul className="space-y-2 text-gray-700">
                                             <li>• <span className="font-semibold">Aggressive</span> - Hurts the opponent</li>
-                                            <li>• Red and black creatures</li>
                                             <li>• Natural enemy of blue</li>
                                         </ul>
                                     </div>
@@ -310,7 +309,6 @@ function SSSHowToPlay() {
                                         </div>
                                         <ul className="space-y-2 text-gray-700">
                                             <li>• <span className="font-semibold">Defensive</span> - Helps the player</li>
-                                            <li>• Blue and green creatures</li>
                                             <li>• Natural enemy of red</li>
                                         </ul>
                                     </div>
@@ -322,7 +320,6 @@ function SSSHowToPlay() {
                                         </div>
                                         <ul className="space-y-2 text-gray-700">
                                             <li>• <span className="font-semibold">Movement</span> - Symmetrical effects</li>
-                                            <li>• Blue wizards and white creatures</li>
                                             <li>• Angels of justice and divine arbitrariness</li>
                                         </ul>
                                     </div>
@@ -367,7 +364,6 @@ function SSSHowToPlay() {
                                             <li>• <span className="font-semibold">Control</span> - Discard and creature movement</li>
                                             <li>• Forces opponents to discard cards</li>
                                             <li>• Electricity and natural energy</li>
-                                            <li>• Azorius or Boros creatures</li>
                                         </ul>
                                     </div>
                                 </div>
@@ -458,7 +454,7 @@ function SSSHowToPlay() {
                         Triple Siege isn't just played—it's mastered. Join the ranks of strategic masterminds who've discovered the perfect blend of calculation, foresight, and adaptability.
                     </p>
                     <div className="flex justify-center">
-                        <button className="bg-yellow-500 hover:bg-yellow-400 text-white text-xl font-bold py-4 px-8 rounded-full transform hover:scale-105 transition-all duration-300 shadow-lg"
+                        <button className="btn btn-dark text-white text-xl font-bold py-4 px-8 rounded-full"
                             onClick={handleClick}>
                             BEGIN YOUR CONQUEST
                         </button>
