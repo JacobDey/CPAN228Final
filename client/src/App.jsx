@@ -15,6 +15,7 @@ import SSSBoosterPack from './pages/SSSBoosterPack.jsx';
 import SSSGame from './pages/SSSGame.jsx';
 import SSSBackground from './components/SSSBackground.jsx';
 import SSSProfile from './pages/SSSProfile.jsx';
+import SSSHowToPlay from './pages/SSSHowToPlay.jsx';
 
 function App() {
   return (
@@ -42,6 +43,7 @@ function App() {
             <Route path="/admin/edit/cards" element={<CardManage />} />
             <Route path="/game/:matchId" element={<SSSGame />} />
             <Route path="/profile" element={<SSSProfile />} />
+            <Route path="/guide" element={<SSSHowToPlay />} />
           </Routes>
         </div>
       </div>
