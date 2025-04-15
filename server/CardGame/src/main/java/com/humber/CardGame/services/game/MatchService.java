@@ -51,10 +51,10 @@ public class MatchService {
         return matchRepository.save(match);
     }
 
-                //get all matches
-                public List<Match> getAllMatches() {
-                    return matchRepository.findAll();
-                }
+    //get all matches
+    public List<Match> getAllMatches() {
+        return matchRepository.findAll();
+    }
 
     //join match that has not yet started as player 2
     public Match joinMatch(String matchId, String player2Username) {
@@ -64,7 +64,7 @@ public class MatchService {
 
         // removing this for now, i think that you should be able to rejoin a match if you disconnect for
         //check if start
-        if(match.getStatus() != MatchStatus.WAITING || match.getPlayer2() != null) {
+        if (match.getStatus() != MatchStatus.WAITING || match.getPlayer2() != null) {
             throw new RuntimeException("Match is already started");
         }
 
@@ -83,28 +83,28 @@ public class MatchService {
         return matchRepository.save(match);
     }
 
-        //join an ongoing match as player 1 or 2
-        public Match joinOngoingMatch(String matchId, String username) {
-            Match match = matchRepository.findById(matchId)
-                    .orElseThrow(() -> new RuntimeException("Match not found"));
-    
-            // Verify the user is one of the players in this match
-            if (!username.equals(match.getPlayer1()) && !username.equals(match.getPlayer2())) {
-                throw new RuntimeException("You are not a player in this match");
-            }
-            
-            // Check if the match is in PLAYING status
-            if (match.getStatus() != MatchStatus.PLAYING) {
-                // If the match is in WAITING status and the user is player1, just return the match
-                if (match.getStatus() == MatchStatus.WAITING && username.equals(match.getPlayer1())) {
-                    return match;
-                }
-                throw new RuntimeException("This match cannot be joined at this time");
-            }
-    
-            // No need to modify the match state, just return it
-            return match;
+    //join an ongoing match as player 1 or 2
+    public Match joinOngoingMatch(String matchId, String username) {
+        Match match = matchRepository.findById(matchId)
+                .orElseThrow(() -> new RuntimeException("Match not found"));
+
+        // Verify the user is one of the players in this match
+        if (!username.equals(match.getPlayer1()) && !username.equals(match.getPlayer2())) {
+            throw new RuntimeException("You are not a player in this match");
         }
+
+        // Check if the match is in PLAYING status
+        if (match.getStatus() != MatchStatus.PLAYING) {
+            // If the match is in WAITING status and the user is player1, just return the match
+            if (match.getStatus() == MatchStatus.WAITING && username.equals(match.getPlayer1())) {
+                return match;
+            }
+            throw new RuntimeException("This match cannot be joined at this time");
+        }
+
+        // No need to modify the match state, just return it
+        return match;
+    }
 
     //start turn
     public Match startTurn(String matchId, String username) {
@@ -112,10 +112,10 @@ public class MatchService {
                 .orElseThrow(() -> new RuntimeException("Match not found"));
 
         //validate turn and phase
-        if(!match.getCurrentTurnPlayer().equals(username)) {
+        if (!match.getCurrentTurnPlayer().equals(username)) {
             throw new RuntimeException("Player " + username + " is not in a turn");
         }
-        if(match.getCurrentPhase() != GamePhase.BEGIN) {
+        if (match.getCurrentPhase() != GamePhase.BEGIN) {
             throw new RuntimeException("Can only draw card during begin phase");
         }
 
@@ -124,7 +124,7 @@ public class MatchService {
         //Find card in player hand
         List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
         playerHand.addFirst(drawCard(isPlayer1 ? match.getPlayer1Deck() : match.getPlayer2Deck()));
-        
+
         // Set phase to MAIN after drawing
         match.setCurrentPhase(GamePhase.MAIN);
 
@@ -137,13 +137,13 @@ public class MatchService {
                 .orElseThrow(() -> new RuntimeException("Match not found"));
 
         //validate turn and phase
-        if(!match.getCurrentTurnPlayer().equals(username)) {
+        if (!match.getCurrentTurnPlayer().equals(username)) {
             throw new RuntimeException("Player " + username + " is not in a turn");
         }
-        if(match.getCurrentPhase() != GamePhase.MAIN) {
+        if (match.getCurrentPhase() != GamePhase.MAIN) {
             throw new RuntimeException("Can only play cards during main phase");
         }
-        if(match.getCardPlayedThisTurn() >= 3) {
+        if (match.getCardPlayedThisTurn() >= 3) {
             throw new RuntimeException("Maximum 3 cards per turn");
         }
 
@@ -155,19 +155,19 @@ public class MatchService {
 
         // Using card's uid instead of id for finding the specific card instance
         Optional<CardDTO> cardToPlay = playerHand.stream().filter(c -> c.getUid().equals(cardId)).findFirst();
-        if(cardToPlay.isEmpty()) {
+        if (cardToPlay.isEmpty()) {
             throw new RuntimeException("Card not in hand");
         }
 
         //play card to tower
-        Tower tower = match.getTowers().get(towerId-1);
+        Tower tower = match.getTowers().get(towerId - 1);
         List<CardDTO> towerCard = isPlayer1 ? tower.getPlayer1Cards() : tower.getPlayer2Cards();
         towerCard.addFirst(cardToPlay.get());
 
         //remove card from player hand
         playerHand.remove(cardToPlay.get());
         //add card count
-        match.setCardPlayedThisTurn(match.getCardPlayedThisTurn()+1);
+        match.setCardPlayedThisTurn(match.getCardPlayedThisTurn() + 1);
 
         return matchRepository.save(match);
     }
@@ -178,7 +178,7 @@ public class MatchService {
                 .orElseThrow(() -> new RuntimeException("Match not found"));
 
         //validate turn
-        if(!match.getCurrentTurnPlayer().equals(username)) {
+        if (!match.getCurrentTurnPlayer().equals(username)) {
             throw new RuntimeException("Player " + username + " is not in a turn");
         }
 
@@ -186,18 +186,18 @@ public class MatchService {
         boolean isPlayer1 = username.equals(match.getPlayer1());
         //discard down to 7 cards
         List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
-        while(playerHand.size() >= 7) {
+        while (playerHand.size() >= 7) {
             playerHand.removeLast();
         }
 
         //switch turn
-        match.setCurrentTurnPlayer( isPlayer1 ? match.getPlayer2() : match.getPlayer1());
-        match.setTurn(match.getTurn()+1);
+        match.setCurrentTurnPlayer(isPlayer1 ? match.getPlayer2() : match.getPlayer1());
+        match.setTurn(match.getTurn() + 1);
         match.setCurrentPhase(GamePhase.BEGIN);
         match.setCardPlayedThisTurn(0);
 
         //check for game end
-        if( match.getTurn() >= 10) {
+        if (match.getTurn() >= 10) {
             determineWinner(match);
         }
 
@@ -209,18 +209,18 @@ public class MatchService {
         int player1Score = 0;
         int player2Score = 0;
 
-        for(Tower tower : match.getTowers()) {
+        for (Tower tower : match.getTowers()) {
             int controller = tower.getControllingPlayerId();
-            if(controller == 1) {
+            if (controller == 1) {
                 player1Score += tower.getVictoryPoints();
-            } else if(controller == 2) {
+            } else if (controller == 2) {
                 player2Score += tower.getVictoryPoints();
             }
         }
 
-        if(player1Score > player2Score) {
+        if (player1Score > player2Score) {
             match.setStatus(MatchStatus.PLAYER1_WIN);
-        } else if(player2Score > player1Score) {
+        } else if (player2Score > player1Score) {
             match.setStatus(MatchStatus.PLAYER2_WIN);
         } else {
             match.setStatus(MatchStatus.DRAW);
@@ -253,12 +253,12 @@ public class MatchService {
     public List<CardDTO> convertDeckToCard(Deck deck) {
         List<CardDTO> cards = new LinkedList<>();
         Map<String, Integer> deckContents = deck.getCardList();
-        for(Map.Entry<String,Integer> entry : deckContents.entrySet()) {
+        for (Map.Entry<String, Integer> entry : deckContents.entrySet()) {
             String cardId = entry.getKey();
             int value = entry.getValue();
 
             //add the card N time based on quantity
-            for(int i = 0;i<value;i++) {
+            for (int i = 0; i < value; i++) {
                 Card card = cardRepository.findById(cardId)
                         .orElseThrow(() -> new RuntimeException("Card not found"));
 
@@ -281,7 +281,7 @@ public class MatchService {
     //draw initial hand
     public List<CardDTO> drawInitialHand(List<CardDTO> deck) {
         List<CardDTO> hand = new ArrayList<>();
-        for(int i = 0;i<3 && !deck.isEmpty();i++) {
+        for (int i = 0; i < 3 && !deck.isEmpty(); i++) {
             hand.add(deck.removeFirst());
         }
         return hand;
@@ -295,6 +295,11 @@ public class MatchService {
     //get match
     public Match getMatch(String matchId) {
         return matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("Match not found"));
+    }
+
+    //get ongoing match
+    public List<Match> getOngoingMatches() {
+        return matchRepository.findByStatus(MatchStatus.PLAYING);
     }
 
 }

@@ -17,11 +17,18 @@ public class MatchController {
     @Autowired
     MatchService matchService;
 
-@GetMapping
-public ResponseEntity<List<Match>> getAllMatches() {
-    List<Match> matches = matchService.getAllMatches();
-    return ResponseEntity.ok(matches);
-}
+    @GetMapping
+    public ResponseEntity<List<Match>> getAllMatches() {
+        List<Match> matches = matchService.getAllMatches();
+        return ResponseEntity.ok(matches);
+    }
+
+    //get waiting match
+    @GetMapping("/ongoing")
+    public ResponseEntity<List<Match>> getOngoingMatches() {
+        List<Match> matches = matchService.getOngoingMatches();
+        return ResponseEntity.ok(matches);
+    }
 
     @PostMapping("/create")
     public ResponseEntity<Match> createMatch(Principal principal) {
@@ -36,7 +43,7 @@ public ResponseEntity<List<Match>> getAllMatches() {
         Match match = matchService.joinMatch(matchId, username);
         return ResponseEntity.ok(match);
     }
-    
+
     @PostMapping("/{matchId}/joinOngoing")
     public ResponseEntity<Match> joinOngoingMatch(Principal principal, @PathVariable String matchId) {
         String username = principal.getName();
@@ -52,7 +59,7 @@ public ResponseEntity<List<Match>> getAllMatches() {
     }
 
     @PutMapping("/{matchId}/play")
-    public ResponseEntity<Match> playMatch(Principal principal, @PathVariable String matchId,@RequestParam String cardId, @RequestParam int towerId ) {
+    public ResponseEntity<Match> playMatch(Principal principal, @PathVariable String matchId, @RequestParam String cardId, @RequestParam int towerId) {
         String username = principal.getName();
         Match match = matchService.playCard(matchId, username, cardId, towerId);
         return ResponseEntity.ok(match);

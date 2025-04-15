@@ -10,7 +10,7 @@ function SSSMatchBrowser() {
         const fetchMatches = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const response = await fetch("http://localhost:8080/matches", {
+                const response = await fetch("http://localhost:8080/matches/ongoing", {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
