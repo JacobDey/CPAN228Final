@@ -4,7 +4,6 @@ import com.humber.CardGame.models.card.CardDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -24,8 +23,8 @@ public class Match {
     private MatchStatus status;
     private GamePhase currentPhase;
     private int cardPlayedThisTurn;
-    @CreatedDate
-    private Date createdAt;
+
+    private Date createdAt = new Date();
 
     private List<Tower> towers = new ArrayList<>();
 
@@ -34,15 +33,12 @@ public class Match {
     private int player1Score;
     private List<CardDTO> player1Hand;
     private List<CardDTO> player1Deck;
-//    private List<Card> player1Field;
 
     //user2
     private String player2;
     private int player2Score;
     private List<CardDTO> player2Hand;
     private List<CardDTO> player2Deck;
-//    private List<Card> player2Field;
-
 
 }
 

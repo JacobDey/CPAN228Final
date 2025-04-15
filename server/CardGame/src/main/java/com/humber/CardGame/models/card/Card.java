@@ -1,9 +1,12 @@
 package com.humber.CardGame.models.card;
 
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Range;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -22,10 +25,14 @@ public class Card {
     private String id;
 
     @Indexed(unique = true)
+    @NotBlank(message = "Card name is required")
     private String name;
-    private String description; // Keeping for backward compatibility
     private String abilityText;
+
+    @NotBlank(message = "Card colour is required")
     private String colour;
+    @NotNull(message = "Card power is required")
+    @Range(min = 0, max = 99, message = "Power must be between 0 - 99")
     private int power;
 
     private byte[] imageData;
@@ -34,31 +41,5 @@ public class Card {
     // New field for structured card abilities
     private List<CardAbility> abilities = new ArrayList<>();
     
-    // Custom getter for description that falls back to abilityText
-    public String getDescription() {
-        return description != null ? description : abilityText;
-    }
     
-    // Custom setter for description to keep both fields in sync
-    public void setDescription(String description) {
-        this.description = description;
-        // If abilityText is not set, sync it with description
-        if (this.abilityText == null) {
-            this.abilityText = description;
-        }
-    }
-    
-    // Custom getter for abilityText that falls back to description
-    public String getAbilityText() {
-        return abilityText != null ? abilityText : description;
-    }
-    
-    // Custom setter for abilityText to keep both fields in sync
-    public void setAbilityText(String abilityText) {
-        this.abilityText = abilityText;
-        // If description is not set, sync it with abilityText
-        if (this.description == null) {
-            this.description = abilityText;
-        }
-    }
 }

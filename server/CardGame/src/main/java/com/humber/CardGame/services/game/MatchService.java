@@ -226,6 +226,27 @@ public class MatchService {
             match.setStatus(MatchStatus.DRAW);
         }
 
+        //save score to match
+        match.setPlayer1Score(player1Score);
+        match.setPlayer2Score(player2Score);
+
+        //save match to user history
+        MyUser player1 = userRepository.findByUsername(match.getPlayer1())
+                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer1() + " not found"));
+
+        MyUser player2 = userRepository.findByUsername(match.getPlayer2())
+                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer2() + " not found"));
+
+        player1.getMatchesHistory().add(match);
+        player2.getMatchesHistory().add(match);
+
+        userRepository.save(player1);
+        userRepository.save(player2);
+
+        //set game state to end
+        match.setCurrentPhase(GamePhase.END);
+        match.setCurrentTurnPlayer(null);
+
     }
 
     //convert deck to List of Card

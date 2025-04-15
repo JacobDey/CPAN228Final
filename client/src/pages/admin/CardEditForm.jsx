@@ -17,6 +17,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
         card.image ? `data:${card.imageType};base64,${card.image}` : null
     );
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [errors, setErrors] = useState({});
     const navigate = useNavigate();
     const SERVER_URL = 'http://localhost:8080';
 
@@ -43,6 +44,14 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
             ...prev,
             [name]: value
         }));
+        
+        // Clear error when field is edited
+        if (errors[name]) {
+            setErrors(prev => ({
+                ...prev,
+                [name]: null
+            }));
+        }
     };
 
     const handleFileChange = async (e) => {
@@ -65,15 +74,57 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
               imageData: Array.from(uint8Array)
             }));
             setPreviewImage(URL.createObjectURL(resized.blob));
+            
+            // Clear image error if it exists
+            if (errors.imageData) {
+                setErrors(prev => ({
+                    ...prev,
+                    imageData: null
+                }));
+            }
           };
           reader.readAsArrayBuffer(resized.blob);
         } catch (error) {
           console.error("Error resizing image:", error);
         }
-      };
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+        
+        if (!formData.name.trim()) {
+            newErrors.name = "Card name is required";
+        }
+        
+        if (!formData.colour) {
+            newErrors.colour = "Card colour is required";
+        }
+        
+        if (formData.power < 0) {
+            newErrors.power = "Power must be at least 0";
+        }
+
+        if(formData.power > 99) {
+            newErrors.power = "Power must be at most 99";
+        }
+        
+        // Only validate image for new cards (when editing, the image might already exist on the server)
+        if (!formData.id && !formData.imageData && !previewImage) {
+            newErrors.imageData = "Card image is required";
+        }
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Client-side validation
+        if (!validateForm()) {
+            return;
+        }
+        
         setIsSubmitting(true);
     
         try {
@@ -115,7 +166,17 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
             onSave();
         } catch (err) {
             console.error("Error saving card:", err);
-            alert('Error saving card: ' + (err.response?.data?.message || err.message));
+            
+            // Handle validation errors from server
+            if (err.response?.status === 400 && err.response?.data) {
+                if (typeof err.response.data === 'object') {
+                    setErrors(err.response.data);
+                } else {
+                    alert('Error saving card: ' + err.response.data);
+                }
+            } else {
+                alert('Error saving card: ' + (err.response?.data?.message || err.message));
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -162,7 +223,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
           };
           reader.readAsDataURL(file);
         });
-      };
+    };
 
     return (
         <div className="bg-white p-6 rounded-lg shadow-md">
@@ -179,9 +240,10 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                            className={`mt-1 block w-full border ${errors.name ? 'border-red-500' : 'border-gray-300'} rounded-md p-2`}
                             required
                         />
+                        {errors.name && <p className="text-red-500 text-xs mt-1">{errors.name}</p>}
                     </div>
 
                     <div>
@@ -190,7 +252,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                             name="colour"
                             value={formData.colour}
                             onChange={handleChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                            className={`mt-1 block w-full border ${errors.colour ? 'border-red-500' : 'border-gray-300'} rounded-md p-2`}
                             required
                         >
                             <option value="">Select a color</option>
@@ -202,6 +264,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                             <option value="Orange">Orange</option>
                             <option value="White">White</option>
                         </select>
+                        {errors.colour && <p className="text-red-500 text-xs mt-1">{errors.colour}</p>}
                     </div>
 
                     <div className="md:col-span-2">
@@ -222,10 +285,12 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                             name="power"
                             value={formData.power}
                             onChange={handleChange}
-                            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                            className={`mt-1 block w-full border ${errors.power ? 'border-red-500' : 'border-gray-300'} rounded-md p-2`}
                             required
                             min="0"
+                            max="99"
                         />
+                        {errors.power && <p className="text-red-500 text-xs mt-1">{errors.power}</p>}
                     </div>
 
                     <div>
@@ -234,8 +299,9 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                             type="file"
                             accept="image/*"
                             onChange={handleFileChange}
-                            className="mt-1 block w-full"
+                            className={`mt-1 block w-full ${errors.imageData ? 'text-red-500' : ''}`}
                         />
+                        {errors.imageData && <p className="text-red-500 text-xs mt-1">{errors.imageData}</p>}
                     </div>
                 </div>
 

@@ -36,11 +36,12 @@ function SSSProfile() {
           headers: { Authorization: `Bearer ${token}` }
         });
         
-        setProfile(profileResponse.data);
+        const profileData = profileResponse.data;
+        setProfile(profileData);
         
         // Calculate match statistics
-        if (profileResponse.data.matchesHistory && profileResponse.data.matchesHistory.length > 0) {
-          calculateMatchStats(profileResponse.data.matchesHistory);
+        if (profileData.matchesHistory && profileData.matchesHistory.length > 0) {
+          calculateMatchStats(profileData.matchesHistory, profileData.username);
         }
         
         // Fetch card details for cards in user's collection
@@ -68,14 +69,15 @@ function SSSProfile() {
     fetchProfile();
   }, [navigate]);
 
-  const calculateMatchStats = (matches) => {
+  const calculateMatchStats = (matches, username) => {
     let wins = 0;
     let losses = 0;
     let draws = 0;
     
     matches.forEach(match => {
+      console.log(match);
       // Determine if the user is player1 or player2
-      const isPlayer1 = match.player1 === profile.username;
+      const isPlayer1 = match.player1 === username;
       
       if (match.status === 'PLAYER1_WIN' && isPlayer1) wins++;
       else if (match.status === 'PLAYER2_WIN' && !isPlayer1) wins++;
@@ -124,6 +126,14 @@ function SSSProfile() {
     return `${match.player1Score} - ${match.player2Score}`;
   };
 
+  const handleGoToAdmin = () => {
+    if(profile.role != "ADMIN") {
+      alert("You must be an admin to access this page");
+      return;
+    }
+    navigate('/admin/edit/cards');
+  }
+
   if (loading) {
     return (
       <Container className="mt-4 text-center">
@@ -144,7 +154,7 @@ function SSSProfile() {
     <Container className="mt-4">
       {profile && (
         <>
-          <Row className="mb-4">
+          <Row className="mb-5">
             <Col>
               <Card className="profile-header shadow">
                 <Card.Body>
@@ -161,6 +171,7 @@ function SSSProfile() {
                       </div>
                       <h4>{profile.username}</h4>
                       <p className="text-muted">Member since {new Date(profile.createdAt).toLocaleDateString()}</p>
+                      {profile.role==="ADMIN" && <Button onClick={handleGoToAdmin}>Go to Admin Page</Button>} 
                     </Col>
                     <Col md={9}>
                       <h3>Battle Statistics</h3>
@@ -199,7 +210,7 @@ function SSSProfile() {
 
           <Tabs defaultActiveKey="cards" className="mb-4">
             <Tab eventKey="cards" title="Card Collection">
-              <Row className="mt-3">
+              <Row className="mt-3 bg-white">
                 <Col>
                   <h3>Card Collection ({cardDetails.length})</h3>
                   <p>Below are all the cards you currently own:</p>
@@ -231,7 +242,7 @@ function SSSProfile() {
             </Tab>
             
             <Tab eventKey="matches" title="Match History">
-              <Row className="mt-3">
+              <Row className="mt-3 bg-white">
                 <Col>
                   <h3>Recent Battles</h3>
                   
@@ -270,7 +281,7 @@ function SSSProfile() {
             </Tab>
             
             <Tab eventKey="decks" title="My Decks">
-              <Row className="mt-3">
+              <Row className="mt-3 bg-white">
                 <Col>
                   <div className="d-flex justify-content-between align-items-center">
                     <h3>My Decks</h3>
@@ -309,38 +320,7 @@ function SSSProfile() {
                 </Col>
               </Row>
             </Tab>
-            
-            <Tab eventKey="account" title="Account Settings">
-              <Row className="mt-3">
-                <Col md={6}>
-                  <Card>
-                    <Card.Body>
-                      <h3>Account Information</h3>
-                      <Table borderless>
-                        <tbody>
-                          <tr>
-                            <td><strong>Username:</strong></td>
-                            <td>{profile.username}</td>
-                          </tr>
-                          <tr>
-                            <td><strong>Email:</strong></td>
-                            <td>{profile.email}</td>
-                          </tr>
-                          <tr>
-                            <td><strong>Member Since:</strong></td>
-                            <td>{new Date(profile.createdAt).toLocaleDateString()}</td>
-                          </tr>
-                        </tbody>
-                      </Table>
-                      
-                      <Button variant="outline-primary" className="mt-2">
-                        Edit Profile
-                      </Button>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              </Row>
-            </Tab>
+          
           </Tabs>
         </>
       )}

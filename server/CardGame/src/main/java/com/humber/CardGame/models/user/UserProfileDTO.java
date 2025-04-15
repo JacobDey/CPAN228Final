@@ -20,6 +20,7 @@ public class UserProfileDTO {
     private String id;
     private String username;
     private String email;
+    private String role;
     private Date createdAt;
     private Map<String, Integer> cards;
     private List<Deck> decks;
