@@ -112,7 +112,7 @@ public class AbilityExecutionService {
     }
 
 
-    // --- Helper Methods for Effect Categories ---
+    // --- Helper Methods for Effect Categoriesss ---
 
     private List<GameEvent> applyPowerChange(Match match, GameEvent event, Map<String, Object> params) {
         List<GameEvent> generatedEvents = new ArrayList<>(); // Initialize the result list
