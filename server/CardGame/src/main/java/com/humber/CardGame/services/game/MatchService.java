@@ -1,8 +1,10 @@
 package com.humber.CardGame.services.game;
 
+import com.humber.CardGame.constants.GameConstants;
 import com.humber.CardGame.models.card.Card;
 import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.models.card.Deck;
+import com.humber.CardGame.models.game.GameEvent;
 import com.humber.CardGame.models.game.GamePhase;
 import com.humber.CardGame.models.game.Match;
 import com.humber.CardGame.models.game.MatchStatus;
@@ -21,8 +23,10 @@ public class MatchService {
     private final MatchRepository matchRepository;
     private final UserRepository userRepository;
     private final CardRepository cardRepository;
+    private final GameEventDispatcher gameEventDispatcher;
 
-    public MatchService(MatchRepository matchRepository, UserRepository userRepository, CardRepository cardRepository){
+    public MatchService(MatchRepository matchRepository, UserRepository userRepository, CardRepository cardRepository, GameEventDispatcher gameEventDispatcher) {
+        this.gameEventDispatcher = gameEventDispatcher;
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
         this.cardRepository = cardRepository;
@@ -143,6 +147,8 @@ public class MatchService {
         return matchRepository.save(match);
     }
 
+// ... existing code ...
+
     //play card
     public Match playCard(String matchId, String username, String cardId, int towerId) {
         Match match = matchRepository.findById(matchId)
@@ -166,23 +172,39 @@ public class MatchService {
         List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
 
         // Using card's uid instead of id for finding the specific card instance
-        Optional<CardDTO> cardToPlay = playerHand.stream().filter(c -> c.getUid().equals(cardId)).findFirst();
-        if (cardToPlay.isEmpty()) {
+        Optional<CardDTO> cardToPlayOpt = playerHand.stream().filter(c -> c.getUid().equals(cardId)).findFirst();
+        if (cardToPlayOpt.isEmpty()) {
             throw new RuntimeException("Card not in hand");
         }
+        CardDTO playedCard = cardToPlayOpt.get(); // Get the actual card object
 
         //play card to tower
         Tower tower = match.getTowers().get(towerId - 1);
-        List<CardDTO> towerCard = isPlayer1 ? tower.getPlayer1Cards() : tower.getPlayer2Cards();
-        towerCard.addFirst(cardToPlay.get());
+        List<CardDTO> towerCardList = isPlayer1 ? tower.getPlayer1Cards() : tower.getPlayer2Cards();
+        towerCardList.addFirst(playedCard); // Add the card to the tower
 
         //remove card from player hand
-        playerHand.remove(cardToPlay.get());
+        playerHand.remove(playedCard);
         //add card count
         match.setCardPlayedThisTurn(match.getCardPlayedThisTurn() + 1);
 
+        // *** Create and Dispatch CARD_PLAYED Event Here ***
+        GameEvent playEvent = new GameEvent(
+            GameConstants.EVENT_CARD_PLAYED,
+            playedCard, // Pass the actual CardDTO object
+            towerId,
+            username,
+            match,
+            null // Context is null for now
+        );
+        // Update the match state by dispatching the event and processing abilities
+        match = gameEventDispatcher.dispatchEvent(playEvent);
+
+        // Save the potentially modified match state AFTER abilities have resolved
         return matchRepository.save(match);
     }
+
+// ... existing code ...
 
     //end turn
     public Match endTurn(String matchId, String username) {

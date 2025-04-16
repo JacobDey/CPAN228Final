@@ -1,5 +1,6 @@
 package com.humber.CardGame.services.game;
 
+import com.humber.CardGame.constants.GameConstants;
 import com.humber.CardGame.models.card.CardAbility;
 import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.models.game.GameEvent;
@@ -26,15 +27,14 @@ public class GameEventDispatcher {
         if (sourceCard == null || sourceCard.getAbilities() == null) {
             return event.getMatch();
         }
-        // Find abilities that should trigger for this event type
+        // Only trigger ON_ENTER abilities when the event is CARD_PLAYED
         List<CardAbility> triggeredAbilities = sourceCard.getAbilities().stream()
-                .filter(ability -> Objects.equals(ability.getAbilityType(), event.getEventType()))
+                .filter(ability -> GameConstants.EVENT_CARD_PLAYED.equals(event.getEventType()) &&
+                        GameConstants.TRIGGER_ON_ENTER.equals(ability.getAbilityType()))
                 .collect(Collectors.toList());
 
-        // Forward each triggered ability to the AbilityExecutionService (stub)
         Match match = event.getMatch();
         for (CardAbility ability : triggeredAbilities) {
-            // In a real implementation, this would update the match state
             match = abilityExecutionService.executeAbility(event, ability);
         }
         return match;

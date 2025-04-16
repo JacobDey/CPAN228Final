@@ -11,14 +11,10 @@ import java.util.Map;
 import com.humber.CardGame.constants.GameConstants; // Import constants
 import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.models.game.Tower;
-import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Random;
 
 @Service
 public class AbilityExecutionService {
-    // decide if drawCard should be reimplemented here or if it should be called from the match service
-    @Autowired
-    private MatchService matchService;
 
     public Match executeAbility(GameEvent event, CardAbility ability) {
         Match match = event.getMatch();
@@ -166,6 +162,11 @@ public class AbilityExecutionService {
         return false;
     }
 
+    //draw card
+    public CardDTO drawCard(List<CardDTO> deck) {
+        return deck.removeFirst(); //return null if empty
+    }
+
     private void applyDrawCards(Match match, GameEvent event, Map<String, Object> params) {
         Integer count = (Integer) params.get("count");
         String condition = (String) params.get("condition");
@@ -182,8 +183,7 @@ public class AbilityExecutionService {
         List<CardDTO> deck = isPlayer1 ? match.getPlayer1Deck() : match.getPlayer2Deck();
         List<CardDTO> hand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
         for (int i = 0; i < count && !deck.isEmpty(); i++) {
-            // unsure if this is implemented right, check matchService
-            hand.add(0, matchService.drawCard(deck));
+            hand.add(0, drawCard(deck));
         }
     }
 

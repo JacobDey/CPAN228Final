@@ -2,7 +2,6 @@ package com.humber.CardGame.controllers.game;
 
 import com.humber.CardGame.models.game.Match;
 import com.humber.CardGame.services.game.MatchService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
