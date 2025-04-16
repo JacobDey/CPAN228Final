@@ -220,6 +220,7 @@ public class MatchService {
     //find Winner
     private void determineWinner(Match match) {
 
+        //error checking, these shouldn't be possible
         MyUser player1 = userRepository.findByUsername(match.getPlayer1())
                 .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer1() + " not found"));
 
@@ -229,6 +230,7 @@ public class MatchService {
         int player1Score = 0;
         int player2Score = 0;
 
+        //tally up victory points
         for (Tower tower : match.getTowers()) {
             int controller = tower.getControllingPlayerId();
             if (controller == 1) {
@@ -238,6 +240,7 @@ public class MatchService {
             }
         }
 
+        //decide winner
         if (player1Score > player2Score) {
             match.setStatus(MatchStatus.PLAYER1_WIN);
             player1.setCredit(player1.getCredit()+WINNER_CREDIT);

@@ -62,95 +62,95 @@ public class AbilityExecutionService {
         // 4. Modify the power of the found cards by 'value'.
     }
 
-private void applyDestruction(Match match, GameEvent event, Map<String, Object> params, String effectType) { // Renamed from destructionType for clarity
-    String target = (String) params.get("target");
-    String condition = (String) params.get("condition"); // Get the condition parameter
+    private void applyDestruction(Match match, GameEvent event, Map<String, Object> params, String effectType) { // Renamed from destructionType for clarity
+        String target = (String) params.get("target");
+        String condition = (String) params.get("condition"); // Get the condition parameter
 
-    if (target == null) {
-         System.err.println("Missing target parameter for " + effectType + " effect.");
-         return;
+        if (target == null) {
+             System.err.println("Missing target parameter for " + effectType + " effect.");
+             return;
+        }
+
+        // --- Condition Check ---
+        boolean conditionMet = checkCondition(match, event, params, condition);
+        if (!conditionMet) {
+            System.out.println("Condition '" + condition + "' not met for effect " + effectType + ". Skipping.");
+            return; // Do not proceed with the effect if condition isn't met
+        }
+        // --- End Condition Check ---
+
+
+        System.out.println("Applying " + effectType + ": target=" + target);
+
+        // TODO: Implement logic based on 'target':
+        // 1. Identify the source card/player of the ability (from event).
+        CardDTO sourceCard = event.getSourceCard(); // Need source card from event
+        String sourcePlayerName = event.getPlayer(); // Need source player ID from event
+
+        // 2. Find the target CardDTO(s) based on 'target' param (SELF, CARD_BELOW, etc.)
+        List<CardDTO> targetCards = findTargetCards(match, event, target, params); // You'll need a helper for this
+
+        if (targetCards.isEmpty()) {
+            System.out.println("No valid targets found for " + target);
+            return;
+        }
+
+        // 3. Remove the card(s) from their location (hand, tower).
+        for (CardDTO cardToDestroy : targetCards) {
+            // ... logic to remove cardToDestroy from match state ...
+            System.out.println("Destroying card: " + cardToDestroy.getName() + " (ID: " + cardToDestroy.getId() + ")");
+            // IMPORTANT: Trigger ON_DEATH for the destroyed card (potentially create new GameEvent)
+            // triggerOnDeathAbilities(match, cardToDestroy);
+        }
     }
 
-    // --- Condition Check ---
-    boolean conditionMet = checkCondition(match, event, params, condition);
-    if (!conditionMet) {
-        System.out.println("Condition '" + condition + "' not met for effect " + effectType + ". Skipping.");
-        return; // Do not proceed with the effect if condition isn't met
-    }
-    // --- End Condition Check ---
+    // --- Helper method to check conditions ---
+    private boolean checkCondition(Match match, GameEvent event, Map<String, Object> params, String condition) {
+        if (condition == null) {
+            return true; // No condition specified, always proceed
+        }
 
+        switch (condition.toUpperCase()) {
+            case GameConstants.CONDITION_OWNERS_TURN:
+                String sourcePlayerName = event.getPlayer(); // Requires source player ID in GameEvent
+                String currentPlayerName = match.getCurrentTurnPlayer(); // Requires current player ID in Match
+                if (sourcePlayerName == null || currentPlayerName == null) {
+                     System.err.println("Cannot check OWNERS_TURN condition: Missing player IDs.");
+                     return false; // Cannot verify, assume false
+                }
+                return sourcePlayerName.equals(currentPlayerName);
 
-    System.out.println("Applying " + effectType + ": target=" + target);
+            // case GameConstants.CONDITION_TARGET_IS_COLOR:
+            //     // Requires target card(s) and targetColor param
+            //     // ... logic to check if the target card(s) match the color ...
+            //     return /* result */;
 
-    // TODO: Implement logic based on 'target':
-    // 1. Identify the source card/player of the ability (from event).
-    CardDTO sourceCard = event.getSourceCard(); // Need source card from event
-    String sourcePlayerName = event.getPlayer(); // Need source player ID from event
+            // case GameConstants.CONDITION_COLOR_PRESENT_HERE:
+            //     // Requires source card location and targetColor param
+            //     // ... logic to check if any card of targetColor exists at the source location ...
+            //     return /* result */;
 
-    // 2. Find the target CardDTO(s) based on 'target' param (SELF, CARD_BELOW, etc.)
-    List<CardDTO> targetCards = findTargetCards(match, event, target, params); // You'll need a helper for this
-
-    if (targetCards.isEmpty()) {
-        System.out.println("No valid targets found for " + target);
-        return;
-    }
-
-    // 3. Remove the card(s) from their location (hand, tower).
-    for (CardDTO cardToDestroy : targetCards) {
-        // ... logic to remove cardToDestroy from match state ...
-        System.out.println("Destroying card: " + cardToDestroy.getName() + " (ID: " + cardToDestroy.getId() + ")");
-        // IMPORTANT: Trigger ON_DEATH for the destroyed card (potentially create new GameEvent)
-        // triggerOnDeathAbilities(match, cardToDestroy);
-    }
-}
-
-// --- Helper method to check conditions ---
-private boolean checkCondition(Match match, GameEvent event, Map<String, Object> params, String condition) {
-    if (condition == null) {
-        return true; // No condition specified, always proceed
+            default:
+                System.err.println("Unhandled condition type: " + condition);
+                return false; // Unknown condition, treat as not met
+        }
     }
 
-    switch (condition.toUpperCase()) {
-        case GameConstants.CONDITION_OWNERS_TURN:
-            String sourcePlayerName = event.getPlayer(); // Requires source player ID in GameEvent
-            String currentPlayerName = match.getCurrentTurnPlayer(); // Requires current player ID in Match
-            if (sourcePlayerName == null || currentPlayerName == null) {
-                 System.err.println("Cannot check OWNERS_TURN condition: Missing player IDs.");
-                 return false; // Cannot verify, assume false
-            }
-            return sourcePlayerName.equals(currentPlayerName);
-
-        // case GameConstants.CONDITION_TARGET_IS_COLOR:
-        //     // Requires target card(s) and targetColor param
-        //     // ... logic to check if the target card(s) match the color ...
-        //     return /* result */;
-
-        // case GameConstants.CONDITION_COLOR_PRESENT_HERE:
-        //     // Requires source card location and targetColor param
-        //     // ... logic to check if any card of targetColor exists at the source location ...
-        //     return /* result */;
-
-        default:
-            System.err.println("Unhandled condition type: " + condition);
-            return false; // Unknown condition, treat as not met
-    }
-}
-
-// --- Placeholder for target finding logic ---
-private List<CardDTO> findTargetCards(Match match, GameEvent event, String target, Map<String, Object> params) {
-    // TODO: Implement the complex logic to find cards based on target string
-    // e.g., "SELF", "CARD_BELOW", "OPPOSING_UNCOVERED_BLUE", etc.
-    // This will need access to match state (towers, players) and event source info.
-    List<CardDTO> foundCards = new ArrayList<>();
-     if (target.equalsIgnoreCase(GameConstants.TARGET_SELF)) {
-         CardDTO sourceCard = event.getSourceCard();
-         if (sourceCard != null) {
-             foundCards.add(sourceCard);
+    // --- Placeholder for target finding logic ---
+    private List<CardDTO> findTargetCards(Match match, GameEvent event, String target, Map<String, Object> params) {
+        // TODO: Implement the complex logic to find cards based on target string
+        // e.g., "SELF", "CARD_BELOW", "OPPOSING_UNCOVERED_BLUE", etc.
+        // This will need access to match state (towers, players) and event source info.
+        List<CardDTO> foundCards = new ArrayList<>();
+         if (target.equalsIgnoreCase(GameConstants.TARGET_SELF)) {
+             CardDTO sourceCard = event.getSourceCard();
+             if (sourceCard != null) {
+                 foundCards.add(sourceCard);
+             }
          }
-     }
-     // ... add many more cases for other target types ...
-    return foundCards;
-}
+         // ... add many more cases for other target types ...
+        return foundCards;
+    }
 
     // Add more private helper methods for other effect categories...
 
