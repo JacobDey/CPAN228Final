@@ -86,4 +86,12 @@ public class MatchController {
         Match match = matchService.getMatch(matchId);
         return ResponseEntity.ok(match);
     }
+
+    //get and clear ability messages
+    @GetMapping("/{matchId}/messages")
+    public ResponseEntity<List<String>> getAndClearAbilityMessages(@PathVariable String matchId, Principal principal) {
+        String username = principal.getName();
+        List<String> messages = matchService.getAndClearAbilityMessages(matchId, username);
+        return ResponseEntity.ok(messages);
+    }
 }

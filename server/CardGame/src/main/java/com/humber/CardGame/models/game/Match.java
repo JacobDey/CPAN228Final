@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Data
 @AllArgsConstructor
@@ -27,6 +25,8 @@ public class Match {
     private Date createdAt = new Date();
 
     private List<Tower> towers = new ArrayList<>();
+    private List<String> abilityMessages = new ArrayList<>();
+    private Map<String, List<String>> playerSeenMessages = new HashMap<>();
 
     //user1
     private String player1;

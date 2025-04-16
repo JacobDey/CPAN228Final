@@ -356,4 +356,26 @@ public class MatchService {
         return matchRepository.findByStatus(MatchStatus.PLAYING);
     }
 
+    public List<String> getAndClearAbilityMessages(String matchId, String username) {
+        Match match = getMatch(matchId);
+        List<String> messages = new ArrayList<>(match.getAbilityMessages());
+
+        // Track that this player has seen these messages
+        match.getPlayerSeenMessages().put(username, new ArrayList<>(messages));
+
+        // Check if both players have seen the messages
+        if (match.getPlayer1() != null && match.getPlayer2() != null) {
+            List<String> player1Seen = match.getPlayerSeenMessages().getOrDefault(match.getPlayer1(), Collections.emptyList());
+            List<String> player2Seen = match.getPlayerSeenMessages().getOrDefault(match.getPlayer2(), Collections.emptyList());
+
+            // If both players have seen all messages, clear them
+            if (!messages.isEmpty() && new HashSet<>(player1Seen).containsAll(messages) && new HashSet<>(player2Seen).containsAll(messages)) {
+                match.setAbilityMessages(new ArrayList<>());
+                match.getPlayerSeenMessages().clear();
+            }
+        }
+
+        matchRepository.save(match);
+        return messages;
+    }
 }
