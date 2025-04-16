@@ -12,17 +12,19 @@ import com.humber.CardGame.constants.GameConstants; // Import constants
 import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.models.game.Tower;
 import java.util.Random;
+import java.util.Collections;
 
 @Service
 public class AbilityExecutionService {
 
-    public Match executeAbility(GameEvent event, CardAbility ability) {
+    public AbilityResult executeAbility(GameEvent event, CardAbility ability) {
         Match match = event.getMatch();
         Map<String, Object> params = ability.getParams();
         String effect = (String) params.get("effect");
+        List<GameEvent> generatedEvents = new ArrayList<>(); // Initialize list
         if (effect == null) {
             System.err.println("Ability effect is null for ability type: " + ability.getAbilityType());
-            return match;
+            return new AbilityResult(match, generatedEvents); // Return result
         }
         String cardName = event.getSourceCard() != null ? event.getSourceCard().getName() : "A card";
         switch (effect.toUpperCase()) {
@@ -40,7 +42,7 @@ public class AbilityExecutionService {
                 break;
             case GameConstants.EFFECT_DESTROY_CARD:
                 List<CardDTO> destroyTargets = findTargetCards(match, event, (String) params.get("target"), params);
-                applyDestruction(match, event, params);
+                generatedEvents.addAll(applyDestruction(match, event, params));
                 if (destroyTargets.size() == 1) {
                     System.out.println(cardName + " destroyed " + destroyTargets.get(0).getName() + "!");
                 } else if (!destroyTargets.isEmpty()) {
@@ -87,79 +89,87 @@ public class AbilityExecutionService {
                 System.out.println("Unhandled ability effect: " + effect);
                 break;
         }
-        return match;
+        return new AbilityResult(match, generatedEvents);
     }
 
     // --- Helper Methods for Effect Categories ---
 
-    private void applyPowerChange(Match match, GameEvent event, Map<String, Object> params) {
+    private List<GameEvent> applyPowerChange(Match match, GameEvent event, Map<String, Object> params) {
+        List<GameEvent> generatedEvents = new ArrayList<>(); // Initialize the result list
         String target = (String) params.get("target");
         Integer value = (Integer) params.get("value");
         String condition = (String) params.get("condition");
         String effect = (String) params.get("effect");
         if (target == null || value == null) {
             System.err.println("Missing parameters for POWER_CHANGE effect.");
-            return;
+            return generatedEvents; // Return empty list
         }
         if (condition != null) {
             boolean conditionMet = checkCondition(match, event, params, condition);
             if (!conditionMet) {
                 System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
-                return;
+                return generatedEvents; // Return empty list
             }
         }
         List<CardDTO> targets = findTargetCards(match, event, target, params);
         for (CardDTO card : targets) {
             card.setPower(card.getPower() + value);
         }
+        return generatedEvents; // Return the result list
     }
 
-    private void applyDestruction(Match match, GameEvent event, Map<String, Object> params) {
+// filepath: c:\Users\lopoc\OneDrive\Desktop\Humber\Semester4\WebDev\Final Project\Triple Siege\CPAN228Final\server\CardGame\src\main\java\com\humber\CardGame\services\game\AbilityExecutionService.java
+    // ... inside AbilityExecutionService class ...
+
+    // Return type changed to List<GameEvent>
+    private List<GameEvent> applyDestruction(Match match, GameEvent event, Map<String, Object> params) {
+        List<GameEvent> deathEvents = new ArrayList<>();
         String target = (String) params.get("target");
         String condition = (String) params.get("condition");
         String effect = (String) params.get("effect");
-        if (target == null) {
-            System.err.println("Missing target parameter for " + effect + " effect.");
-            return;
-        }
         if (condition != null) {
             boolean conditionMet = checkCondition(match, event, params, condition);
             if (!conditionMet) {
                 System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
-                return;
+                return deathEvents; // Return empty list
             }
         }
-        List<CardDTO> targetCards = findTargetCards(match, event, target, params);
-        for (CardDTO cardToDestroy : targetCards) {
-            if (removeCardFromTowers(match, cardToDestroy)) {
-                triggerOnDeathAbilities(match, cardToDestroy, event);
-            }
-        }
-    }
 
-    private void triggerOnDeathAbilities(Match match, CardDTO destroyedCard, GameEvent causeEvent) {
-        if (destroyedCard.getAbilities() == null) return;
-        for (CardAbility ability : destroyedCard.getAbilities()) {
-            if (GameConstants.TRIGGER_ON_DEATH.equals(ability.getAbilityType())) {
+        List<CardDTO> targetCards = findTargetCards(match, event, target, params);
+        // Iterate over a copy in case the target list overlaps with source list
+        for (CardDTO cardToDestroy : new ArrayList<>(targetCards)) {
+            RemovalInfo removalInfo = removeCardFromTowers(match, cardToDestroy); // Get removal info
+            if (removalInfo.removed) {
+                // Card was successfully removed, create a death event
                 GameEvent deathEvent = new GameEvent(
                         GameConstants.EVENT_CARD_DESTROYED,
-                        destroyedCard,
-                        causeEvent.getTowerId(),
-                        causeEvent.getPlayer(),
-                        match,
-                        null
+                        cardToDestroy, // Source card is the one that died
+                        removalInfo.towerId, // Tower where it died
+                        removalInfo.ownerUsername, // Player who owned it
+                        match, // Pass current match state (will be updated by dispatcher later)
+                        null // No specific context needed here
                 );
-                executeAbility(deathEvent, ability);
+                deathEvents.add(deathEvent); // Add to list
             }
         }
+        return deathEvents; // Return the list of generated death events
     }
 
-    private boolean removeCardFromTowers(Match match, CardDTO card) {
+    // Updated removeCardFromTowers to return RemovalInfo
+    private RemovalInfo removeCardFromTowers(Match match, CardDTO card) {
+        int towerIndex = 0;
         for (Tower tower : match.getTowers()) {
-            if (tower.getPlayer1Cards().removeIf(c -> c.getUid().equals(card.getUid()))) return true;
-            if (tower.getPlayer2Cards().removeIf(c -> c.getUid().equals(card.getUid()))) return true;
+            towerIndex++; // 1-based index
+            // Check player 1
+            if (tower.getPlayer1Cards().removeIf(c -> c.getUid().equals(card.getUid()))) {
+                return new RemovalInfo(true, towerIndex, match.getPlayer1());
+            }
+            // Check player 2
+            if (tower.getPlayer2Cards().removeIf(c -> c.getUid().equals(card.getUid()))) {
+                return new RemovalInfo(true, towerIndex, match.getPlayer2());
+            }
         }
-        return false;
+        return new RemovalInfo(false, -1, null); // Not found
     }
 
     //draw card
@@ -167,7 +177,8 @@ public class AbilityExecutionService {
         return deck.removeFirst(); //return null if empty
     }
 
-    private void applyDrawCards(Match match, GameEvent event, Map<String, Object> params) {
+    private List<GameEvent> applyDrawCards(Match match, GameEvent event, Map<String, Object> params) {
+        List<GameEvent> generatedEvents = new ArrayList<>(); // Initialize the result list
         Integer count = (Integer) params.get("count");
         String condition = (String) params.get("condition");
         String effect = (String) params.get("effect");
@@ -175,7 +186,7 @@ public class AbilityExecutionService {
             boolean conditionMet = checkCondition(match, event, params, condition);
             if (!conditionMet) {
                 System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
-                return;
+                return generatedEvents; // Return empty list
             }
         }
         if (count == null) count = 1;
@@ -185,9 +196,11 @@ public class AbilityExecutionService {
         for (int i = 0; i < count && !deck.isEmpty(); i++) {
             hand.add(0, drawCard(deck));
         }
+        return generatedEvents; // Return the result list
     }
 
-    private void applyOpponentDiscard(Match match, GameEvent event, Map<String, Object> params) {
+    private List<GameEvent> applyOpponentDiscard(Match match, GameEvent event, Map<String, Object> params) {
+        List<GameEvent> generatedEvents = new ArrayList<>(); // Initialize the result list
         Integer count = (Integer) params.get("count");
         String condition = (String) params.get("condition");
         String effect = (String) params.get("effect");
@@ -195,7 +208,7 @@ public class AbilityExecutionService {
             boolean conditionMet = checkCondition(match, event, params, condition);
             if (!conditionMet) {
                 System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
-                return;
+                return generatedEvents; // Return empty list
             }
         }
         if (count == null) count = 1;
@@ -205,22 +218,24 @@ public class AbilityExecutionService {
         for (int i = 0; i < count && !oppHand.isEmpty(); i++) {
             oppHand.remove(rand.nextInt(oppHand.size()));
         }
+        return generatedEvents; // Return the result list
     }
 
-    private void applyMoveDestination(Match match, GameEvent event, Map<String, Object> params) {
+    private List<GameEvent> applyMoveDestination(Match match, GameEvent event, Map<String, Object> params) {
         String target = (String) params.get("target");
         String destination = (String) params.get("destination");
         String condition = (String) params.get("condition");
         String effect = (String) params.get("effect");
+        List<GameEvent> generatedEvents = new ArrayList<>(); // Initialize the result list
         if (condition != null) {
             boolean conditionMet = checkCondition(match, event, params, condition);
             if (!conditionMet) {
                 System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
-                return;
+                return generatedEvents; // Return empty list
             }
         }
         List<CardDTO> cardsToMove = findTargetCards(match, event, target, params);
-        if (cardsToMove.isEmpty()) return;
+        if (cardsToMove.isEmpty()) return generatedEvents; // Return empty list
         Tower destTower = null;
         if (GameConstants.DESTINATION_TOWER_WITH_FEWEST_CARDS.equals(destination)) {
             int min = Integer.MAX_VALUE;
@@ -232,7 +247,7 @@ public class AbilityExecutionService {
                 }
             }
         }
-        if (destTower == null) return;
+        if (destTower == null) return generatedEvents; // Return empty list
         for (CardDTO card : cardsToMove) {
             removeCardFromTowers(match, card);
             // Move to same owner stack as before
@@ -240,27 +255,29 @@ public class AbilityExecutionService {
             if (isPlayer1) destTower.getPlayer2Cards().add(0, card);
             else destTower.getPlayer1Cards().add(0, card);
         }
+        return generatedEvents; // Return the result list
     }
 
-    private void applyMoveDirection(Match match, GameEvent event, Map<String, Object> params) {
+    private List<GameEvent> applyMoveDirection(Match match, GameEvent event, Map<String, Object> params) {
         String target = (String) params.get("target");
         String direction = (String) params.get("direction");
         Integer value = (Integer) params.get("value");
         String condition = (String) params.get("condition");
         String effect = (String) params.get("effect");
+        List<GameEvent> generatedEvents = new ArrayList<>(); // Initialize the result list
         if (condition != null) {
             boolean conditionMet = checkCondition(match, event, params, condition);
             if (!conditionMet) {
                 System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
-                return;
+                return generatedEvents; // Return empty list
             }
         }
-        if (direction == null || value == null) return;
+        if (direction == null || value == null) return generatedEvents;
         List<CardDTO> cardsToMove = findTargetCards(match, event, target, params);
         Integer towerId = event.getTowerId();
-        if (towerId == null) return;
+        if (towerId == null) return generatedEvents;
         int newTowerId = direction.equals(GameConstants.DIRECTION_RIGHT) ? towerId + value : towerId - value;
-        if (newTowerId < 1 || newTowerId > match.getTowers().size()) return;
+        if (newTowerId < 1 || newTowerId > match.getTowers().size()) return generatedEvents;
         Tower destTower = match.getTowers().get(newTowerId - 1);
         for (CardDTO card : cardsToMove) {
             removeCardFromTowers(match, card);
@@ -268,6 +285,7 @@ public class AbilityExecutionService {
             if (isPlayer1) destTower.getPlayer1Cards().add(0, card);
             else destTower.getPlayer2Cards().add(0, card);
         }
+        return generatedEvents; // Return the result list
     }
 
     private void applySwapControl(Match match) {
