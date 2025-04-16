@@ -36,10 +36,10 @@ public final class GameConstants {
     public static final String TARGET_YOUR_CARDS_HERE = "YOUR_CARDS_HERE";
     public static final String TARGET_OPPOSING_CARDS_HERE = "OPPOSING_CARDS_HERE";
     public static final String TARGET_CARD_BELOW_EVENT_INITIATOR = "CARD_BELOW_EVENT_INITIATOR"; 
-    public static final String TARGET_ALL_CARDS_HERE = "ALL_CARDS_HERE";
+    public static final String TARGET_ALL_CARDS_HERE = "ALL_CARDS_HERE"; // duplicate of CARDS_HERE, should be removed 
     public static final String TARGET_OPPOSING_UNCOVERED_HERE = "OPPOSING_UNCOVERED_HERE";
     public static final String TARGET_YOUR_CARDS_HERE_WITH_POWER_LESS_THAN = "YOUR_CARDS_HERE_WITH_POWER_LESS_THAN"; // Card with this target key must also have a powerThreshold parameter with an integer value
-    public static final String TARGET_OPPOSING_UNCOVERED_CARD = "OPPOSING_UNCOVERED_CARD";
+    public static final String TARGET_OPPOSING_UNCOVERED_CARD = "OPPOSING_UNCOVERED_CARD"; // duplicate of OPPOSING_UNCOVERED_HERE here, should be removed 
     public static final String TARGET_ALL_UNCOVERED_CARDS = "ALL_UNCOVERED_CARDS";
     public static final String TARGET_ALL_CARDS = "ALL_CARDS";
 

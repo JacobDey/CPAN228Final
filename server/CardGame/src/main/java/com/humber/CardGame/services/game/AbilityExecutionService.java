@@ -10,36 +10,88 @@ import java.util.List;
 import java.util.Map;
 import com.humber.CardGame.constants.GameConstants; // Import constants
 import com.humber.CardGame.models.card.CardDTO;
+import com.humber.CardGame.models.game.Tower;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Random;
 
 @Service
 public class AbilityExecutionService {
+    // decide if drawCard should be reimplemented here or if it should be called from the match service
+    @Autowired
+    private MatchService matchService;
 
     public Match executeAbility(GameEvent event, CardAbility ability) {
         Match match = event.getMatch();
         Map<String, Object> params = ability.getParams();
-
-        // Assuming 'effect' is the key determining the action
         String effect = (String) params.get("effect");
-
         if (effect == null) {
             System.err.println("Ability effect is null for ability type: " + ability.getAbilityType());
-            return match; // Or handle error appropriately
+            return match;
         }
-
-        // Dispatch based on the effect type
+        String cardName = event.getSourceCard() != null ? event.getSourceCard().getName() : "A card";
         switch (effect.toUpperCase()) {
-            case "POWER_CHANGE":
+            case GameConstants.EFFECT_POWER_CHANGE:
                 applyPowerChange(match, event, params);
+                // Print what just happened
+                List<CardDTO> powerTargets = findTargetCards(match, event, (String) params.get("target"), params);
+                Integer value = (Integer) params.get("value");
+                if (powerTargets.size() == 1) {
+                    System.out.println(cardName + " just changed " + powerTargets.get(0).getName() + "'s power by " + value + ".");
+                } else if (!powerTargets.isEmpty()) {
+                    String names = powerTargets.stream().map(CardDTO::getName).reduce((a, b) -> a + ", " + b).orElse("");
+                    System.out.println(cardName + " just changed " + names + "'s power by " + value + ".");
+                }
                 break;
-            case "DESTROY_CARD":
- 
-            // Add cases for "DRAW_CARD", "SWAP_CONTROL", etc.
+            case GameConstants.EFFECT_DESTROY_CARD:
+                List<CardDTO> destroyTargets = findTargetCards(match, event, (String) params.get("target"), params);
+                applyDestruction(match, event, params);
+                if (destroyTargets.size() == 1) {
+                    System.out.println(cardName + " destroyed " + destroyTargets.get(0).getName() + "!");
+                } else if (!destroyTargets.isEmpty()) {
+                    String names = destroyTargets.stream().map(CardDTO::getName).reduce((a, b) -> a + ", " + b).orElse("");
+                    System.out.println(cardName + " destroyed " + names + "!");
+                }
+                break;
+            case GameConstants.EFFECT_DRAW_CARDS:
+                Integer count = (Integer) params.get("count");
+                if (count == null) count = 1;
+                applyDrawCards(match, event, params);
+                System.out.println(cardName + " drew " + count + (count == 1 ? " card." : " cards."));
+                break;
+            case GameConstants.EFFECT_OPPONENT_DISCARD:
+                Integer discardCount = (Integer) params.get("count");
+                if (discardCount == null) discardCount = 1;
+                applyOpponentDiscard(match, event, params);
+                System.out.println(cardName + " made the opponent discard " + discardCount + (discardCount == 1 ? " card." : " cards."));
+                break;
+            case GameConstants.EFFECT_MOVE_DESTINATION:
+                List<CardDTO> moveDestTargets = findTargetCards(match, event, (String) params.get("target"), params);
+                String dest = (String) params.get("destination");
+                applyMoveDestination(match, event, params);
+                if (!moveDestTargets.isEmpty()) {
+                    String names = moveDestTargets.stream().map(CardDTO::getName).reduce((a, b) -> a + ", " + b).orElse("");
+                    System.out.println(cardName + " moved " + names + " to " + dest + ".");
+                }
+                break;
+            case GameConstants.EFFECT_MOVE_DIRECTION:
+                List<CardDTO> moveDirTargets = findTargetCards(match, event, (String) params.get("target"), params);
+                String dir = (String) params.get("direction");
+                Integer val = (Integer) params.get("value");
+                applyMoveDirection(match, event, params);
+                if (!moveDirTargets.isEmpty()) {
+                    String names = moveDirTargets.stream().map(CardDTO::getName).reduce((a, b) -> a + ", " + b).orElse("");
+                    System.out.println(cardName + " moved " + names + " " + dir.toLowerCase() + " by " + val + ".");
+                }
+                break;
+            case GameConstants.EFFECT_SWAP_CONTROL:
+                applySwapControl(match);
+                System.out.println(cardName + " swapped everyone's cards!");
+                break;
             default:
                 System.out.println("Unhandled ability effect: " + effect);
                 break;
         }
-
-        return match; // Return the potentially modified match state
+        return match;
     }
 
     // --- Helper Methods for Effect Categories ---
@@ -47,111 +99,328 @@ public class AbilityExecutionService {
     private void applyPowerChange(Match match, GameEvent event, Map<String, Object> params) {
         String target = (String) params.get("target");
         Integer value = (Integer) params.get("value");
-        // Extract other potential params like targetColor, powerThreshold, etc.
-
+        String condition = (String) params.get("condition");
+        String effect = (String) params.get("effect");
         if (target == null || value == null) {
             System.err.println("Missing parameters for POWER_CHANGE effect.");
             return;
         }
-
-        System.out.println("Applying POWER_CHANGE: target=" + target + ", value=" + value);
-        // TODO: Implement logic to:
-        // 1. Identify the source of the ability (card, player, tower) from the 'event'.
-        // 2. Parse the 'target' string (e.g., "YOUR_CARDS_HERE", "OPPOSING_BLUE_CARDS").
-        // 3. Find the actual CardDTO objects in the 'match' state matching the target criteria.
-        // 4. Modify the power of the found cards by 'value'.
-    }
-
-private void applyDestruction(Match match, GameEvent event, Map<String, Object> params, String effectType) { // Renamed from destructionType for clarity
-    String target = (String) params.get("target");
-    String condition = (String) params.get("condition"); // Get the condition parameter
-
-    if (target == null) {
-         System.err.println("Missing target parameter for " + effectType + " effect.");
-         return;
-    }
-
-    // --- Condition Check ---
-    boolean conditionMet = checkCondition(match, event, params, condition);
-    if (!conditionMet) {
-        System.out.println("Condition '" + condition + "' not met for effect " + effectType + ". Skipping.");
-        return; // Do not proceed with the effect if condition isn't met
-    }
-    // --- End Condition Check ---
-
-
-    System.out.println("Applying " + effectType + ": target=" + target);
-
-    // TODO: Implement logic based on 'target':
-    // 1. Identify the source card/player of the ability (from event).
-    CardDTO sourceCard = event.getSourceCard(); // Need source card from event
-    String sourcePlayerName = event.getPlayer(); // Need source player ID from event
-
-    // 2. Find the target CardDTO(s) based on 'target' param (SELF, CARD_BELOW, etc.)
-    List<CardDTO> targetCards = findTargetCards(match, event, target, params); // You'll need a helper for this
-
-    if (targetCards.isEmpty()) {
-        System.out.println("No valid targets found for " + target);
-        return;
-    }
-
-    // 3. Remove the card(s) from their location (hand, tower).
-    for (CardDTO cardToDestroy : targetCards) {
-        // ... logic to remove cardToDestroy from match state ...
-        System.out.println("Destroying card: " + cardToDestroy.getName() + " (ID: " + cardToDestroy.getId() + ")");
-        // IMPORTANT: Trigger ON_DEATH for the destroyed card (potentially create new GameEvent)
-        // triggerOnDeathAbilities(match, cardToDestroy);
-    }
-}
-
-// --- Helper method to check conditions ---
-private boolean checkCondition(Match match, GameEvent event, Map<String, Object> params, String condition) {
-    if (condition == null) {
-        return true; // No condition specified, always proceed
-    }
-
-    switch (condition.toUpperCase()) {
-        case GameConstants.CONDITION_OWNERS_TURN:
-            String sourcePlayerName = event.getPlayer(); // Requires source player ID in GameEvent
-            String currentPlayerName = match.getCurrentTurnPlayer(); // Requires current player ID in Match
-            if (sourcePlayerName == null || currentPlayerName == null) {
-                 System.err.println("Cannot check OWNERS_TURN condition: Missing player IDs.");
-                 return false; // Cannot verify, assume false
+        if (condition != null) {
+            boolean conditionMet = checkCondition(match, event, params, condition);
+            if (!conditionMet) {
+                System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
+                return;
             }
-            return sourcePlayerName.equals(currentPlayerName);
-
-        // case GameConstants.CONDITION_TARGET_IS_COLOR:
-        //     // Requires target card(s) and targetColor param
-        //     // ... logic to check if the target card(s) match the color ...
-        //     return /* result */;
-
-        // case GameConstants.CONDITION_COLOR_PRESENT_HERE:
-        //     // Requires source card location and targetColor param
-        //     // ... logic to check if any card of targetColor exists at the source location ...
-        //     return /* result */;
-
-        default:
-            System.err.println("Unhandled condition type: " + condition);
-            return false; // Unknown condition, treat as not met
+        }
+        List<CardDTO> targets = findTargetCards(match, event, target, params);
+        for (CardDTO card : targets) {
+            card.setPower(card.getPower() + value);
+        }
     }
-}
 
-// --- Placeholder for target finding logic ---
-private List<CardDTO> findTargetCards(Match match, GameEvent event, String target, Map<String, Object> params) {
-    // TODO: Implement the complex logic to find cards based on target string
-    // e.g., "SELF", "CARD_BELOW", "OPPOSING_UNCOVERED_BLUE", etc.
-    // This will need access to match state (towers, players) and event source info.
-    List<CardDTO> foundCards = new ArrayList<>();
-     if (target.equalsIgnoreCase(GameConstants.TARGET_SELF)) {
-         CardDTO sourceCard = event.getSourceCard();
-         if (sourceCard != null) {
-             foundCards.add(sourceCard);
-         }
-     }
-     // ... add many more cases for other target types ...
-    return foundCards;
-}
+    private void applyDestruction(Match match, GameEvent event, Map<String, Object> params) {
+        String target = (String) params.get("target");
+        String condition = (String) params.get("condition");
+        String effect = (String) params.get("effect");
+        if (target == null) {
+            System.err.println("Missing target parameter for " + effect + " effect.");
+            return;
+        }
+        if (condition != null) {
+            boolean conditionMet = checkCondition(match, event, params, condition);
+            if (!conditionMet) {
+                System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
+                return;
+            }
+        }
+        List<CardDTO> targetCards = findTargetCards(match, event, target, params);
+        for (CardDTO cardToDestroy : targetCards) {
+            if (removeCardFromTowers(match, cardToDestroy)) {
+                triggerOnDeathAbilities(match, cardToDestroy, event);
+            }
+        }
+    }
 
-    // Add more private helper methods for other effect categories...
+    private void triggerOnDeathAbilities(Match match, CardDTO destroyedCard, GameEvent causeEvent) {
+        if (destroyedCard.getAbilities() == null) return;
+        for (CardAbility ability : destroyedCard.getAbilities()) {
+            if (GameConstants.TRIGGER_ON_DEATH.equals(ability.getAbilityType())) {
+                GameEvent deathEvent = new GameEvent(
+                        GameConstants.EVENT_CARD_DESTROYED,
+                        destroyedCard,
+                        causeEvent.getTowerId(),
+                        causeEvent.getPlayer(),
+                        match,
+                        null
+                );
+                executeAbility(deathEvent, ability);
+            }
+        }
+    }
 
+    private boolean removeCardFromTowers(Match match, CardDTO card) {
+        for (Tower tower : match.getTowers()) {
+            if (tower.getPlayer1Cards().removeIf(c -> c.getUid().equals(card.getUid()))) return true;
+            if (tower.getPlayer2Cards().removeIf(c -> c.getUid().equals(card.getUid()))) return true;
+        }
+        return false;
+    }
+
+    private void applyDrawCards(Match match, GameEvent event, Map<String, Object> params) {
+        Integer count = (Integer) params.get("count");
+        String condition = (String) params.get("condition");
+        String effect = (String) params.get("effect");
+        if (condition != null) {
+            boolean conditionMet = checkCondition(match, event, params, condition);
+            if (!conditionMet) {
+                System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
+                return;
+            }
+        }
+        if (count == null) count = 1;
+        boolean isPlayer1 = event.getPlayer().equals(match.getPlayer1());
+        List<CardDTO> deck = isPlayer1 ? match.getPlayer1Deck() : match.getPlayer2Deck();
+        List<CardDTO> hand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
+        for (int i = 0; i < count && !deck.isEmpty(); i++) {
+            // unsure if this is implemented right, check matchService
+            hand.add(0, matchService.drawCard(deck));
+        }
+    }
+
+    private void applyOpponentDiscard(Match match, GameEvent event, Map<String, Object> params) {
+        Integer count = (Integer) params.get("count");
+        String condition = (String) params.get("condition");
+        String effect = (String) params.get("effect");
+        if (condition != null) {
+            boolean conditionMet = checkCondition(match, event, params, condition);
+            if (!conditionMet) {
+                System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
+                return;
+            }
+        }
+        if (count == null) count = 1;
+        boolean isPlayer1 = event.getPlayer().equals(match.getPlayer1());
+        List<CardDTO> oppHand = isPlayer1 ? match.getPlayer2Hand() : match.getPlayer1Hand();
+        Random rand = new Random();
+        for (int i = 0; i < count && !oppHand.isEmpty(); i++) {
+            oppHand.remove(rand.nextInt(oppHand.size()));
+        }
+    }
+
+    private void applyMoveDestination(Match match, GameEvent event, Map<String, Object> params) {
+        String target = (String) params.get("target");
+        String destination = (String) params.get("destination");
+        String condition = (String) params.get("condition");
+        String effect = (String) params.get("effect");
+        if (condition != null) {
+            boolean conditionMet = checkCondition(match, event, params, condition);
+            if (!conditionMet) {
+                System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
+                return;
+            }
+        }
+        List<CardDTO> cardsToMove = findTargetCards(match, event, target, params);
+        if (cardsToMove.isEmpty()) return;
+        Tower destTower = null;
+        if (GameConstants.DESTINATION_TOWER_WITH_FEWEST_CARDS.equals(destination)) {
+            int min = Integer.MAX_VALUE;
+            for (Tower t : match.getTowers()) {
+                int total = t.getPlayer1Cards().size() + t.getPlayer2Cards().size();
+                if (total < min) {
+                    min = total;
+                    destTower = t;
+                }
+            }
+        }
+        if (destTower == null) return;
+        for (CardDTO card : cardsToMove) {
+            removeCardFromTowers(match, card);
+            // Move to same owner stack as before
+            boolean isPlayer1 = event.getPlayer().equals(match.getPlayer1());
+            if (isPlayer1) destTower.getPlayer2Cards().add(0, card);
+            else destTower.getPlayer1Cards().add(0, card);
+        }
+    }
+
+    private void applyMoveDirection(Match match, GameEvent event, Map<String, Object> params) {
+        String target = (String) params.get("target");
+        String direction = (String) params.get("direction");
+        Integer value = (Integer) params.get("value");
+        String condition = (String) params.get("condition");
+        String effect = (String) params.get("effect");
+        if (condition != null) {
+            boolean conditionMet = checkCondition(match, event, params, condition);
+            if (!conditionMet) {
+                System.out.println("Condition '" + condition + "' not met for effect " + effect + ". Skipping.");
+                return;
+            }
+        }
+        if (direction == null || value == null) return;
+        List<CardDTO> cardsToMove = findTargetCards(match, event, target, params);
+        Integer towerId = event.getTowerId();
+        if (towerId == null) return;
+        int newTowerId = direction.equals(GameConstants.DIRECTION_RIGHT) ? towerId + value : towerId - value;
+        if (newTowerId < 1 || newTowerId > match.getTowers().size()) return;
+        Tower destTower = match.getTowers().get(newTowerId - 1);
+        for (CardDTO card : cardsToMove) {
+            removeCardFromTowers(match, card);
+            boolean isPlayer1 = event.getPlayer().equals(match.getPlayer1());
+            if (isPlayer1) destTower.getPlayer1Cards().add(0, card);
+            else destTower.getPlayer2Cards().add(0, card);
+        }
+    }
+
+    private void applySwapControl(Match match) {
+        // No condition on this one for now!!
+        for (Tower tower : match.getTowers()) {
+            List<CardDTO> p1 = new ArrayList<>(tower.getPlayer1Cards());
+            List<CardDTO> p2 = new ArrayList<>(tower.getPlayer2Cards());
+            tower.getPlayer1Cards().clear();
+            tower.getPlayer2Cards().clear();
+            tower.getPlayer1Cards().addAll(p2);
+            tower.getPlayer2Cards().addAll(p1);
+        }
+    }
+
+    // --- Helper Methods for Effect Categories ---
+
+    // --- Helper method to check conditions ---
+    private boolean checkCondition(Match match, GameEvent event, Map<String, Object> params, String condition) {
+        if (condition == null) {
+            return true; // No condition specified, always proceed
+        }
+
+        switch (condition.toUpperCase()) {
+            case GameConstants.CONDITION_OWNERS_TURN:
+                String sourcePlayerName = event.getPlayer(); // Requires source player ID in GameEvent
+                String currentPlayerName = match.getCurrentTurnPlayer(); // Requires current player ID in Match
+                if (sourcePlayerName == null || currentPlayerName == null) {
+                    System.err.println("Cannot check OWNERS_TURN condition: Missing player IDs.");
+                    return false; // Cannot verify, assume false
+                }
+                return sourcePlayerName.equals(currentPlayerName);
+
+            case GameConstants.CONDITION_RED_PRESENT_HERE:
+                Integer towerId = event.getTowerId();
+                if (towerId == null || towerId < 1 || towerId > match.getTowers().size()) {
+                    System.err.println("Cannot check RED_PRESENT_HERE: Invalid towerId.");
+                    return false;
+                }
+                // Check both player's stacks for a red card
+                for (var card : match.getTowers().get(towerId - 1).getPlayer1Cards()) {
+                    if (card.getColour() != null && card.getColour().equalsIgnoreCase(GameConstants.COLOR_RED)) {
+                        return true;
+                    }
+                }
+                for (var card : match.getTowers().get(towerId - 1).getPlayer2Cards()) {
+                    if (card.getColour() != null && card.getColour().equalsIgnoreCase(GameConstants.COLOR_RED)) {
+                        return true;
+                    }
+                }
+                return false;
+
+            default:
+                System.err.println("Unhandled condition type: " + condition);
+                return false; // Unknown condition, treat as not met
+        }
+    }
+
+    // --- Placeholder for target finding logic ---
+    private List<CardDTO> findTargetCards(Match match, GameEvent event, String target, Map<String, Object> params) {
+        List<CardDTO> foundCards = new ArrayList<>();
+        String targetColor = params.get("targetColor") != null ? ((String) params.get("targetColor")).toUpperCase() : null;
+        Integer powerThreshold = params.get("powerThreshold") instanceof Integer ? (Integer) params.get("powerThreshold") : null;
+        CardDTO sourceCard = event.getSourceCard();
+        Integer towerId = event.getTowerId();
+        boolean isPlayer1 = event.getPlayer() != null && event.getPlayer().equals(match.getPlayer1());
+
+        // Helper to filter by color and power
+        java.util.function.Predicate<CardDTO> colorAndPowerFilter = card -> {
+            boolean colorOk = targetColor == null || (card.getColour() != null && card.getColour().equalsIgnoreCase(targetColor));
+            boolean powerOk = powerThreshold == null || card.getPower() <= powerThreshold;
+            return colorOk && powerOk;
+        };
+
+        switch (target) {
+            case GameConstants.TARGET_SELF:
+                if (sourceCard != null) foundCards.add(sourceCard);
+                break;
+            case GameConstants.TARGET_CARDS_HERE:
+            case GameConstants.TARGET_ALL_CARDS_HERE:
+                if (towerId != null && towerId > 0 && towerId <= match.getTowers().size()) {
+                    Tower tower = match.getTowers().get(towerId - 1);
+                    foundCards.addAll(tower.getPlayer1Cards());
+                    foundCards.addAll(tower.getPlayer2Cards());
+                }
+                break;
+            case GameConstants.TARGET_YOUR_CARDS_HERE:
+                if (towerId != null && towerId > 0 && towerId <= match.getTowers().size()) {
+                    Tower tower = match.getTowers().get(towerId - 1);
+                    foundCards.addAll(isPlayer1 ? tower.getPlayer1Cards() : tower.getPlayer2Cards());
+                }
+                break;
+            case GameConstants.TARGET_OPPOSING_CARDS_HERE:
+                if (towerId != null && towerId > 0 && towerId <= match.getTowers().size()) {
+                    Tower tower = match.getTowers().get(towerId - 1);
+                    foundCards.addAll(isPlayer1 ? tower.getPlayer2Cards() : tower.getPlayer1Cards());
+                }
+                break;
+            case GameConstants.TARGET_CARD_BELOW_EVENT_INITIATOR:
+                if (towerId != null && towerId > 0 && towerId <= match.getTowers().size() && sourceCard != null) {
+                    Tower tower = match.getTowers().get(towerId - 1);
+                    List<CardDTO> stack = isPlayer1 ? tower.getPlayer1Cards() : tower.getPlayer2Cards();
+                    int idx = -1;
+                    for (int i = 0; i < stack.size(); i++) {
+                        if (stack.get(i).getUid().equals(sourceCard.getUid())) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    if (idx > 0) {
+                        foundCards.add(stack.get(idx - 1));
+                    }
+                }
+                break;
+            case GameConstants.TARGET_OPPOSING_UNCOVERED_HERE:
+            case GameConstants.TARGET_OPPOSING_UNCOVERED_CARD:
+                if (towerId != null && towerId > 0 && towerId <= match.getTowers().size()) {
+                    Tower tower = match.getTowers().get(towerId - 1);
+                    List<CardDTO> oppStack = isPlayer1 ? tower.getPlayer2Cards() : tower.getPlayer1Cards();
+                    if (!oppStack.isEmpty()) {
+                        CardDTO top = oppStack.get(0);
+                        foundCards.add(top);
+                    }
+                }
+                break;
+            case GameConstants.TARGET_YOUR_CARDS_HERE_WITH_POWER_LESS_THAN:
+                if (towerId != null && towerId > 0 && towerId <= match.getTowers().size() && powerThreshold != null) {
+                    Tower tower = match.getTowers().get(towerId - 1);
+                    List<CardDTO> yourStack = isPlayer1 ? tower.getPlayer1Cards() : tower.getPlayer2Cards();
+                    for (CardDTO card : yourStack) {
+                        if (card.getPower() <= powerThreshold) foundCards.add(card);
+                    }
+                }
+                break;
+            case GameConstants.TARGET_ALL_UNCOVERED_CARDS:
+                for (Tower tower : match.getTowers()) {
+                    if (!tower.getPlayer1Cards().isEmpty()) foundCards.add(tower.getPlayer1Cards().get(0));
+                    if (!tower.getPlayer2Cards().isEmpty()) foundCards.add(tower.getPlayer2Cards().get(0));
+                }
+                break;
+            case GameConstants.TARGET_ALL_CARDS:
+                for (Tower tower : match.getTowers()) {
+                    foundCards.addAll(tower.getPlayer1Cards());
+                    foundCards.addAll(tower.getPlayer2Cards());
+                }
+                break;
+            default:
+                System.err.println("ERROR: Effect has no target type!");
+                break;
+        }
+        // Apply color and power filter if needed
+        if (targetColor != null || powerThreshold != null) {
+            foundCards.removeIf(card -> !colorAndPowerFilter.test(card));
+        }
+        return foundCards;
+    }
 }
