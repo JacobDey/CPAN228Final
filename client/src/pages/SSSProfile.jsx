@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Container, Row, Col, Card, Table, Badge, Button, Alert, Tabs, Tab } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from "../components/SSSAuth";
 import SSSCard from '../components/SSSCard';
 import axios from 'axios';
 
@@ -17,15 +16,14 @@ function SSSProfile() {
     winRate: 0
   });
   const navigate = useNavigate();
-  const { logOut } = useAuth();
-  const SERVER_URL = "http://localhost:8080";
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
         setLoading(true);
         const token = localStorage.getItem('token');
-        
+
         if (!token) {
           navigate('/login');
           return;
@@ -35,29 +33,29 @@ function SSSProfile() {
         const profileResponse = await axios.get(`${SERVER_URL}/users/profile`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        
+
         const profileData = profileResponse.data;
         setProfile(profileData);
-        
+
         // Calculate match statistics
         if (profileData.matchesHistory && profileData.matchesHistory.length > 0) {
           calculateMatchStats(profileData.matchesHistory, profileData.username);
         }
-        
+
         // Fetch card details for cards in user's collection
         if (profileResponse.data.cards && Object.keys(profileResponse.data.cards).length > 0) {
           const cardIds = Object.keys(profileResponse.data.cards);
-          
+
           const cardsResponse = await axios.post(`${SERVER_URL}/card/cardByIds`, cardIds, {
             headers: { Authorization: `Bearer ${token}` }
           });
-          
+
           setCardDetails(cardsResponse.data);
         }
       } catch (err) {
         if (err.status === 400) {
-            alert("Please Login");
-            navigate("/login");
+          alert("Please Login");
+          navigate("/login");
         }
         console.error("Error fetching profile data:", err);
         setError('Failed to load profile data. Please try again later.');
@@ -65,7 +63,7 @@ function SSSProfile() {
         setLoading(false);
       }
     };
-    
+
     fetchProfile();
   }, [navigate]);
 
@@ -73,22 +71,22 @@ function SSSProfile() {
     let wins = 0;
     let losses = 0;
     let draws = 0;
-    
+
     matches.forEach(match => {
       console.log(match);
       // Determine if the user is player1 or player2
       const isPlayer1 = match.player1 === username;
-      
+
       if (match.status === 'PLAYER1_WIN' && isPlayer1) wins++;
       else if (match.status === 'PLAYER2_WIN' && !isPlayer1) wins++;
       else if (match.status === 'PLAYER1_WIN' && !isPlayer1) losses++;
       else if (match.status === 'PLAYER2_WIN' && isPlayer1) losses++;
       else if (match.status === 'DRAW') draws++;
     });
-    
+
     const totalMatches = matches.length;
     const winRate = totalMatches > 0 ? Math.round((wins / totalMatches) * 100) : 0;
-    
+
     setStats({
       wins,
       losses,
@@ -99,15 +97,15 @@ function SSSProfile() {
 
   const getMatchResultDisplay = (match) => {
     const isPlayer1 = profile.username === match.player1;
-    
-    switch(match.status) {
+
+    switch (match.status) {
       case 'PLAYER1_WIN':
-        return isPlayer1 ? 
-          <Badge bg="success">Win</Badge> : 
+        return isPlayer1 ?
+          <Badge bg="success">Win</Badge> :
           <Badge bg="danger">Loss</Badge>;
       case 'PLAYER2_WIN':
-        return isPlayer1 ? 
-          <Badge bg="danger">Loss</Badge> : 
+        return isPlayer1 ?
+          <Badge bg="danger">Loss</Badge> :
           <Badge bg="success">Win</Badge>;
       case 'DRAW':
         return <Badge bg="warning">Draw</Badge>;
@@ -127,7 +125,7 @@ function SSSProfile() {
   };
 
   const handleGoToAdmin = () => {
-    if(profile.role != "ADMIN") {
+    if (profile.role != "ADMIN") {
       alert("You must be an admin to access this page");
       return;
     }
@@ -162,7 +160,7 @@ function SSSProfile() {
                     <Col md={3} className="text-center">
                       <div className="profile-avatar mb-3">
                         {/* Placeholder avatar circle with user's first letter */}
-                        <div 
+                        <div
                           className="rounded-circle bg-primary d-flex align-items-center justify-content-center"
                           style={{ width: '100px', height: '100px', margin: '0 auto', color: 'white', fontSize: '2.5rem' }}
                         >
@@ -170,8 +168,26 @@ function SSSProfile() {
                         </div>
                       </div>
                       <h4>{profile.username}</h4>
+                      {/* Credit Display */}
+                      <div className="credit-display" style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '20px',
+                        background: '#fff',
+                        padding: '8px 15px',
+                        borderRadius: '20px',
+                        color: '#4CC9F0',
+                        border: '2px solid #4361EE',
+                        fontWeight: 'bold',
+                        fontSize: '1.1rem',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
+                      }}>
+                        <span style={{ marginRight: '5px' }}>💎</span>
+                        <span>{profile.credits}</span>
+                      </div>
                       <p className="text-muted">Member since {new Date(profile.createdAt).toLocaleDateString()}</p>
-                      {profile.role==="ADMIN" && <Button onClick={handleGoToAdmin}>Go to Admin Page</Button>} 
+                      {profile.role === "ADMIN" && <Button onClick={handleGoToAdmin}>Go to Admin Page</Button>}
                     </Col>
                     <Col md={9}>
                       <h3>Battle Statistics</h3>
@@ -214,7 +230,7 @@ function SSSProfile() {
                 <Col>
                   <h3>Card Collection ({cardDetails.length})</h3>
                   <p>Below are all the cards you currently own:</p>
-                  
+
                   <div className="card-collection mt-3">
                     <Row>
                       {cardDetails.map(card => (
@@ -227,7 +243,7 @@ function SSSProfile() {
                           )}
                         </Col>
                       ))}
-                      
+
                       {cardDetails.length === 0 && (
                         <Col xs={12}>
                           <Alert variant="info">
@@ -240,12 +256,12 @@ function SSSProfile() {
                 </Col>
               </Row>
             </Tab>
-            
+
             <Tab eventKey="matches" title="Match History">
               <Row className="mt-3 bg-white">
                 <Col>
                   <h3>Recent Battles</h3>
-                  
+
                   <Table striped bordered hover responsive className="mt-3">
                     <thead>
                       <tr>
@@ -266,7 +282,7 @@ function SSSProfile() {
                           <td>{match.turn}</td>
                         </tr>
                       ))}
-                      
+
                       {(!profile.matchesHistory || profile.matchesHistory.length === 0) && (
                         <tr>
                           <td colSpan="5" className="text-center">
@@ -279,7 +295,7 @@ function SSSProfile() {
                 </Col>
               </Row>
             </Tab>
-            
+
             <Tab eventKey="decks" title="My Decks">
               <Row className="mt-3 bg-white">
                 <Col>
@@ -287,7 +303,7 @@ function SSSProfile() {
                     <h3>My Decks</h3>
                     <Button variant="primary" onClick={() => navigate('/decks')}>Manage Decks</Button>
                   </div>
-                  
+
                   {profile.decks && profile.decks.length > 0 ? (
                     <Row className="mt-3">
                       {profile.decks.map(deck => (
@@ -301,8 +317,8 @@ function SSSProfile() {
                                 )}
                                 <Badge bg="primary">{Object.values(deck.cardList || {}).reduce((sum, count) => sum + count, 0)} Cards</Badge>
                               </Card.Text>
-                              <Button 
-                                variant="outline-primary" 
+                              <Button
+                                variant="outline-primary"
                                 onClick={() => navigate(`/decks/${deck.id}`)}
                               >
                                 View Deck
@@ -320,7 +336,7 @@ function SSSProfile() {
                 </Col>
               </Row>
             </Tab>
-          
+
           </Tabs>
         </>
       )}

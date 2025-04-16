@@ -8,12 +8,13 @@ function MainMenu() {
   const { isLogIn, username } = useAuth();
   const [featuredCards, setFeaturedCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
   useEffect(() => {
     const fetchFeaturedCards = async () => {
       try {
         setLoading(true);
-        const response = await fetch("http://localhost:8080/card/random/5");
+        const response = await fetch(`${SERVER_URL}/card/random/5`);
         const data = await response.json();
         setFeaturedCards(data);
       } catch (error) {

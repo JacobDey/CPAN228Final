@@ -39,7 +39,8 @@ public class MyUser {
     @NotBlank(message = "Email is required")
     private String email;
     private Date createdAt = new Date();
-//    private Date lastLoginAt;
+    private int credit = 300;
+
     private Map<String, Integer> cards;
     @DBRef
     private List<Deck> decks;

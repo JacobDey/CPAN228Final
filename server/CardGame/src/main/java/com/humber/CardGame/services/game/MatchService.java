@@ -26,6 +26,16 @@ public class MatchService {
     @Autowired
     private CardRepository cardRepository;
 
+    //constant data for game
+    private final int MAX_CARD_PER_TURN = 3;
+    private final int GAME_LENGTH = 10;
+    private final int MAX_HAND_SIZE = 7;
+    private final int START_HAND_SIZE = 3;
+    private final int TOWER_NO = 3;
+    private final int WINNER_CREDIT = 300;
+    private final int LOSER_CREDIT = 3;
+    private final int DRAW_CREDIT = 30;
+
     //create match
     public Match createMatch(String player1Username) {
         //fetch deck
@@ -44,7 +54,7 @@ public class MatchService {
 
         // Initialize towers with random victory points
         Random random = new Random();
-        for (int i = 1; i <= 3; i++) {
+        for (int i = 1; i <= TOWER_NO; i++) {
             match.getTowers().add(new Tower(i, random.nextInt(5) + 2, new ArrayList<>(), new ArrayList<>())); // Random 2-6))
         }
 
@@ -143,7 +153,7 @@ public class MatchService {
         if (match.getCurrentPhase() != GamePhase.MAIN) {
             throw new RuntimeException("Can only play cards during main phase");
         }
-        if (match.getCardPlayedThisTurn() >= 3) {
+        if (match.getCardPlayedThisTurn() >= MAX_CARD_PER_TURN) {
             throw new RuntimeException("Maximum 3 cards per turn");
         }
 
@@ -186,7 +196,7 @@ public class MatchService {
         boolean isPlayer1 = username.equals(match.getPlayer1());
         //discard down to 7 cards
         List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
-        while (playerHand.size() >= 7) {
+        while (playerHand.size() >= MAX_HAND_SIZE) {
             playerHand.removeLast();
         }
 
@@ -197,7 +207,7 @@ public class MatchService {
         match.setCardPlayedThisTurn(0);
 
         //check for game end
-        if (match.getTurn() >= 10) {
+        if (match.getTurn() >= GAME_LENGTH) {
             determineWinner(match);
         }
 
@@ -206,6 +216,13 @@ public class MatchService {
 
     //find Winner
     private void determineWinner(Match match) {
+
+        MyUser player1 = userRepository.findByUsername(match.getPlayer1())
+                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer1() + " not found"));
+
+        MyUser player2 = userRepository.findByUsername(match.getPlayer2())
+                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer2() + " not found"));
+
         int player1Score = 0;
         int player2Score = 0;
 
@@ -220,10 +237,16 @@ public class MatchService {
 
         if (player1Score > player2Score) {
             match.setStatus(MatchStatus.PLAYER1_WIN);
+            player1.setCredit(player1.getCredit()+WINNER_CREDIT);
+            player2.setCredit(player2.getCredit()+LOSER_CREDIT);
         } else if (player2Score > player1Score) {
             match.setStatus(MatchStatus.PLAYER2_WIN);
+            player1.setCredit(player1.getCredit()+LOSER_CREDIT);
+            player2.setCredit(player2.getCredit()+WINNER_CREDIT);
         } else {
             match.setStatus(MatchStatus.DRAW);
+            player1.setCredit(player1.getCredit()+DRAW_CREDIT);
+            player2.setCredit(player2.getCredit()+DRAW_CREDIT);
         }
 
         //save score to match
@@ -231,12 +254,6 @@ public class MatchService {
         match.setPlayer2Score(player2Score);
 
         //save match to user history
-        MyUser player1 = userRepository.findByUsername(match.getPlayer1())
-                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer1() + " not found"));
-
-        MyUser player2 = userRepository.findByUsername(match.getPlayer2())
-                .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer2() + " not found"));
-
         player1.getMatchesHistory().addFirst(match);
         player2.getMatchesHistory().addFirst(match);
 
@@ -281,7 +298,7 @@ public class MatchService {
     //draw initial hand
     public List<CardDTO> drawInitialHand(List<CardDTO> deck) {
         List<CardDTO> hand = new ArrayList<>();
-        for (int i = 0; i < 3 && !deck.isEmpty(); i++) {
+        for (int i = 0; i < START_HAND_SIZE && !deck.isEmpty(); i++) {
             hand.add(deck.removeFirst());
         }
         return hand;

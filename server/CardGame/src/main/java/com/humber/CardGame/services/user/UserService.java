@@ -3,6 +3,7 @@ package com.humber.CardGame.services.user;
 
 import com.humber.CardGame.config.JwtUtil;
 import com.humber.CardGame.models.card.Card;
+import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.models.card.Deck;
 import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.models.user.UserProfileDTO;
@@ -191,10 +192,22 @@ public class UserService {
                 user.getEmail(),
                 user.getRole(),
                 user.getCreatedAt(),
+                user.getCredit(),
                 user.getCards(),
                 user.getDecks(),
                 user.getSelectedDeck(),
                 user.getMatchesHistory()
         );
+    }
+
+    //reduce credit (open booster pack)
+    public void reduceCredit(String username, int price) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if (userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        user.setCredit(user.getCredit() - price);
+        userRepository.save(user);
     }
 }

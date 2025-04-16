@@ -7,12 +7,13 @@ import { Container, Row, Col, Card, Button, Carousel, Badge, Spinner, Placeholde
 function SSSCollection() {
   const [randomCards, setRandomCards] = useState([]);
   const [loading, setLoading] = useState(true);
+  const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:8080/card/random/3`);
+        const response = await fetch(`${SERVER_URL}/card/random/3`);
         const cards = await response.json();
         setRandomCards(cards);
       } catch (error) {

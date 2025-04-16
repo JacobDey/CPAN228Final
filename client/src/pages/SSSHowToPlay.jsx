@@ -8,6 +8,7 @@ function SSSHowToPlay() {
     const [card, setCard] = useState(null);
     const { isLogIn } = useAuth();
     const navigate = useNavigate();
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     useEffect(() => {
         let isMounted = true;
@@ -17,7 +18,7 @@ function SSSHowToPlay() {
                 // Only proceed if the component is still mounted
                 if (!isMounted) return;
                 
-                const response = await fetch(`http://localhost:8080/card/random/1`);
+                const response = await fetch(`${SERVER_URL}/card/random/1`);
                 
                 if (!response.ok) {
                     throw new Error(`Error fetching card: ${response.status}`);

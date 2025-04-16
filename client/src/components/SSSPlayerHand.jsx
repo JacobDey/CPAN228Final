@@ -2,12 +2,15 @@ import { useEffect, useState, useRef } from "react";
 import SSSCard from "./SSSCard.jsx";
 import { useDrag } from "react-dnd";
 
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
+const MAX_CARDS_PER_TURN = 3;
+
 // Create a draggable card component that wraps SSSCard
 const DraggableCard = ({ card, isMyTurn, cardsPlayedThisTurn, gamePhase, isCurrentPlayer }) => {
   const [{ isDragging }, drag] = useDrag({
     type: "CARD",
     item: { id: card.id, card },
-    canDrag: () => isMyTurn && cardsPlayedThisTurn < 3,
+    canDrag: () => isMyTurn && cardsPlayedThisTurn < MAX_CARDS_PER_TURN,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -49,7 +52,7 @@ const DraggableCard = ({ card, isMyTurn, cardsPlayedThisTurn, gamePhase, isCurre
       borderRadius: "8px"
     };
     message = "Begin Phase";
-  } else if (isMyTurn && cardsPlayedThisTurn >= 3) {
+  } else if (isMyTurn && cardsPlayedThisTurn >= MAX_CARDS_PER_TURN) {
     overlayStyle = {
       position: "absolute",
       top: 0,
@@ -72,7 +75,7 @@ const DraggableCard = ({ card, isMyTurn, cardsPlayedThisTurn, gamePhase, isCurre
       ref={drag}
       style={{
         opacity: isDragging ? 0.5 : 1,
-        cursor: isMyTurn && cardsPlayedThisTurn < 3 ? "grab" : "not-allowed",
+        cursor: isMyTurn && cardsPlayedThisTurn < MAX_CARDS_PER_TURN ? "grab" : "not-allowed",
         position: "relative",
         margin: "0 5px"
       }}
@@ -114,7 +117,7 @@ function PlayerHand({ matchId, player, isMyTurn, cardsPlayedThisTurn = 0, gamePh
         return;
       }
 
-      const response = await fetch(`http://localhost:8080/matches/${matchId}`, {
+      const response = await fetch(`${SERVER_URL}/matches/${matchId}`, {
         headers: {
           "Authorization": `Bearer ${token}`
         }

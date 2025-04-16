@@ -10,7 +10,7 @@ const Login = () => {
     const navigate = useNavigate();
     const [error, setError] = useState(null);
     const { logIn } = useAuth();
-    const SERVER_URL = "http://localhost:8080";
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     const handleLogin = async (e) => {
         e.preventDefault();

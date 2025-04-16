@@ -9,7 +9,7 @@ const CardManage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const navigate = useNavigate();
-    const SERVER_URL = 'http://localhost:8080';
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -90,7 +90,7 @@ const CardManage = () => {
                             imageData: null,
                             imageType: ''
                         })}
-                        className="bg-blue-500 text-white px-4 py-2 rounded mb-4"
+                        className="btn btn-dark m-3"
                     >
                         Add New Card
                     </button>
@@ -114,13 +114,13 @@ const CardManage = () => {
                                 <div className="flex justify-end mt-4 space-x-2">
                                     <button
                                         onClick={() => handleEdit(card)}
-                                        className="bg-yellow-500 text-white px-3 py-1 rounded text-sm"
+                                        className="btn btn-warning mr-2"
                                     >
                                         Edit
                                     </button>
                                     <button
                                         onClick={() => handleDelete(card.id)}
-                                        className="bg-red-500 text-white px-3 py-1 rounded text-sm"
+                                        className="btn btn-danger"
                                     >
                                         Delete
                                     </button>

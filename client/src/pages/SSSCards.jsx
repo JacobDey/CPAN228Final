@@ -18,6 +18,7 @@ function SSSCards() {
         field: "colour",
         direction: "asc"
     });
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     // Memoize fetchCards to prevent recreation on every render
     const fetchCards = useCallback(async (filters = {}, page = 0, size = 6, sortField = "colour", sortDirection = "asc") => {
@@ -27,21 +28,21 @@ function SSSCards() {
             // Clear current data immediately to show loading state
             setCardData([]);
 
-            let url = `http://localhost:8080/card/cards?page=${page}&size=${size}&sortField=${sortField}&sortDirection=${sortDirection}`;
+            let url = `${SERVER_URL}/card/cards?page=${page}&size=${size}&sortField=${sortField}&sortDirection=${sortDirection}`;
 
             // Apply filters if any
             if (filters.name) {
-                url = `http://localhost:8080/card/name/${filters.name}?page=${page}&size=${size}&sortField=${sortField}&sortDirection=${sortDirection}`;
+                url = `${SERVER_URL}/card/name/${filters.name}?page=${page}&size=${size}&sortField=${sortField}&sortDirection=${sortDirection}`;
             } else if (filters.colour) {
-                url = `http://localhost:8080/card/colour/${filters.colour}?page=${page}&size=${size}`;
+                url = `${SERVER_URL}/card/colour/${filters.colour}?page=${page}&size=${size}`;
             } else if (filters.power) {
-                url = `http://localhost:8080/card/power/${filters.power}?page=${page}&size=${size}&sortField=power&sortDirection=${sortDirection}`;
+                url = `${SERVER_URL}/card/power/${filters.power}?page=${page}&size=${size}&sortField=power&sortDirection=${sortDirection}`;
             } else if (filters.minPower && filters.maxPower) {
-                url = `http://localhost:8080/card/power/${filters.minPower}/${filters.maxPower}?page=${page}&size=${size}&sortField=power&sortDirection=${sortDirection}`;
+                url = `${SERVER_URL}/card/power/${filters.minPower}/${filters.maxPower}?page=${page}&size=${size}&sortField=power&sortDirection=${sortDirection}`;
             } else if (filters.minPower) {
-                url = `http://localhost:8080/card/power/min/${filters.minPower}?page=${page}&size=${size}&sortField=power&sortDirection=${sortDirection}`;
+                url = `${SERVER_URL}/card/power/min/${filters.minPower}?page=${page}&size=${size}&sortField=power&sortDirection=${sortDirection}`;
             } else if (filters.maxPower) {
-                url = `http://localhost:8080/card/power/max/${filters.maxPower}?page=${page}&size=${size}&sortField=power&sortDirection=${sortDirection}`;
+                url = `${SERVER_URL}/card/power/max/${filters.maxPower}?page=${page}&size=${size}&sortField=power&sortDirection=${sortDirection}`;
             }
 
             // Update pagination state immediately to show correct page
@@ -107,9 +108,8 @@ function SSSCards() {
         }}>
             <div style={{ padding: '20px' }}>
                 <h1 style={{
-                    textAlign: 'center', marginBottom: '30px', textAlign: 'center',
+                    textAlign: 'center', marginBottom: '30px',
                     color: '#4361ee',
-                    marginBottom: '30px',
                     fontFamily: "'Poppins', sans-serif",
                     fontWeight: '600'
                 }}>Card Collection</h1>

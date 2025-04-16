@@ -26,8 +26,8 @@ export const AuthProvider = ({ children }) => {
   const logIn = (token, username) => {
     localStorage.setItem('token', token);
     const decodedToken = jwtDecode(token); // Decode the JWT token
-    console.log("Token:", token); // Log the decoded token for debugging
-    console.log("Decoded Token:", decodedToken); // Log the decoded token for debugging
+    // console.log("Token:", token); // Log the decoded token for debugging
+    // console.log("Decoded Token:", decodedToken); // Log the decoded token for debugging
     setUsername(decodedToken.sub); // Assuming the username is stored in the "sub" field
     SetIsLogIn(true);
   };

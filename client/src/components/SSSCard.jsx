@@ -7,6 +7,7 @@ function SSSCard({ data, compact = false, gameplay = false }) {
     const [cardPower] = useState(data.power);
     const [cardAbilityText] = useState(data.abilityText || data.description); // Support both fields during transition
     const [cardColour] = useState(data.colour.toLowerCase());
+    const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
 
     // Color mapping to Bootstrap variants and hex codes
     const colorStyles = {
@@ -40,7 +41,7 @@ function SSSCard({ data, compact = false, gameplay = false }) {
             >
                 {/* Small Image */}
                 <img 
-                    src={`http://localhost:8080/card/image/${data.id}`} 
+                    src={`${SERVER_URL}/card/image/${data.id}`} 
                     alt={cardName} 
                     style={{
                         height: '100px',
@@ -166,8 +167,8 @@ function SSSCard({ data, compact = false, gameplay = false }) {
                     }}
                     className="hover-effect"
                 >
-                    {/* Placeholder Image */}
-                    <img src={`http://localhost:8080/card/image/${data.id}`} alt={cardName} 
+                    {/*Image */}
+                    <img src={`${SERVER_URL}/card/image/${data.id}`} alt={cardName} 
                     style={{
                         height: '180px',
                         backgroundColor: '#f0f0f0',

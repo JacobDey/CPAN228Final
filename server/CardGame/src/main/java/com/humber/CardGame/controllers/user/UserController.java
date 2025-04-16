@@ -1,9 +1,11 @@
 package com.humber.CardGame.controllers.user;
 
+import com.humber.CardGame.models.card.CardDTO;
 import com.humber.CardGame.models.card.Deck;
 import com.humber.CardGame.models.user.LoginRequest;
 import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.models.user.UserProfileDTO;
+import com.humber.CardGame.services.card.CardService;
 import com.humber.CardGame.services.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +21,11 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final CardService cardService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService, CardService cardService) {
         this.userService = userService;
+        this.cardService = cardService;
     }
 
     //register
@@ -92,6 +96,14 @@ public class UserController {
     public ResponseEntity<UserProfileDTO> getUserProfile(Principal principal) {
         String username = principal.getName();
         return ResponseEntity.ok(userService.getUserProfile(username));
+    }
+
+    //open booster pack
+    @PutMapping("/booster")
+    public ResponseEntity<List<CardDTO>> openBoosterPack(Principal principal) {
+        String username = principal.getName();
+        userService.reduceCredit(username, 300);
+        return ResponseEntity.ok(cardService.getRandomCard(3));
     }
 
 }
