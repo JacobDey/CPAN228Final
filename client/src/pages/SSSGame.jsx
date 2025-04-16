@@ -8,6 +8,7 @@ import { useAuth } from "../components/SSSAuth";
 import SSSPlayerHand from "../components/SSSPlayerHand";
 import SSSTower from "../components/SSSTower";
 import SSSMatchResultModal from "../components/SSSMatchResultModal";
+import toast, { Toaster } from 'react-hot-toast';
 
 function SSSGame() {
     const { matchId } = useParams();
@@ -44,6 +45,19 @@ function SSSGame() {
             const data = await response.json();
             setMatch(data);
             setError(null);
+
+            const toastResponse = await fetch(`${SERVER_URL}/matches/${matchId}/messages`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+            const toastData = await toastResponse.json();
+            // setToastMessages(toastData);
+            if(toastData.length > 0) {
+                toastData.forEach((data) => {
+                    toast.success(data);
+                  });
+            }
 
             // Update the local counter with the server's value when it's your turn
             if (data.currentTurnPlayer === username) {
@@ -271,6 +285,10 @@ function SSSGame() {
         <DndProvider backend={HTML5Backend}>
             <SSSNavbar />
             <Container fluid className="game-container py-3 pb-5">
+                
+                {/* Toast */}
+                <Toaster position="bottom-right" reverseOrder={false}/>
+
                 <Row className="mb-3">
                     <Col>
                         <div className="d-flex justify-content-between align-items-center">

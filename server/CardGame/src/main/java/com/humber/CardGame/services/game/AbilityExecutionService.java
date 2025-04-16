@@ -27,40 +27,42 @@ public class AbilityExecutionService {
             return new AbilityResult(match, generatedEvents); // Return result
         }
         String cardName = event.getSourceCard() != null ? event.getSourceCard().getName() : "A card";
+        String abilityMessage = null;
+
         switch (effect.toUpperCase()) {
             case GameConstants.EFFECT_POWER_CHANGE:
                 applyPowerChange(match, event, params);
-                // Print what just happened
+                // Create message about what just happened
                 List<CardDTO> powerTargets = findTargetCards(match, event, (String) params.get("target"), params);
                 Integer value = (Integer) params.get("value");
                 if (powerTargets.size() == 1) {
-                    System.out.println(cardName + " just changed " + powerTargets.get(0).getName() + "'s power by " + value + ".");
+                    abilityMessage = cardName + " changed " + powerTargets.get(0).getName() + "'s power by " + value + ".";
                 } else if (!powerTargets.isEmpty()) {
                     String names = powerTargets.stream().map(CardDTO::getName).reduce((a, b) -> a + ", " + b).orElse("");
-                    System.out.println(cardName + " just changed " + names + "'s power by " + value + ".");
+                    abilityMessage = cardName + " changed " + names + "'s power by " + value + ".";
                 }
                 break;
             case GameConstants.EFFECT_DESTROY_CARD:
                 List<CardDTO> destroyTargets = findTargetCards(match, event, (String) params.get("target"), params);
                 generatedEvents.addAll(applyDestruction(match, event, params));
                 if (destroyTargets.size() == 1) {
-                    System.out.println(cardName + " destroyed " + destroyTargets.get(0).getName() + "!");
+                    abilityMessage = cardName + " destroyed " + destroyTargets.get(0).getName() + "!";
                 } else if (!destroyTargets.isEmpty()) {
                     String names = destroyTargets.stream().map(CardDTO::getName).reduce((a, b) -> a + ", " + b).orElse("");
-                    System.out.println(cardName + " destroyed " + names + "!");
+                    abilityMessage = cardName + " destroyed " + names + "!";
                 }
                 break;
             case GameConstants.EFFECT_DRAW_CARDS:
                 Integer count = (Integer) params.get("count");
                 if (count == null) count = 1;
                 applyDrawCards(match, event, params);
-                System.out.println(cardName + " drew " + count + (count == 1 ? " card." : " cards."));
+                abilityMessage = cardName + " drew " + count + (count == 1 ? " card." : " cards.");
                 break;
             case GameConstants.EFFECT_OPPONENT_DISCARD:
                 Integer discardCount = (Integer) params.get("count");
                 if (discardCount == null) discardCount = 1;
                 applyOpponentDiscard(match, event, params);
-                System.out.println(cardName + " made the opponent discard " + discardCount + (discardCount == 1 ? " card." : " cards."));
+                abilityMessage = cardName + " made the opponent discard " + discardCount + (discardCount == 1 ? " card." : " cards.");
                 break;
             case GameConstants.EFFECT_MOVE_DESTINATION:
                 List<CardDTO> moveDestTargets = findTargetCards(match, event, (String) params.get("target"), params);
@@ -68,7 +70,7 @@ public class AbilityExecutionService {
                 applyMoveDestination(match, event, params);
                 if (!moveDestTargets.isEmpty()) {
                     String names = moveDestTargets.stream().map(CardDTO::getName).reduce((a, b) -> a + ", " + b).orElse("");
-                    System.out.println(cardName + " moved " + names + " to " + dest + ".");
+                    abilityMessage = cardName + " moved " + names + " to " + dest + ".";
                 }
                 break;
             case GameConstants.EFFECT_MOVE_DIRECTION:
@@ -78,19 +80,37 @@ public class AbilityExecutionService {
                 applyMoveDirection(match, event, params);
                 if (!moveDirTargets.isEmpty()) {
                     String names = moveDirTargets.stream().map(CardDTO::getName).reduce((a, b) -> a + ", " + b).orElse("");
-                    System.out.println(cardName + " moved " + names + " " + dir.toLowerCase() + " by " + val + ".");
+                    abilityMessage = cardName + " moved " + names + " " + dir.toLowerCase() + " by " + val + ".";
                 }
                 break;
             case GameConstants.EFFECT_SWAP_CONTROL:
                 applySwapControl(match);
-                System.out.println(cardName + " swapped everyone's cards!");
+                abilityMessage = cardName + " swapped everyone's cards!";
                 break;
             default:
-                System.out.println("Unhandled ability effect: " + effect);
+                abilityMessage = "Unhandled ability effect: " + effect;
                 break;
         }
+
+        // Log to console
+        if (abilityMessage != null) {
+            System.out.println(abilityMessage);
+
+            // Add to match ability messages
+            if (match.getAbilityMessages() == null) {
+                match.setAbilityMessages(new ArrayList<>());
+            }
+            match.getAbilityMessages().add(abilityMessage);
+
+            // Keep the list size manageable (optional)
+            if (match.getAbilityMessages().size() > 10) {
+                match.getAbilityMessages().remove(0);
+            }
+        }
+
         return new AbilityResult(match, generatedEvents);
     }
+
 
     // --- Helper Methods for Effect Categories ---
 

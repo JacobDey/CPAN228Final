@@ -62,6 +62,21 @@ const CardManage = () => {
         }
     };
 
+    const addCardForAdmin = async () => {
+        try {
+            const response = await axios.put(`${SERVER_URL}/admin/addAllCard`, {}, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                }
+            })
+
+            alert('All Card added')
+        } catch (err) {
+            console.error('Add all card error:', err.response ? err.response.data : err.message);
+            alert(`Failed to add all card: ${err.response ? err.response.data : err.message}`);
+        }
+    }
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
@@ -93,6 +108,13 @@ const CardManage = () => {
                         className="btn btn-dark m-3"
                     >
                         Add New Card
+                    </button>
+
+                    <button
+                        onClick={addCardForAdmin}
+                        className="btn btn-success m-3"
+                    >
+                        Add All Card to your card list
                     </button>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
