@@ -6,8 +6,6 @@ import { DndProvider, useDrag, useDrop } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { TouchBackend } from 'react-dnd-touch-backend';
 import { isMobile } from 'react-device-detect';
-import { DndProvider as MultiBackendProvider } from 'react-dnd-multi-backend';
-import { HTML5toTouch } from 'rdndmb-html5-to-touch';
 import SSSCard from "../components/SSSCard.jsx";
 
 // Card drag item component
@@ -673,9 +671,9 @@ function SSSDeckDetail() {
 
     // For desktop view, we'll show both panels side by side
     const desktopView = (
-        <div className="deck-editor-content d-flex flex-grow-1 overflow-hidden">
+        <div className="deck-editor-content d-flex flex-grow-1 overflow-hidden" style={{ minHeight: 0 }}>
             {/* Left Panel - Deck Cards */}
-            <div className="deck-editor-card-list p-4 overflow-auto" style={{ width: '50%' }}>
+            <div className="deck-editor-card-list p-4 overflow-auto flex-grow-1 flex-shrink-1 flex-basis-0">
                 <CardDropArea
                     onDrop={handleDropToDeck}
                     isDeckArea={true}
@@ -705,7 +703,7 @@ function SSSDeckDetail() {
             </div>
 
             {/* Right Panel - Available Cards */}
-            <div className="deck-editor-available-cards p-4 overflow-auto bg-white border-start" style={{ width: '50%' }}>
+            <div className="deck-editor-available-cards p-4 overflow-auto bg-white border-start flex-grow-1 flex-shrink-1 flex-basis-0">
                 <h3 className="mb-3">Your Cards</h3>
 
                 <div className="filter-controls mb-3">
