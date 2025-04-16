@@ -73,7 +73,6 @@ function SSSProfile() {
     let draws = 0;
 
     matches.forEach(match => {
-      console.log(match);
       // Determine if the user is player1 or player2
       const isPlayer1 = match.player1 === username;
 
