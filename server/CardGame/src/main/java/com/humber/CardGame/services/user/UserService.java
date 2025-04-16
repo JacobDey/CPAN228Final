@@ -215,4 +215,23 @@ public class UserService {
         user.setCredit(user.getCredit() - price);
         userRepository.save(user);
     }
+
+    public void addAllCards(String username) {
+        Optional<MyUser> userOp = userRepository.findByUsername(username);
+        if (userOp.isEmpty()) {
+            throw new RuntimeException("username not found");
+        }
+        MyUser user = userOp.get();
+        //get all card in database
+        List<Card> cards = cardRepository.findAll();
+        Map<String, Integer> userCards = new HashMap<>();
+        //add each card to user cards
+        for (Card card : cards) {
+            String cardId = card.getId();
+            userCards.put(cardId, 3);
+        }
+        //save to db
+        user.setCards(userCards);
+        userRepository.save(user);
+    }
 }

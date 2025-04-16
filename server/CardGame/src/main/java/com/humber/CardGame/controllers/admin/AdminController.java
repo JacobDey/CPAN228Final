@@ -2,11 +2,14 @@ package com.humber.CardGame.controllers.admin;
 
 import com.humber.CardGame.models.card.Card;
 import com.humber.CardGame.services.card.CardService;
+import com.humber.CardGame.services.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.security.Principal;
 
 @CrossOrigin
 @RestController
@@ -14,9 +17,11 @@ import org.springframework.web.multipart.MultipartFile;
 public class AdminController {
 
     private final CardService cardService;
+    private final UserService userService;
 
-    public AdminController(CardService cardService){
+    public AdminController(CardService cardService, UserService userService) {
         this.cardService = cardService;
+        this.userService = userService;
     }
 
     @GetMapping("/test")
@@ -63,5 +68,12 @@ public class AdminController {
     public ResponseEntity<String> deleteCard(@PathVariable String cardId) {
         cardService.deleteCardFromDatabase(cardId);
         return ResponseEntity.ok("success, card deleted from database");
+    }
+
+    @PutMapping("/addAllCard")
+    public ResponseEntity<String> addAllCard(Principal principal) {
+        String username = principal.getName();
+        userService.addAllCards(username);
+        return ResponseEntity.ok().build();
     }
 }
