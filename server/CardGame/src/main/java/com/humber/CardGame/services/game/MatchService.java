@@ -137,11 +137,21 @@ public class MatchService {
 
         //find user
         boolean isPlayer1 = username.equals(match.getPlayer1());
-        //Find card in player hand
+        //Find hand, then add card to it
         List<CardDTO> playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
         playerHand.addFirst(drawCard(isPlayer1 ? match.getPlayer1Deck() : match.getPlayer2Deck()));
-
-        // Set phase to MAIN after drawing
+                // *** Create and Dispatch START_TURN Event Here ***
+                GameEvent turnStartEvent = new GameEvent(
+                    GameConstants.EVENT_TURN_START,
+                    null, // Pass the actual CardDTO object
+                    null,
+                    username,
+                    match,
+                    null // Context is null for now
+                );
+                // Update the match state by dispatching the event and processing abilities
+                match = gameEventDispatcher.dispatchEvent(turnStartEvent);
+                        // Set phase to MAIN after drawing
         match.setCurrentPhase(GamePhase.MAIN);
 
         return matchRepository.save(match);
