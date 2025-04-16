@@ -754,7 +754,10 @@ function SSSDeckDetail() {
     );
 
     return (
-        <DndProvider backend={getDndBackend()}>
+        <DndProvider backend={getDndBackend()} options={{
+            enableMouseEvents: true,
+            delayTouchStart: 250, // Delay drag for 250ms on touch (lets user scroll)
+        }}>
             <div className="deck-editor-container vw-100 d-flex flex-column bg-light" style={{
                 height: 'calc(100vh - 60px)',
                 marginTop: '60px'
