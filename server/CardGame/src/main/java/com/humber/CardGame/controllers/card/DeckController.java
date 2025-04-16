@@ -13,9 +13,13 @@ import java.util.Map;
 @RequestMapping("/decks")
 @CrossOrigin
 public class DeckController {
-    @Autowired
-    private DeckService deckService;
+    private final DeckService deckService;
 
+    public DeckController(DeckService deckService){
+        this.deckService = deckService;
+    }
+
+    //create new deck
     @PostMapping("/newDeck")
     public ResponseEntity<String> createDeck(Principal principal, @RequestParam(required = false) String deckName) {
         String username = principal.getName();

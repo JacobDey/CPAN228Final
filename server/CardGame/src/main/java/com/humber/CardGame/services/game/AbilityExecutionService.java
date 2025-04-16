@@ -289,6 +289,11 @@ public class AbilityExecutionService {
         if (condition == null) {
             return true; // No condition specified, always proceed
         }
+    // --- Helper method to check conditions ---
+    private boolean checkCondition(Match match, GameEvent event, Map<String, Object> params, String condition) {
+        if (condition == null) {
+            return true; // No condition specified, always proceed
+        }
 
         switch (condition.toUpperCase()) {
             case GameConstants.CONDITION_OWNERS_TURN:
@@ -319,6 +324,11 @@ public class AbilityExecutionService {
                 }
                 return false;
 
+            default:
+                System.err.println("Unhandled condition type: " + condition);
+                return false; // Unknown condition, treat as not met
+        }
+    }
             default:
                 System.err.println("Unhandled condition type: " + condition);
                 return false; // Unknown condition, treat as not met

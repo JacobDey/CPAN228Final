@@ -16,12 +16,15 @@ import java.util.Optional;
 @Service
 public class DeckService {
 
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    CardRepository cardRepository;
-    @Autowired
-    DeckRepository deckRepository;
+    final UserRepository userRepository;
+    final CardRepository cardRepository;
+    final DeckRepository deckRepository;
+
+    public DeckService(UserRepository userRepository, CardRepository cardRepository, DeckRepository deckRepository){
+        this.userRepository = userRepository;
+        this.cardRepository = cardRepository;
+        this.deckRepository = deckRepository;
+    }
 
     //create new deck
     public void createNewDeck(String username, String deckName){

@@ -55,6 +55,7 @@ public class UserService {
         3x Sacral Healer
         3x Gentle Whale
         3x Martyr’s Spirit*/
+        //set up starter deck cards
         Map<String, Integer> startDeck = new HashMap<>();
         startDeck.put("67e9d0c59a7f463f2f43aa8f",3);
         startDeck.put("67e9d0c59a7f463f2f43aa94",3);
@@ -63,14 +64,18 @@ public class UserService {
         startDeck.put("67e9d0c59a7f463f2f43aa91",3);
         startDeck.put("67e9d0c59a7f463f2f43aa93",3);
         startDeck.put("67e9d0c59a7f463f2f43aa95",3);
+        //add starter deck cards to users collection
         user.setCards(startDeck);
+        //create starter deck and add cards
         Deck deck = new Deck();
         deck.setOwner(user.getUsername());
         deck.setCardList(new HashMap<>(startDeck));
         deck.setName("StarterDeck");
         deck.setIcon("Default");
         deckRepository.save(deck);
+        //set starter deck as selected deck
         user.setSelectedDeck(deck);
+        //add starter deck to user
         List<Deck> decks = new ArrayList<>();
         decks.add(deck);
         user.setDecks(decks);

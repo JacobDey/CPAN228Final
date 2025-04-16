@@ -19,12 +19,15 @@ import java.util.*;
 @Service
 public class MatchService {
 
-    @Autowired
-    private MatchRepository matchRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private CardRepository cardRepository;
+    private final MatchRepository matchRepository;
+    private final UserRepository userRepository;
+    private final CardRepository cardRepository;
+
+    public MatchService(MatchRepository matchRepository, UserRepository userRepository, CardRepository cardRepository){
+        this.matchRepository = matchRepository;
+        this.userRepository = userRepository;
+        this.cardRepository = cardRepository;
+    }
 
     //constant data for game
     private final int MAX_CARD_PER_TURN = 3;
@@ -217,6 +220,7 @@ public class MatchService {
     //find Winner
     private void determineWinner(Match match) {
 
+        //error checking, these shouldn't be possible
         MyUser player1 = userRepository.findByUsername(match.getPlayer1())
                 .orElseThrow(() -> new RuntimeException("Player " + match.getPlayer1() + " not found"));
 
@@ -226,6 +230,7 @@ public class MatchService {
         int player1Score = 0;
         int player2Score = 0;
 
+        //tally up victory points
         for (Tower tower : match.getTowers()) {
             int controller = tower.getControllingPlayerId();
             if (controller == 1) {
@@ -235,6 +240,7 @@ public class MatchService {
             }
         }
 
+        //decide winner
         if (player1Score > player2Score) {
             match.setStatus(MatchStatus.PLAYER1_WIN);
             player1.setCredit(player1.getCredit()+WINNER_CREDIT);

@@ -14,8 +14,11 @@ import java.util.List;
 @CrossOrigin
 public class MatchController {
 
-    @Autowired
-    MatchService matchService;
+    final MatchService matchService;
+
+    public MatchController(MatchService matchService){
+        this.matchService = matchService;
+    }
 
     @GetMapping
     public ResponseEntity<List<Match>> getAllMatches() {
@@ -30,6 +33,7 @@ public class MatchController {
         return ResponseEntity.ok(matches);
     }
 
+    //create new match
     @PostMapping("/create")
     public ResponseEntity<Match> createMatch(Principal principal) {
         String username = principal.getName();
@@ -37,6 +41,7 @@ public class MatchController {
         return ResponseEntity.ok(match);
     }
 
+    //join new match
     @PostMapping("/{matchId}/join")
     public ResponseEntity<Match> joinMatch(Principal principal, @PathVariable String matchId) {
         String username = principal.getName();
@@ -44,6 +49,7 @@ public class MatchController {
         return ResponseEntity.ok(match);
     }
 
+    //join ongoing match
     @PostMapping("/{matchId}/joinOngoing")
     public ResponseEntity<Match> joinOngoingMatch(Principal principal, @PathVariable String matchId) {
         String username = principal.getName();
@@ -51,6 +57,7 @@ public class MatchController {
         return ResponseEntity.ok(match);
     }
 
+    //start player turn
     @PutMapping("/{matchId}/startTurn")
     public ResponseEntity<Match> startTurn(Principal principal, @PathVariable String matchId) {
         String username = principal.getName();
@@ -58,6 +65,7 @@ public class MatchController {
         return ResponseEntity.ok(match);
     }
 
+    //play card on tower
     @PutMapping("/{matchId}/play")
     public ResponseEntity<Match> playMatch(Principal principal, @PathVariable String matchId, @RequestParam String cardId, @RequestParam int towerId) {
         String username = principal.getName();
@@ -65,6 +73,7 @@ public class MatchController {
         return ResponseEntity.ok(match);
     }
 
+    //end turn
     @PutMapping("/{matchId}/end")
     public ResponseEntity<Match> endTurn(Principal principal, @PathVariable String matchId) {
         String username = principal.getName();
@@ -72,6 +81,7 @@ public class MatchController {
         return ResponseEntity.ok(match);
     }
 
+    //get match object
     @GetMapping("/{matchId}")
     public ResponseEntity<Match> getMatch(@PathVariable String matchId) {
         Match match = matchService.getMatch(matchId);
