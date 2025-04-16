@@ -19,12 +19,15 @@ import java.util.*;
 @Service
 public class MatchService {
 
-    @Autowired
-    private MatchRepository matchRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private CardRepository cardRepository;
+    private final MatchRepository matchRepository;
+    private final UserRepository userRepository;
+    private final CardRepository cardRepository;
+
+    public MatchService(MatchRepository matchRepository, UserRepository userRepository, CardRepository cardRepository){
+        this.matchRepository = matchRepository;
+        this.userRepository = userRepository;
+        this.cardRepository = cardRepository;
+    }
 
     //constant data for game
     private final int MAX_CARD_PER_TURN = 3;

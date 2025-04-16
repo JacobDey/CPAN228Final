@@ -13,8 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/admin")
 public class AdminController {
 
-    @Autowired
-    private CardService cardService;
+    private final CardService cardService;
+
+    public AdminController(CardService cardService){
+        this.cardService = cardService;
+    }
 
     @GetMapping("/test")
     public String test() {
