@@ -298,7 +298,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                 case "ON_CARD_DESTROYED":
                     return generateOnCardDestroyedText(params);
                 case "TURN_START":
-                    return "Destroys itself at the beginning of your turn.";
+                    return generateTurnStartText(params);
                 default:
                     return `${ability.abilityType} with ${Object.keys(params).length} parameters`;
             }
@@ -308,43 +308,64 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
     const generateOnEnterText = (params) => {
         const effect = params.effect;
 
-        if (effect === "DESTROY_CARD" || effect === "DESTROY_CARDS") {
-            if (params.target === "OPPOSING_UNCOVERED_BLUE") {
+        if (effect === "DESTROY_CARD") {
+            if (params.target === "OPPOSING_UNCOVERED_HERE" && params.targetColor === "BLUE") {
                 return "On enter, destroy opposing uncovered blue card.";
             } else if (params.target === "OPPOSING_UNCOVERED_CARD") {
                 return "On enter, destroy the opposing uncovered card.";
-            } else if (params.target === "ALL_UNCOVERED_CARDS") {
-                return "On enter, destroy every uncovered card.";
+            } else if (params.target === "CARD_BELOW_EVENT_INITIATOR" && params.targetColor) {
+                return `On enter, destroy the card it's covering if it is ${params.targetColor.toLowerCase()}.`;
             }
-        } else if (effect === "DESTROY_SELF_IF_COLOR_HERE" && params.targetColor === "RED") {
+        } else if (effect === "DESTROY_CARDS") {
+            if (params.target === "ALL_UNCOVERED_CARDS") {
+                return "On enter, destroy every uncovered card.";
+            } else if (params.target === "ALL_CARDS") {
+                return "On enter, destroy all cards.";
+            }
+        } else if (effect === "DESTROY_SELF" && params.condition === "RED_PRESENT_HERE") {
             return "On enter, destroy itself if there is a red card here.";
-        } else if (effect === "DESTROY_IF_COLOR" && params.target === "CARD_BELOW") {
-            return `On enter, destroy the card it's covering if it is ${params.targetColor.toLowerCase()}.`;
         } else if (effect === "POWER_CHANGE") {
             const value = params.value;
             const target = params.target;
 
-            if (target === "RED_CARDS_HERE" || target === "BLUE_CARDS_HERE") {
-                const color = target.startsWith("RED") ? "red" : "blue";
+            if (target === "CARDS_HERE" && params.targetColor) {
+                const color = params.targetColor.toLowerCase();
                 return `On enter, ${color} cards here get ${value > 0 ? '+' : ''}${value}.`;
             } else if (target === "YOUR_CARDS_HERE") {
                 return `On enter, your cards here get ${value > 0 ? '+' : ''}${value}.`;
+            } else if (target === "OPPOSING_CARDS_HERE") {
+                return `On enter, opposing cards here get ${value > 0 ? '+' : ''}${value}.`;
             } else if (target === "YOUR_CARDS_HERE_WITH_POWER_LESS_THAN") {
                 return `On enter, your cards with power ${params.powerThreshold} or less here get ${value > 0 ? '+' : ''}${value}.`;
+            } else if (target === "ALL_CARDS") {
+                return `On enter, all cards get ${value > 0 ? '+' : ''}${value}.`;
+            } else if (target === "SELF") {
+                return `On enter, this card gets ${value > 0 ? '+' : ''}${value}.`;
             }
         } else if (effect === "DRAW_CARDS") {
-            const count = params.count;
+            const count = params.count || 1;
             if (count === 1) {
                 return "On enter, draw a card.";
             } else {
                 return `On enter, draw ${count} cards.`;
             }
-        } else if (effect === "MOVE_CARDS") {
-            return `On enter, all cards here move ${params.direction.toLowerCase()} ${params.distance}.`;
-        } else if (effect === "MOVE_CARD" && params.destination === "TOWER_WITH_FEWEST_CARDS") {
-            return "On enter, move opposing uncovered card here to the tower with the fewest cards.";
+        } else if (effect === "MOVE_DIRECTION") {
+            return `On enter, all cards here move ${params.direction.toLowerCase()} ${params.distance || 1}.`;
+        } else if (effect === "MOVE_DESTINATION" && params.destination === "TOWER_WITH_FEWEST_CARDS") {
+            if (params.target === "OPPOSING_UNCOVERED_CARD") {
+                return "On enter, move opposing uncovered card here to the tower with the fewest cards.";
+            } else if (params.target === "ALL_CARDS_HERE") {
+                return "On enter, move all cards here to the tower with the fewest cards.";
+            }
         } else if (effect === "OPPONENT_DISCARD") {
-            return "On enter, opponent discards a random card.";
+            const count = params.count || 1;
+            const randomText = params.random ? " random" : "";
+
+            if (count === 1) {
+                return `On enter, opponent discards a${randomText} card.`;
+            } else {
+                return `On enter, opponent discards ${count}${randomText} cards.`;
+            }
         } else if (effect === "SWAP_CONTROL") {
             return "On enter, swap control of every card on the board, including this card.";
         }
@@ -354,13 +375,35 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
 
     const generateOnDeathText = (params) => {
         const effect = params.effect;
-        const value = params.value;
-        const target = params.target;
 
         if (effect === "POWER_CHANGE") {
-            if (target === "RED_CARDS_HERE" || target === "BLUE_CARDS_HERE") {
-                const color = target.startsWith("RED") ? "red" : "blue";
+            const value = params.value;
+            const target = params.target;
+
+            if (target === "CARDS_HERE" && params.targetColor) {
+                const color = params.targetColor.toLowerCase();
                 return `On death, ${color} cards here get ${value > 0 ? '+' : ''}${value}.`;
+            } else if (target === "YOUR_CARDS_HERE") {
+                return `On death, your cards here get ${value > 0 ? '+' : ''}${value}.`;
+            } else if (target === "OPPOSING_CARDS_HERE") {
+                return `On death, opposing cards here get ${value > 0 ? '+' : ''}${value}.`;
+            } else if (target === "ALL_CARDS_HERE") {
+                return `On death, all cards here get ${value > 0 ? '+' : ''}${value}.`;
+            } else if (target === "ALL_CARDS") {
+                return `On death, all cards get ${value > 0 ? '+' : ''}${value}.`;
+            }
+        } else if (effect === "DESTROY_CARD" || effect === "DESTROY_CARDS") {
+            if (params.target === "ALL_CARDS_HERE") {
+                return "On death, destroy all cards here.";
+            } else if (params.target === "OPPOSING_UNCOVERED_HERE") {
+                return "On death, destroy opposing uncovered card here.";
+            }
+        } else if (effect === "DRAW_CARDS") {
+            const count = params.count || 1;
+            if (count === 1) {
+                return "On death, draw a card.";
+            } else {
+                return `On death, draw ${count} cards.`;
             }
         }
 
@@ -370,13 +413,23 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
     const generateOnCardDestroyedText = (params) => {
         const effect = params.effect;
 
-        if (effect === "DESTROY_SELF") {
+        if (effect === "DESTROY_CARD" && params.target === "SELF") {
             return "When a card is destroyed, this card destroys itself.";
         } else if (effect === "POWER_CHANGE" && params.target === "SELF") {
-            return `When a card is destroyed, this card gets ${params.value > 0 ? '+' : ''}${params.value}`;
+            return `When a card is destroyed, this card gets ${params.value > 0 ? '+' : ''}${params.value}.`;
         }
 
         return `When a card is destroyed: ${effect}`;
+    };
+
+    const generateTurnStartText = (params) => {
+        const effect = params.effect;
+
+        if (effect === "DESTROY_CARD" && params.target === "SELF" && params.condition === "OWNERS_TURN") {
+            return "Destroys itself at the beginning of your turn.";
+        }
+
+        return `Turn start effect: ${effect}`;
     };
 
     // Get ability type options
@@ -394,27 +447,29 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                 return [
                     { value: "DESTROY_CARD", label: "Destroy Card" },
                     { value: "DESTROY_CARDS", label: "Destroy Cards" },
-                    { value: "DESTROY_SELF_IF_COLOR_HERE", label: "Destroy Self If Color Here" },
-                    { value: "DESTROY_IF_COLOR", label: "Destroy If Color" },
+                    { value: "DESTROY_SELF", label: "Destroy Self" },
                     { value: "POWER_CHANGE", label: "Power Change" },
                     { value: "DRAW_CARDS", label: "Draw Cards" },
-                    { value: "MOVE_CARDS", label: "Move Cards" },
-                    { value: "MOVE_CARD", label: "Move Card" },
+                    { value: "MOVE_DIRECTION", label: "Move Direction" },
+                    { value: "MOVE_DESTINATION", label: "Move Destination" },
                     { value: "OPPONENT_DISCARD", label: "Opponent Discard" },
                     { value: "SWAP_CONTROL", label: "Swap Control" }
                 ];
             case "ON_DEATH":
                 return [
-                    { value: "POWER_CHANGE", label: "Power Change" }
+                    { value: "POWER_CHANGE", label: "Power Change" },
+                    { value: "DESTROY_CARD", label: "Destroy Card" },
+                    { value: "DESTROY_CARDS", label: "Destroy Cards" },
+                    { value: "DRAW_CARDS", label: "Draw Cards" }
                 ];
             case "ON_CARD_DESTROYED":
                 return [
-                    { value: "DESTROY_SELF", label: "Destroy Self" },
+                    { value: "DESTROY_CARD", label: "Destroy Card" },
                     { value: "POWER_CHANGE", label: "Power Change" }
                 ];
             case "TURN_START":
                 return [
-                    { value: "DESTROY_SELF_IF_OWNERS_TURN", label: "Destroy Self If Owner's Turn" }
+                    { value: "DESTROY_CARD", label: "Destroy Card" }
                 ];
             default:
                 return [];
@@ -422,36 +477,47 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
     };
 
     // Get target options based on effect
-    const getTargetOptions = (effect) => {
+    const getTargetOptions = (effect, abilityType) => {
         switch (effect) {
             case "DESTROY_CARD":
+                if (abilityType === "ON_CARD_DESTROYED") {
+                    return [
+                        { value: "SELF", label: "Self" }
+                    ];
+                }
                 return [
-                    { value: "OPPOSING_UNCOVERED_BLUE", label: "Opposing Uncovered Blue Card" },
-                    { value: "OPPOSING_UNCOVERED_CARD", label: "Opposing Uncovered Card" }
+                    { value: "OPPOSING_UNCOVERED_HERE", label: "Opposing Uncovered Here" },
+                    { value: "OPPOSING_UNCOVERED_CARD", label: "Opposing Uncovered Card" },
+                    { value: "SELF", label: "Self" },
+                    { value: "CARD_BELOW_EVENT_INITIATOR", label: "Card Below" }
                 ];
             case "DESTROY_CARDS":
                 return [
-                    { value: "ALL_UNCOVERED_CARDS", label: "All Uncovered Cards" }
+                    { value: "ALL_UNCOVERED_CARDS", label: "All Uncovered Cards" },
+                    { value: "ALL_CARDS", label: "All Cards" },
+                    { value: "ALL_CARDS_HERE", label: "All Cards Here" }
                 ];
-            case "DESTROY_IF_COLOR":
-                return [
-                    { value: "CARD_BELOW", label: "Card Below" }
-                ];
+            case "DESTROY_SELF":
+                // No target needed for self-destruction
+                return [];
             case "POWER_CHANGE":
                 return [
-                    { value: "RED_CARDS_HERE", label: "Red Cards Here" },
-                    { value: "BLUE_CARDS_HERE", label: "Blue Cards Here" },
+                    { value: "CARDS_HERE", label: "Cards Here (by Color)" },
                     { value: "YOUR_CARDS_HERE", label: "Your Cards Here" },
+                    { value: "OPPOSING_CARDS_HERE", label: "Opposing Cards Here" },
+                    { value: "ALL_CARDS_HERE", label: "All Cards Here" },
                     { value: "YOUR_CARDS_HERE_WITH_POWER_LESS_THAN", label: "Your Cards Here With Power Less Than" },
+                    { value: "ALL_CARDS", label: "All Cards" },
                     { value: "SELF", label: "Self" }
                 ];
-            case "MOVE_CARDS":
+            case "MOVE_DIRECTION":
                 return [
                     { value: "ALL_CARDS_HERE", label: "All Cards Here" }
                 ];
-            case "MOVE_CARD":
+            case "MOVE_DESTINATION":
                 return [
-                    { value: "OPPOSING_UNCOVERED_CARD", label: "Opposing Uncovered Card" }
+                    { value: "OPPOSING_UNCOVERED_CARD", label: "Opposing Uncovered Card" },
+                    { value: "ALL_CARDS_HERE", label: "All Cards Here" }
                 ];
             default:
                 return [];
@@ -556,6 +622,14 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
             }));
         };
 
+        const handleConditionChange = (e) => {
+            const condition = e.target.value;
+            setLocalAbility(prev => ({
+                ...prev,
+                params: { ...prev.params, condition }
+            }));
+        };
+
         const handleSaveClick = () => {
             onSave(localAbility);
         };
@@ -568,7 +642,7 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
             const params = [];
 
             // Add target field for effects that need it
-            if (["DESTROY_CARD", "DESTROY_CARDS", "POWER_CHANGE", "MOVE_CARDS", "MOVE_CARD", "DESTROY_IF_COLOR"].includes(effect)) {
+            if (["DESTROY_CARD", "DESTROY_CARDS", "POWER_CHANGE", "MOVE_DIRECTION", "MOVE_DESTINATION", "OPPONENT_DISCARD", "SWAP_CONTROL"].includes(effect)) {
                 const targetOptions = getTargetOptions(effect);
 
                 if (targetOptions.length > 0) {
@@ -654,8 +728,8 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                 }
             }
 
-            // Add direction and distance for MOVE_CARDS
-            if (effect === "MOVE_CARDS") {
+            // Add direction and distance for MOVE_DIRECTION
+            if (effect === "MOVE_DIRECTION") {
                 params.push(
                     <div key="direction" className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Direction</label>
@@ -680,13 +754,14 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                             onChange={handleDistanceChange}
                             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                             min="1"
+                            max="2"
                         />
                     </div>
                 );
             }
 
-            // Add destination for MOVE_CARD
-            if (effect === "MOVE_CARD") {
+            // Add destination for MOVE_DESTINATION
+            if (effect === "MOVE_DESTINATION") {
                 params.push(
                     <div key="destination" className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Destination</label>
@@ -703,16 +778,18 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
             }
 
             // Add target color for color-specific effects
-            if (effect === "DESTROY_SELF_IF_COLOR_HERE" || effect === "DESTROY_IF_COLOR") {
+            if (["DESTROY_CARD", "DESTROY_CARDS", "POWER_CHANGE"].includes(effect) &&
+                localAbility.params.target &&
+                !["SELF", "YOUR_CARDS_HERE", "YOUR_CARDS_HERE_WITH_POWER_LESS_THAN"].includes(localAbility.params.target)) {
                 params.push(
                     <div key="targetColor" className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Target Color</label>
+                        <label className="block text-sm font-medium text-gray-700">Target Color (Optional)</label>
                         <select
                             value={localAbility.params.targetColor || ""}
                             onChange={handleTargetColorChange}
                             className="mt-1 block w-full border border-gray-300 rounded-md p-2"
                         >
-                            <option value="">Select a color</option>
+                            <option value="">Any Color</option>
                             <option value="RED">Red</option>
                             <option value="BLUE">Blue</option>
                             <option value="GREEN">Green</option>
@@ -720,6 +797,30 @@ const CardEditForm = ({ card, onCancel, onSave }) => {
                             <option value="PURPLE">Purple</option>
                             <option value="ORANGE">Orange</option>
                             <option value="WHITE">White</option>
+                        </select>
+                    </div>
+                );
+            }
+
+            // Add condition field for abilities that can have conditions
+            if (["DESTROY_CARD", "POWER_CHANGE"].includes(effect) && localAbility.abilityType === "TURN_START") {
+                params.push(
+                    <div key="condition" className="mb-4">
+                        <label className="block text-sm font-medium text-gray-700">Condition</label>
+                        <select
+                            value={localAbility.params.condition || ""}
+                            onChange={(e) => {
+                                const condition = e.target.value;
+                                setLocalAbility(prev => ({
+                                    ...prev,
+                                    params: { ...prev.params, condition }
+                                }));
+                            }}
+                            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+                        >
+                            <option value="">Select a condition</option>
+                            <option value="OWNERS_TURN">Owner's Turn</option>
+                            <option value="RED_PRESENT_HERE">Red Card Present Here</option>
                         </select>
                     </div>
                 );
