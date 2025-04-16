@@ -11,7 +11,6 @@ import com.humber.CardGame.models.user.MyUser;
 import com.humber.CardGame.repositories.CardRepository;
 import com.humber.CardGame.repositories.MatchRepository;
 import com.humber.CardGame.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
