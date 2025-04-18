@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Allow preflight OPTIONS requests
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/matches/**","/decks/**").hasAnyRole("ADMIN","USER")
-                        .requestMatchers("/card/**","/users/**").permitAll()
+                        .requestMatchers("/card/**","/users/**","/ws/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

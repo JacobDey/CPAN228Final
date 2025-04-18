@@ -17,6 +17,12 @@ import java.util.Collections;
 @Service
 public class AbilityExecutionService {
 
+    private final WebSocketService webSocketService;
+
+    public AbilityExecutionService(WebSocketService webSocketService) {
+        this.webSocketService = webSocketService;
+    }
+
     public AbilityResult executeAbility(GameEvent event, CardAbility ability) {
         Match match = event.getMatch();
         Map<String, Object> params = ability.getParams();
@@ -96,16 +102,7 @@ public class AbilityExecutionService {
         if (abilityMessage != null) {
             System.out.println(abilityMessage);
 
-            // Add to match ability messages
-            if (match.getAbilityMessages() == null) {
-                match.setAbilityMessages(new ArrayList<>());
-            }
-            match.getAbilityMessages().add(abilityMessage);
-
-            // Keep the list size manageable (optional)
-            if (match.getAbilityMessages().size() > 10) {
-                match.getAbilityMessages().remove(0);
-            }
+            webSocketService.sendAbilityMessages(match.getId(), abilityMessage);
         }
 
         return new AbilityResult(match, generatedEvents);

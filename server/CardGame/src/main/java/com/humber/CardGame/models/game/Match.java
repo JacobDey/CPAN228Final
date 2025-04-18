@@ -25,8 +25,6 @@ public class Match {
     private Date createdAt = new Date();
 
     private List<Tower> towers = new ArrayList<>();
-    private List<String> abilityMessages = new ArrayList<>();
-    private Map<String, List<String>> playerSeenMessages = new HashMap<>();
 
     //user1
     private String player1;

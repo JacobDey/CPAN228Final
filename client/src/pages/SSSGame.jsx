@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Container, Row, Col, Card, Button, Spinner, Alert } from "react-bootstrap";
-import { DndProvider, useDrop } from "react-dnd";
+import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import SSSNavbar from "../components/SSSNavbar";
 import { useAuth } from "../components/SSSAuth";
@@ -9,6 +9,8 @@ import SSSPlayerHand from "../components/SSSPlayerHand";
 import SSSTower from "../components/SSSTower";
 import SSSMatchResultModal from "../components/SSSMatchResultModal";
 import toast, { Toaster } from 'react-hot-toast';
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
 
 function SSSGame() {
     const { matchId } = useParams();
@@ -17,19 +19,115 @@ function SSSGame() {
     const [match, setMatch] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const intervalRef = useRef(null);
     const [cardsPlayedThisTurn, setCardsPlayedThisTurn] = useState(0);
     const [playStatus, setPlayStatus] = useState({ message: "", type: "" });
     const [showResultModal, setShowResultModal] = useState(false);
+    const [wsConnected, setWsConnected] = useState(false);
     const SERVER_URL = import.meta.env.VITE_SERVER_URL || "http://localhost:8080";
+    const stompClient = useRef(null);
 
     const MAX_CARDS_PER_TURN = 3;
-    const FETCH_INTERVAL = 3000;
     const MAX_TURN = 10;
 
+    // Initialize WebSocket connection
+    useEffect(() => {
+        const connectWebSocket = () => {
+            const socket = new SockJS(`${SERVER_URL}/ws`);
+            const client = new Client({
+                webSocketFactory: () => socket,
+                debug: function (str) {
+                    console.log('STOMP: ' + str);
+                },
+                reconnectDelay: 5000,
+                heartbeatIncoming: 4000,
+                heartbeatOutgoing: 4000,
+            });
 
-    // Fetch match data
-    const fetchMatchData = async () => {
+            client.onConnect = (frame) => {
+                console.log('Connected to WebSocket');
+                setWsConnected(true);
+
+                // Subscribe to match updates
+                client.subscribe(`/topic/match/${matchId}`, (message) => {
+                    const receivedMatch = JSON.parse(message.body);
+                    handleMatchUpdate(receivedMatch);
+                });
+
+                // Subscribe to ability messages
+                client.subscribe(`/topic/match/${matchId}/messages`, (message) => {
+                    try {
+                        const messages = message.body;
+                        handleAbilityMessages(messages);
+                    } catch (err) {
+                        console.error('Error processing ability messages:', err);
+                    }
+                });
+
+                // Request initial match data via WebSocket
+                client.publish({
+                    destination: `/app/match/${matchId}/fetch`
+                });
+
+                // Fallback: If we don't receive data through WebSocket quickly, fetch via HTTP
+                setTimeout(() => {
+                    if (loading) {
+                        fetchMatchDataHttp();
+                    }
+                }, 2000);
+            };
+
+            client.onStompError = (frame) => {
+                console.error('STOMP error', frame);
+                setError(`WebSocket error: ${frame.headers['message']}`);
+                setLoading(false);
+
+                // Fallback to HTTP if WebSocket fails
+                fetchMatchDataHttp();
+            };
+
+            client.activate();
+            stompClient.current = client;
+        };
+
+        connectWebSocket();
+
+        // Clean up WebSocket connection on unmount
+        return () => {
+            if (stompClient.current && stompClient.current.active) {
+                stompClient.current.deactivate();
+                console.log('WebSocket disconnected');
+            }
+        };
+    }, [matchId, username]);
+
+    // Handle received match updates
+    const handleMatchUpdate = (receivedMatch) => {
+        setMatch(receivedMatch);
+        setLoading(false);
+
+        // Update the local counter with the server's value when it's your turn
+        if (receivedMatch.currentTurnPlayer === username) {
+            setCardsPlayedThisTurn(receivedMatch.cardPlayedThisTurn || 0);
+        }
+
+        // Automatically start turn if it's BEGIN phase and player's turn
+        if (receivedMatch.currentTurnPlayer === username && receivedMatch.currentPhase === "BEGIN") {
+            handleStartTurn();
+        }
+
+        // Check if game end, show modal
+        if (receivedMatch.status === "PLAYER1_WIN" || receivedMatch.status === "PLAYER2_WIN" || receivedMatch.status === "DRAW") {
+            setShowResultModal(true);
+        }
+    };
+
+    // Handle ability messages
+    const handleAbilityMessages = (message) => {
+        toast(message)
+    };
+
+    // Fallback HTTP fetch method if WebSocket fails
+    const fetchMatchDataHttp = async () => {
         try {
             const token = localStorage.getItem("token");
             const response = await fetch(`${SERVER_URL}/matches/${matchId}`, {
@@ -43,70 +141,16 @@ function SSSGame() {
             }
 
             const data = await response.json();
-            setMatch(data);
-            setError(null);
+            handleMatchUpdate(data);
 
-            const toastResponse = await fetch(`${SERVER_URL}/matches/${matchId}/messages`, {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-            const toastData = await toastResponse.json();
-            // setToastMessages(toastData);
-            if(toastData.length > 0) {
-                toastData.forEach((data) => {
-                    toast.success(data);
-                  });
-            }
-
-            // Update the local counter with the server's value when it's your turn
-            if (data.currentTurnPlayer === username) {
-                // Use the server's counter value
-                setCardsPlayedThisTurn(data.cardPlayedThisTurn || 0);
-            }
-
-            // Automatically start turn if it's BEGIN phase and player's turn
-            if (data.currentTurnPlayer === username && data.currentPhase === "BEGIN") {
-                handleStartTurn();
-            }
-
-            //check if game end, show modal
-            if (data.status === "PLAYER1_WIN" || data.status === "PLAYER2_WIN" || data.status === "DRAW") {
-                setShowResultModal(true);
-            }
+            // We no longer fetch ability messages via HTTP as they should come over WebSocket
 
         } catch (err) {
             console.error("Error fetching match data:", err);
             setError(err.message);
-        } finally {
             setLoading(false);
         }
     };
-
-    // Set up polling interval
-    useEffect(() => {
-        // Initial fetch
-        fetchMatchData();
-
-        // Clean up any existing interval first
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current);
-            intervalRef.current = null;
-        }
-
-        // Set up a new interval
-        intervalRef.current = setInterval(() => {
-            fetchMatchData();
-        }, 3000);
-
-        // Clean up on unmount or when matchId changes
-        return () => {
-            if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-            }
-        };
-    }, [matchId, username]); // Now depends on username as well
 
     // Handle playing a card on a tower
     const handlePlayCard = async (card, towerIndex) => {
@@ -117,7 +161,7 @@ function SSSGame() {
                     message: "Maximum 3 cards per turn reached",
                     type: "warning"
                 });
-                setTimeout(() => setPlayStatus({ message: "", type: "" }), FETCH_INTERVAL);
+                setTimeout(() => setPlayStatus({ message: "", type: "" }), 3000);
                 return;
             }
 
@@ -147,15 +191,9 @@ function SSSGame() {
                 throw new Error(errorText || `Failed to play card: ${response.statusText}`);
             }
 
-            // Get updated match data
-            const updatedMatch = await response.json();
-
-            // Update the match state with new data
-            setMatch(updatedMatch);
-
-            // Clear status after successful play
+            // Card played successfully - the WebSocket will handle the state update
             setPlayStatus({ message: "Card played successfully!", type: "success" });
-            setTimeout(() => setPlayStatus({ message: "", type: "" }), FETCH_INTERVAL);
+            setTimeout(() => setPlayStatus({ message: "", type: "" }), 3000);
 
         } catch (err) {
             console.error("Error playing card:", err);
@@ -163,7 +201,7 @@ function SSSGame() {
                 message: err.message || "Failed to play card",
                 type: "danger"
             });
-            setTimeout(() => setPlayStatus({ message: "", type: "" }), FETCH_INTERVAL+2000);
+            setTimeout(() => setPlayStatus({ message: "", type: "" }), 5000);
         }
     };
 
@@ -178,11 +216,8 @@ function SSSGame() {
                 }
             });
 
-            // Reset cards played counter
+            // Reset cards played counter - WebSocket will handle the rest
             setCardsPlayedThisTurn(0);
-
-            // Refresh match data
-            fetchMatchData();
         } catch (err) {
             console.error("Error starting turn:", err);
             setError(err.message);
@@ -199,9 +234,7 @@ function SSSGame() {
                     "Authorization": `Bearer ${token}`
                 }
             });
-
-            // Refresh match data
-            fetchMatchData();
+            // WebSocket will handle the state update
         } catch (err) {
             console.error("Error ending turn:", err);
             setError(err.message);
@@ -285,9 +318,9 @@ function SSSGame() {
         <DndProvider backend={HTML5Backend}>
             <SSSNavbar />
             <Container fluid className="game-container py-3 pb-5">
-                
+
                 {/* Toast */}
-                <Toaster position="bottom-right" reverseOrder={false}/>
+                <Toaster position="bottom-right" reverseOrder={false} />
 
                 <Row className="mb-3">
                     <Col>
@@ -368,9 +401,6 @@ function SSSGame() {
                         </Card>
                     </Col>
                 </Row>
-
-                {/* Game log and fixed End Turn Button */}
-                {/* ... existing game log code ... */}
             </Container>
 
             {/* Fixed End Turn button */}

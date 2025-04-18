@@ -24,12 +24,16 @@ public class MatchService {
     private final UserRepository userRepository;
     private final CardRepository cardRepository;
     private final GameEventDispatcher gameEventDispatcher;
+    private final WebSocketService webSocketService;
 
-    public MatchService(MatchRepository matchRepository, UserRepository userRepository, CardRepository cardRepository, GameEventDispatcher gameEventDispatcher) {
+    public MatchService(MatchRepository matchRepository, UserRepository userRepository,
+                        CardRepository cardRepository, GameEventDispatcher gameEventDispatcher,
+                        WebSocketService webSocketService) {
         this.gameEventDispatcher = gameEventDispatcher;
         this.matchRepository = matchRepository;
         this.userRepository = userRepository;
         this.cardRepository = cardRepository;
+        this.webSocketService = webSocketService;
     }
 
     //constant data for game
@@ -64,7 +68,11 @@ public class MatchService {
             match.getTowers().add(new Tower(i, random.nextInt(5) + 2, new ArrayList<>(), new ArrayList<>())); // Random 2-6))
         }
 
-        return matchRepository.save(match);
+        Match savedMatch = matchRepository.save(match);
+        //send websocket update
+        webSocketService.sendMatchUpdate(savedMatch);
+
+        return savedMatch;
     }
 
     //get all matches
@@ -96,7 +104,11 @@ public class MatchService {
         match.setPlayer2Hand(drawInitialHand(match.getPlayer2Deck())); //set hand
         match.setStatus(MatchStatus.PLAYING);
         match.setCurrentPhase(GamePhase.BEGIN);
-        return matchRepository.save(match);
+        Match savedMatch = matchRepository.save(match);
+        //send websocket update
+        webSocketService.sendMatchUpdate(savedMatch);
+
+        return savedMatch;
     }
 
     //join an ongoing match as player 1 or 2
@@ -119,6 +131,7 @@ public class MatchService {
         }
 
         // No need to modify the match state, just return it
+        webSocketService.sendMatchUpdate(match);
         return match;
     }
 
@@ -154,7 +167,11 @@ public class MatchService {
                         // Set phase to MAIN after drawing
         match.setCurrentPhase(GamePhase.MAIN);
 
-        return matchRepository.save(match);
+        Match savedMatch = matchRepository.save(match);
+        //send websocket update
+        webSocketService.sendMatchUpdate(savedMatch);
+
+        return savedMatch;
     }
 
 // ... existing code ...
@@ -211,7 +228,16 @@ public class MatchService {
         match = gameEventDispatcher.dispatchEvent(playEvent);
 
         // Save the potentially modified match state AFTER abilities have resolved
-        return matchRepository.save(match);
+        Match savedMatch = matchRepository.save(match);
+        //send websocket update
+        webSocketService.sendMatchUpdate(savedMatch);
+
+        // If there are ability messages, send those separately
+//        if (!match.getAbilityMessages().isEmpty()) {
+//            webSocketService.sendAbilityMessages(matchId, match.getAbilityMessages());
+//        }
+
+        return savedMatch;
     }
 
 // ... existing code ...
@@ -245,7 +271,11 @@ public class MatchService {
             determineWinner(match);
         }
 
-        return matchRepository.save(match);
+        Match savedMatch = matchRepository.save(match);
+        //send websocket update
+        webSocketService.sendMatchUpdate(savedMatch);
+
+        return savedMatch;
     }
 
     //find Winner
@@ -356,26 +386,5 @@ public class MatchService {
         return matchRepository.findByStatus(MatchStatus.PLAYING);
     }
 
-    public List<String> getAndClearAbilityMessages(String matchId, String username) {
-        Match match = getMatch(matchId);
-        List<String> messages = new ArrayList<>(match.getAbilityMessages());
 
-        // Track that this player has seen these messages
-        match.getPlayerSeenMessages().put(username, new ArrayList<>(messages));
-
-        // Check if both players have seen the messages
-        if (match.getPlayer1() != null && match.getPlayer2() != null) {
-            List<String> player1Seen = match.getPlayerSeenMessages().getOrDefault(match.getPlayer1(), Collections.emptyList());
-            List<String> player2Seen = match.getPlayerSeenMessages().getOrDefault(match.getPlayer2(), Collections.emptyList());
-
-            // If both players have seen all messages, clear them
-            if (!messages.isEmpty() && new HashSet<>(player1Seen).containsAll(messages) && new HashSet<>(player2Seen).containsAll(messages)) {
-                match.setAbilityMessages(new ArrayList<>());
-                match.getPlayerSeenMessages().clear();
-            }
-        }
-
-        matchRepository.save(match);
-        return messages;
-    }
 }

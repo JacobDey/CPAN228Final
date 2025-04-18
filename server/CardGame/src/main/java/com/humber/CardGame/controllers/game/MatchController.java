@@ -2,6 +2,7 @@ package com.humber.CardGame.controllers.game;
 
 import com.humber.CardGame.models.game.Match;
 import com.humber.CardGame.services.game.MatchService;
+import com.humber.CardGame.services.game.WebSocketService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,9 +15,11 @@ import java.util.List;
 public class MatchController {
 
     final MatchService matchService;
+    private final WebSocketService webSocketService;
 
-    public MatchController(MatchService matchService){
+    public MatchController(MatchService matchService, WebSocketService webSocketService) {
         this.matchService = matchService;
+        this.webSocketService = webSocketService;
     }
 
     @GetMapping
@@ -87,11 +90,4 @@ public class MatchController {
         return ResponseEntity.ok(match);
     }
 
-    //get and clear ability messages
-    @GetMapping("/{matchId}/messages")
-    public ResponseEntity<List<String>> getAndClearAbilityMessages(@PathVariable String matchId, Principal principal) {
-        String username = principal.getName();
-        List<String> messages = matchService.getAndClearAbilityMessages(matchId, username);
-        return ResponseEntity.ok(messages);
-    }
 }
