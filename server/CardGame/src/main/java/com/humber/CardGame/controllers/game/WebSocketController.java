@@ -22,6 +22,14 @@ public class WebSocketController {
 
     @MessageMapping("/match/{matchId}/fetch")
     public void fetchMatch(@DestinationVariable String matchId, Principal principal) {
+        // Check if principal is null and handle it gracefully
+        if (principal == null) {
+            // Broadcast to the public topic instead of user-specific queue when principal is null
+            Match match = matchService.getMatch(matchId);
+            messagingTemplate.convertAndSend("/topic/match/" + matchId, match);
+            return;
+        }
+
         // Fetch the latest match data and send it back to the requesting client
         Match match = matchService.getMatch(matchId);
         messagingTemplate.convertAndSendToUser(principal.getName(), "/queue/match/" + matchId, match);
