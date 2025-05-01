@@ -93,11 +93,21 @@
 }
 
 .join-match-button {
+  background-color: #0787ff;
+  color: #fff;
+}
+
+.join-match-button:hover {
+  background-color: #0775db;
+  transform: scale(1.05);
+}
+
+.ai-battle-button {
   background-color: #ffc107;
   color: #000;
 }
 
-.join-match-button:hover {
+.ai-battle-button:hover {
   background-color: #d39e00;
   transform: scale(1.05);
 }

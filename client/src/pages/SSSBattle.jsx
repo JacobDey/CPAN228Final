@@ -10,7 +10,9 @@ function SSSBattle() {
     const { username } = useAuth();
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showJoinModal, setShowJoinModal] = useState(false);
+    const [showAIModal, setShowAIModal] = useState(false);
     const [matchId, setMatchId] = useState('');
+    const [aiDifficulty, setAiDifficulty] = useState('easy');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [createdMatch, setCreatedMatch] = useState(null);
@@ -127,31 +129,57 @@ function SSSBattle() {
                 >
                     Join Match
                 </button>
-                <div className="mt-8 text-center">
-                    <h3 className="text-lg font-semibold mb-3 text-gray-700">Battle Against AI</h3>
-                    <div className="flex justify-center gap-4 flex-wrap">
-                        <button
-                            className="px-4 py-2 rounded-lg bg-green-100 text-green-800 font-semibold shadow hover:scale-105 transition"
-                            onClick={() => handleCreateAIMatch("easy")}
-                        >
-                            Play AI (Easy)
-                        </button>
-                        <button
-                            className="px-4 py-2 rounded-lg bg-yellow-100 text-yellow-800 font-semibold shadow hover:scale-105 transition"
-                            onClick={() => handleCreateAIMatch("medium")}
-                        >
-                            Play AI (Medium)
-                        </button>
-                        <button
-                            className="px-4 py-2 rounded-lg bg-red-100 text-red-800 font-semibold shadow hover:scale-105 transition"
-                            onClick={() => handleCreateAIMatch("hard")}
-                        >
-                            Play AI (Hard)
-                        </button>
-                    </div>
-                </div>
+                <button
+                    className="battle-button ai-battle-button"
+                    onClick={() => setShowAIModal(true)}
+                >
+                    Battle Against AI
+                </button>
             </div>
             <SSSMatchBrowser />
+
+            {/* AI Battle Modal */}
+            <Modal show={showAIModal} onHide={() => setShowAIModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Choose AI Difficulty</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    {isLoading ? (
+                        <div className="text-center py-4">
+                            <Spinner animation="border" variant="primary" />
+                            <p className="mt-3">Creating AI match...</p>
+                        </div>
+                    ) : (
+                        <>
+                            <p>Select the difficulty level for your AI opponent:</p>
+                            <Form.Group className="mb-3">
+                                <Form.Select
+                                    value={aiDifficulty}
+                                    onChange={(e) => setAiDifficulty(e.target.value)}
+                                    className="form-select"
+                                >
+                                    <option value="easy">Easy - For New Players</option>
+                                    <option value="medium">Medium - For Experienced Players</option>
+                                    <option value="hard">Hard - For Expert Players</option>
+                                </Form.Select>
+                            </Form.Group>
+                            {error && <Alert variant="danger">{error}</Alert>}
+                        </>
+                    )}
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShowAIModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="primary"
+                        onClick={() => handleCreateAIMatch(aiDifficulty)}
+                        disabled={isLoading}
+                    >
+                        {isLoading ? 'Creating...' : 'Start Battle'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
             {/* Create Match Modal */}
             <Modal show={showCreateModal} onHide={() => setShowCreateModal(false)} centered>
