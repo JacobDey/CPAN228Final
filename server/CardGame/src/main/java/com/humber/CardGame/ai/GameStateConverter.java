@@ -17,77 +17,68 @@ public class GameStateConverter {
     // Convert Match object to feature vectors for the AI model
     public static INDArray convertMatchToFeatures(Match match, String aiPlayerName) {
         boolean isPlayer1 = match.getPlayer1().equals(aiPlayerName);
-        List<Double> featureList = new ArrayList<>();
+        List<Double> features = new ArrayList<>();
 
-        // Hand: Power of up to 7 cards
-        var playerHand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
+        //  Hand: encode up to 7 cards
+        List<CardDTO> hand = isPlayer1 ? match.getPlayer1Hand() : match.getPlayer2Hand();
+
         for (int i = 0; i < 7; i++) {
-            if (i < playerHand.size()) {
-                featureList.add((double) playerHand.get(i).getPower());
+            if (i < hand.size()) {
+                CardDTO card = hand.get(i);
+                features.add((double) card.getPower());
+
+                // Add 3 ability flags
+                boolean hasDestroy = false, hasDraw = false, hasBuff = false;
+
+                if (card.getAbilities() != null) {
+                    for (CardAbility ab : card.getAbilities()) {
+                        String effect = ((String) ab.getParams().get("effect")).toUpperCase();
+                        switch (effect) {
+                            case GameConstants.EFFECT_DESTROY_CARD:
+                                hasDestroy = true;
+                                break;
+                            case GameConstants.EFFECT_DRAW_CARDS:
+                                hasDraw = true;
+                                break;
+                            case GameConstants.EFFECT_POWER_CHANGE:
+                                hasBuff = true;
+                                break;
+                        }
+                    }
+                }
+
+                features.add(hasDestroy ? 1.0 : 0.0);
+                features.add(hasDraw ? 1.0 : 0.0);
+                features.add(hasBuff ? 1.0 : 0.0);
             } else {
-                featureList.add(0.0);
+                // Pad empty slots: 0 power, 0 abilities
+                features.add(0.0); // power
+                features.add(0.0); // destroy
+                features.add(0.0); // draw
+                features.add(0.0); // buff
             }
         }
 
-        // Towers: 3 towers × 2 players = 6
+        // Tower control (3 towers × 2 powers)
         for (Tower tower : match.getTowers()) {
             int p1Power = tower.getPlayer1Cards().stream().mapToInt(CardDTO::getPower).sum();
             int p2Power = tower.getPlayer2Cards().stream().mapToInt(CardDTO::getPower).sum();
-            featureList.add((double) p1Power);
-            featureList.add((double) p2Power);
+            features.add((double) p1Power);
+            features.add((double) p2Power);
         }
 
-        // Game state: turn and cards played
-        featureList.add((double) match.getTurn());
-        featureList.add((double) match.getCardPlayedThisTurn());
+        //  Game phase info
+        features.add((double) match.getTurn());
+        features.add((double) match.getCardPlayedThisTurn());
 
-        // Ability flags
-        boolean hasDestroy = false;
-        boolean hasDraw = false;
-        boolean hasOpponentDiscard = false;
-        boolean hasSwapControl = false;
-        boolean hasMovement = false;
-
-        for (CardDTO card : playerHand) {
-            if (card.getAbilities() != null) {
-                for (CardAbility ab : card.getAbilities()) {
-                    String effect = ((String) ab.getParams().get("effect")).toUpperCase();
-                    switch (effect) {
-                        case GameConstants.EFFECT_DESTROY_CARD:
-                            hasDestroy = true;
-                            break;
-                        case GameConstants.EFFECT_DRAW_CARDS:
-                            hasDraw = true;
-                            break;
-                        case GameConstants.EFFECT_OPPONENT_DISCARD:
-                            hasOpponentDiscard = true;
-                            break;
-                        case GameConstants.EFFECT_SWAP_CONTROL:
-                            hasSwapControl = true;
-                            break;
-                        case GameConstants.EFFECT_MOVE_DESTINATION:
-                        case GameConstants.EFFECT_MOVE_DIRECTION:
-                            hasMovement = true;
-                            break;
-                    }
-                }
-            }
+        // Final shape check
+        if (features.size() != 36) {
+            throw new IllegalStateException("Expected 36 features, got " + features.size());
         }
 
-        // Add the 5 ability flags to the feature vector
-        featureList.add(hasDestroy ? 1.0 : 0.0);
-        featureList.add(hasDraw ? 1.0 : 0.0);
-        featureList.add(hasOpponentDiscard ? 1.0 : 0.0);
-        featureList.add(hasSwapControl ? 1.0 : 0.0);
-        featureList.add(hasMovement ? 1.0 : 0.0);
-
-        // Final check: feature size should be 20
-        if (featureList.size() != 20) {
-            throw new IllegalStateException("Expected 20 features, but got " + featureList.size());
-        }
-
-        return Nd4j.create(featureList).reshape(1, 20);
+        return Nd4j.create(features).reshape(1, 36);
     }
+
 
 
 //    private static int calculateFeatureSize(Match match) {

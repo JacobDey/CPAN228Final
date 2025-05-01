@@ -19,7 +19,7 @@ import java.io.File;
 
 public class AITrainer {
     public static void main(String[] args) throws Exception {
-        int numInputs = 20; // GameStateConverter feature count
+        int numInputs = 36; // GameStateConverter feature count
         int numOutputs = 31; // 30 play actions + 1 end turn
         int batchSize = 64;
         int epochs = 10;

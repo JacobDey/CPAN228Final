@@ -386,5 +386,23 @@ public class MatchService {
         return matchRepository.findByStatus(MatchStatus.PLAYING);
     }
 
+    //remove match
+    public void removeMatch(String matchId) {
+        if(matchRepository.findById(matchId).isEmpty()) {
+            return;
+        }
+        matchRepository.deleteById(matchId);
+    }
+
+    //create AI match
+    public Match createAIMatch(String username) {
+        Match match = createMatch(username);
+        MyUser ai = userRepository.findByUsername("AI_1").orElseThrow(
+                () -> new RuntimeException("AI_1 not found")
+        );
+        match = joinMatch(match.getId(), ai.getUsername());
+        return match;
+    }
+
 
 }
