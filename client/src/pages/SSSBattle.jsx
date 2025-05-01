@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Modal, Button, Form, Spinner, Alert } from 'react-bootstrap';
 import { useAuth } from '../components/SSSAuth.jsx';
 
-function SSSBattle(){
+function SSSBattle() {
     const navigate = useNavigate();
     const { username } = useAuth();
     const [showCreateModal, setShowCreateModal] = useState(false);
@@ -20,7 +20,7 @@ function SSSBattle(){
         try {
             setIsLoading(true);
             setError(null);
-            
+
             const token = localStorage.getItem('token');
             const response = await fetch(`${SERVER_URL}/matches/create`, {
                 method: 'POST',
@@ -52,7 +52,7 @@ function SSSBattle(){
         try {
             setIsLoading(true);
             setError(null);
-            
+
             const token = localStorage.getItem('token');
             const response = await fetch(`${SERVER_URL}/matches/${matchId}/join`, {
                 method: 'POST',
@@ -66,12 +66,39 @@ function SSSBattle(){
             }
 
             const match = await response.json();
-            
+
             // Navigate to game screen with the match ID
             navigate(`/game/${matchId}`);
         } catch (error) {
             console.error('Error joining match:', error);
             setError(error.message || 'Failed to join match');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleCreateAIMatch = async (difficulty) => {
+        try {
+            setIsLoading(true);
+            setError(null);
+
+            const token = localStorage.getItem('token');
+            const response = await fetch(`${SERVER_URL}/ai/playWithAI?difficulty=${difficulty}`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to create AI match: ${response.statusText}`);
+            }
+
+            const match = await response.json();
+            navigate(`/game/${match.id}`);
+        } catch (error) {
+            console.error('Error creating AI match:', error);
+            setError(error.message || 'Failed to create AI match');
         } finally {
             setIsLoading(false);
         }
@@ -83,23 +110,46 @@ function SSSBattle(){
         }
     };
 
-    return(
+    return (
         <>
             <SSSNavbar />
             <h1>Battle!</h1>
             <div className="battle-buttons-container">
-                <button 
-                    className="battle-button create-match-button" 
+                <button
+                    className="battle-button create-match-button"
                     onClick={() => setShowCreateModal(true)}
                 >
                     Create Match
                 </button>
-                <button 
-                    className="battle-button join-match-button" 
+                <button
+                    className="battle-button join-match-button"
                     onClick={() => setShowJoinModal(true)}
                 >
                     Join Match
                 </button>
+                <div className="mt-8 text-center">
+                    <h3 className="text-lg font-semibold mb-3 text-gray-700">Battle Against AI</h3>
+                    <div className="flex justify-center gap-4 flex-wrap">
+                        <button
+                            className="px-4 py-2 rounded-lg bg-green-100 text-green-800 font-semibold shadow hover:scale-105 transition"
+                            onClick={() => handleCreateAIMatch("easy")}
+                        >
+                            Play AI (Easy)
+                        </button>
+                        <button
+                            className="px-4 py-2 rounded-lg bg-yellow-100 text-yellow-800 font-semibold shadow hover:scale-105 transition"
+                            onClick={() => handleCreateAIMatch("medium")}
+                        >
+                            Play AI (Medium)
+                        </button>
+                        <button
+                            className="px-4 py-2 rounded-lg bg-red-100 text-red-800 font-semibold shadow hover:scale-105 transition"
+                            onClick={() => handleCreateAIMatch("hard")}
+                        >
+                            Play AI (Hard)
+                        </button>
+                    </div>
+                </div>
             </div>
             <SSSMatchBrowser />
 
@@ -123,7 +173,7 @@ function SSSBattle(){
                                 </p>
                                 <div className="d-flex justify-content-between align-items-center p-2 bg-light rounded">
                                     <code className="fs-5">{createdMatch.id}</code>
-                                    <Button 
+                                    <Button
                                         variant="outline-secondary"
                                         size="sm"
                                         onClick={() => {
@@ -165,8 +215,8 @@ function SSSBattle(){
                             <Button variant="secondary" onClick={() => setShowCreateModal(false)}>
                                 Cancel
                             </Button>
-                            <Button 
-                                variant="primary" 
+                            <Button
+                                variant="primary"
                                 onClick={handleCreateMatch}
                                 disabled={isLoading}
                             >
@@ -195,7 +245,7 @@ function SSSBattle(){
                             </p>
                             <Form.Group className="mb-3">
                                 <Form.Label>Match ID</Form.Label>
-                                <Form.Control 
+                                <Form.Control
                                     type="text"
                                     value={matchId}
                                     onChange={(e) => setMatchId(e.target.value)}
@@ -210,8 +260,8 @@ function SSSBattle(){
                     <Button variant="secondary" onClick={() => setShowJoinModal(false)}>
                         Cancel
                     </Button>
-                    <Button 
-                        variant="primary" 
+                    <Button
+                        variant="primary"
                         onClick={handleJoinMatch}
                         disabled={isLoading}
                     >

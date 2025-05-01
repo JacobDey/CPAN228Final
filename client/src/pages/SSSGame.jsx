@@ -235,6 +235,18 @@ function SSSGame() {
                 }
             });
             // WebSocket will handle the state update
+            // If AI is the next player, trigger AI move
+            const isAIOpponent = match.player2 === "AI_1";
+            if (isAIOpponent) {
+                await new Promise(resolve => setTimeout(resolve, 700)); // Optional delay
+                await fetch(`${SERVER_URL}/ai/${matchId}/aiMove`, {
+                    method: "PUT",
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+            }
+
         } catch (err) {
             console.error("Error ending turn:", err);
             setError(err.message);
